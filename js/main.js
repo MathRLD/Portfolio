@@ -1,0 +1,432 @@
+/* =====================================================
+   main.js — logique du portfolio RAWLAND
+   ===================================================== */
+(function () {
+  "use strict";
+
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  document.getElementById("year").textContent = new Date().getFullYear();
+
+  /* ---------------------------------------------------
+     1. HEADER : ombre au scroll + couleur selon section
+     --------------------------------------------------- */
+  const header = document.getElementById("site-header");
+  const darkSections = document.querySelectorAll(".section--dark, .hero");
+
+  function updateHeaderState() {
+    header.classList.toggle("is-scrolled", window.scrollY > 20);
+
+    // change la couleur du header selon la section actuellement sous la nav
+    const probeY = header.offsetHeight + 10;
+    let onDark = false;
+    document.querySelectorAll(".section--dark").forEach((sec) => {
+      const r = sec.getBoundingClientRect();
+      if (r.top <= probeY && r.bottom >= probeY) onDark = true;
+    });
+    header.classList.toggle("on-dark", onDark);
+  }
+  document.addEventListener("scroll", updateHeaderState, { passive: true });
+  updateHeaderState();
+
+  /* ---------------------------------------------------
+     2. NAV : menu mobile + lien actif
+     --------------------------------------------------- */
+  const navToggle = document.getElementById("nav-toggle");
+  const mainNav = document.getElementById("main-nav");
+
+  navToggle.addEventListener("click", () => {
+    const isOpen = mainNav.classList.toggle("is-open");
+    navToggle.classList.toggle("is-open", isOpen);
+    navToggle.setAttribute("aria-expanded", String(isOpen));
+  });
+  mainNav.querySelectorAll("a").forEach((a) =>
+    a.addEventListener("click", () => {
+      mainNav.classList.remove("is-open");
+      navToggle.classList.remove("is-open");
+    })
+  );
+
+  const navLinks = document.querySelectorAll("[data-nav]");
+  const navSections = Array.from(navLinks).map((a) =>
+    document.querySelector(a.getAttribute("href"))
+  );
+
+  const navObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const idx = navSections.indexOf(entry.target);
+        navLinks.forEach((a) => a.classList.remove("is-active"));
+        if (idx > -1) navLinks[idx].classList.add("is-active");
+      });
+    },
+    { rootMargin: "-45% 0px -45% 0px" }
+  );
+  navSections.forEach((sec) => sec && navObserver.observe(sec));
+
+  /* ---------------------------------------------------
+     3. REVEAL AU SCROLL
+     --------------------------------------------------- */
+  const revealObserver = new IntersectionObserver(
+    (entries, obs) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          obs.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.15 }
+  );
+
+  function observeReveal(el) {
+    if (prefersReducedMotion) {
+      el.classList.add("is-visible");
+    } else {
+      revealObserver.observe(el);
+    }
+  }
+  document.querySelectorAll(".reveal").forEach(observeReveal);
+
+  /* ---------------------------------------------------
+     4. HERO : titre en parallax + orbite de vignettes
+     façon "anneaux de Saturne" autour du portrait.
+     - rotation automatique continue
+     - on peut cliquer-glisser pour la faire tourner à la main
+     - survoler une vignette met la rotation en pause
+     - une vignette passe alternativement devant/derrière le
+       portrait selon sa position sur l'ellipse (profondeur simulée)
+     --------------------------------------------------- */
+  const heroTitle = document.getElementById("hero-title");
+  const heroStage = document.querySelector(".hero-stage");
+  const orbitContainer = document.getElementById("hero-orbit");
+
+  let scrollY = window.scrollY;
+  document.addEventListener(
+    "scroll",
+    () => {
+      scrollY = window.scrollY;
+      if (heroTitle && !prefersReducedMotion) {
+        heroTitle.style.transform = `translateY(${scrollY * 0.25}px)`;
+      }
+    },
+    { passive: true }
+  );
+
+  // Récupère jusqu'à `count` projets (tous types confondus, entrelacés)
+  // pour peupler l'orbite ; complète avec des cases vides si besoin.
+  function gatherOrbitProjects(count) {
+    const cats = ["videos", "photos", "graphisme"];
+    const lists = cats.map((c) =>
+      (projectsData[c] || []).map((p) => Object.assign({}, p, { category: c }))
+    );
+    const picked = [];
+    let i = 0;
+    while (picked.length < count) {
+      let addedAny = false;
+      for (const list of lists) {
+        if (picked.length >= count) break;
+        if (list[i]) {
+          picked.push(list[i]);
+          addedAny = true;
+        }
+      }
+      i++;
+      if (!addedAny) break;
+    }
+    while (picked.length < count) picked.push(null);
+    return picked;
+  }
+
+  const ORBIT_COUNT = 6;
+  const orbitItems = orbitContainer
+    ? gatherOrbitProjects(ORBIT_COUNT).map((project) => {
+        const el = document.createElement(project ? "button" : "div");
+        el.className = "hero-orbit-item" + (project ? "" : " is-placeholder");
+        if (project) {
+          el.type = "button";
+          el.setAttribute("aria-label", project.title);
+          el.innerHTML = `<img src="${project.cover}" alt="" onerror="this.parentElement.classList.add('img-missing')">`;
+          el.addEventListener("click", () => openModal(project));
+        }
+        orbitContainer.appendChild(el);
+        return el;
+      })
+    : [];
+
+  if (orbitContainer && orbitItems.length) {
+    const N = orbitItems.length;
+    let autoAngle = 0;
+    let dragOffset = 0;
+    let isDragging = false;
+    let hoverPause = false;
+    let lastX = 0;
+    let lastT = performance.now();
+
+    function ellipseForStage() {
+      const rect = heroStage.getBoundingClientRect();
+      const rx = Math.min(rect.width * 0.44, 380);
+      const ry = rx * 0.34;
+      return { cx: rect.width / 2, cy: rect.height / 2, rx, ry };
+    }
+
+    function renderOrbit(totalAngle) {
+      const { cx, cy, rx, ry } = ellipseForStage();
+      orbitItems.forEach((el, i) => {
+        const angle = totalAngle + (i * (Math.PI * 2)) / N;
+        const x = cx + rx * Math.cos(angle);
+        const y = cy + ry * Math.sin(angle);
+        const z = Math.sin(angle); // -1 (derrière) → 1 (devant)
+        const scale = 0.72 + 0.36 * ((z + 1) / 2);
+        const opacity = 0.5 + 0.5 * ((z + 1) / 2);
+        const tilt = Math.cos(angle) * 6;
+        el.style.zIndex = z > 0 ? 5 : 2;
+        el.style.opacity = opacity.toFixed(2);
+        el.style.transform =
+          `translate(${x}px, ${y}px) translate(-50%, -50%) scale(${scale.toFixed(3)}) rotate(${tilt.toFixed(1)}deg)`;
+      });
+    }
+
+    if (prefersReducedMotion) {
+      renderOrbit(0);
+    } else {
+      if (heroStage) {
+        heroStage.addEventListener("pointerdown", (e) => {
+          isDragging = true;
+          lastX = e.clientX;
+          heroStage.classList.add("is-dragging");
+          heroStage.setPointerCapture(e.pointerId);
+        });
+        heroStage.addEventListener("pointermove", (e) => {
+          if (!isDragging) return;
+          const dx = e.clientX - lastX;
+          lastX = e.clientX;
+          dragOffset += dx * 0.006;
+        });
+        ["pointerup", "pointerleave", "pointercancel"].forEach((evt) =>
+          heroStage.addEventListener(evt, () => {
+            isDragging = false;
+            heroStage.classList.remove("is-dragging");
+          })
+        );
+      }
+
+      orbitItems.forEach((el) => {
+        el.addEventListener("pointerenter", () => (hoverPause = true));
+        el.addEventListener("pointerleave", () => (hoverPause = false));
+      });
+
+      function tick(t) {
+        const dt = (t - lastT) / 1000;
+        lastT = t;
+        if (!isDragging && !hoverPause) {
+          autoAngle += dt * 0.28; // vitesse de rotation automatique
+        }
+        renderOrbit(autoAngle + dragOffset);
+        requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+  }
+
+  /* ---------------------------------------------------
+     5. GÉNÉRATION DES CARTES À PARTIR DE projects-data.js
+     --------------------------------------------------- */
+  function createCard(project, emptyLabel) {
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "project-card reveal-item";
+    card.innerHTML = `
+      <img src="${project.cover}" alt="${project.title}" onerror="this.parentElement.classList.add('img-missing')">
+      <div class="card-overlay">
+        <span class="card-title">${project.title}</span>
+        ${project.client ? `<span class="card-client">${project.client}</span>` : ""}
+      </div>
+    `;
+    card.addEventListener("click", () => openModal(project));
+    return card;
+  }
+
+  function createEmptyCard(label) {
+    const el = document.createElement("div");
+    el.className = "project-card is-empty reveal-item";
+    el.textContent = label;
+    return el;
+  }
+
+  function fillRow(containerId, list, category, minSlots) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const emptyLabel = container.dataset.emptyLabel || "À venir";
+
+    list.forEach((project) => {
+      container.appendChild(createCard({ ...project, category }, emptyLabel));
+    });
+
+    const remaining = Math.max(0, minSlots - list.length);
+    for (let i = 0; i < remaining; i++) {
+      container.appendChild(createEmptyCard(emptyLabel));
+    }
+  }
+
+  fillRow("videos-row", projectsData.videos, "videos", 4);
+  fillRow("photos-grid", projectsData.photos, "photos", 10);
+  fillRow("graphisme-row", projectsData.graphisme, "graphisme", 4);
+
+  document.querySelectorAll(".reveal-item").forEach(observeReveal);
+
+  /* ---------------------------------------------------
+     6. MODALE PROJET — un gabarit différent par type :
+     - vidéo      : poster flouté + bouton lecture, titre en overlay
+     - photo      : titre seul, puis galerie en masonry sans texte
+     - graphisme  : titre, puis image + description côte à côte,
+                    et le reste des visuels en galerie en dessous
+     --------------------------------------------------- */
+  const modal = document.getElementById("project-modal");
+  const modalTopbar = document.getElementById("modal-topbar");
+  const modalKicker = document.getElementById("modal-kicker");
+  const modalTitle = document.getElementById("modal-title");
+  const modalContent = document.getElementById("modal-content");
+  let lastFocusedEl = null;
+
+  function youTubeEmbedUrl(id) {
+    return `https://www.youtube.com/embed/${id}?rel=0&autoplay=1`;
+  }
+  function vimeoEmbedUrl(id) {
+    return `https://player.vimeo.com/video/${id}?autoplay=1`;
+  }
+  function imgTag(src, alt) {
+    return `<img src="${src}" alt="${alt || ""}" onerror="this.parentElement.classList.add('img-missing')">`;
+  }
+
+  function renderVideoContent(project) {
+    const media = project.media || {};
+    const stage = document.createElement("div");
+    stage.className = "modal-video-stage";
+    stage.innerHTML = imgTag(project.cover, project.title);
+
+    if (media.src) {
+      const playBtn = document.createElement("button");
+      playBtn.type = "button";
+      playBtn.className = "modal-play-btn";
+      playBtn.setAttribute("aria-label", "Lancer la lecture");
+      playBtn.addEventListener("click", () => {
+        let playerHtml = "";
+        if (media.type === "youtube") {
+          playerHtml = `<iframe src="${youTubeEmbedUrl(media.src)}" title="${project.title}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
+        } else if (media.type === "vimeo") {
+          playerHtml = `<iframe src="${vimeoEmbedUrl(media.src)}" title="${project.title}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
+        } else if (media.type === "file") {
+          playerHtml = `<video src="${media.src}" controls autoplay playsinline></video>`;
+        }
+        stage.innerHTML = playerHtml;
+      });
+      stage.appendChild(playBtn);
+    }
+    return stage;
+  }
+
+  function renderPhotoContent(project) {
+    const gallery = document.createElement("div");
+    gallery.className = "modal-masonry";
+    const images = project.images && project.images.length ? project.images : [project.cover];
+    gallery.innerHTML = images.map((src) => imgTag(src, project.title)).join("");
+    return gallery;
+  }
+
+  function renderGraphismeContent(project) {
+    const wrapper = document.createDocumentFragment();
+    const images = project.images && project.images.length ? project.images : [project.cover];
+
+    const intro = document.createElement("div");
+    intro.className = "modal-graphisme-intro";
+
+    const introImg = document.createElement("div");
+    introImg.innerHTML = imgTag(images[0], project.title);
+
+    const introText = document.createElement("div");
+    introText.className = "modal-graphisme-text";
+    const desc = document.createElement("p");
+    desc.textContent = project.description || "";
+    introText.appendChild(desc);
+
+    const context = document.createElement("span");
+    context.className = "modal-context";
+    context.textContent = project.client ? project.client : "Projet personnel";
+    introText.appendChild(context);
+
+    if (project.tags && project.tags.length) {
+      const tagList = document.createElement("ul");
+      tagList.className = "modal-graphisme-tags";
+      tagList.innerHTML = project.tags.map((t) => `<li>${t}</li>`).join("");
+      introText.appendChild(tagList);
+    }
+
+    intro.appendChild(introImg);
+    intro.appendChild(introText);
+    wrapper.appendChild(intro);
+
+    if (images.length > 1) {
+      const rest = document.createElement("div");
+      rest.className = "modal-graphisme-gallery";
+      rest.innerHTML = images.slice(1).map((src) => imgTag(src, project.title)).join("");
+      wrapper.appendChild(rest);
+    }
+    return wrapper;
+  }
+
+  function openModal(project) {
+    lastFocusedEl = document.activeElement;
+    modalContent.innerHTML = "";
+    modalTopbar.classList.remove("modal-topbar--on-media");
+
+    if (project.category === "videos") {
+      modalKicker.textContent = project.client || "Vidéo";
+      modalTopbar.classList.add("modal-topbar--on-media");
+      modalContent.appendChild(renderVideoContent(project));
+    } else if (project.category === "graphisme") {
+      modalKicker.textContent = "Graphisme";
+      modalContent.appendChild(renderGraphismeContent(project));
+    } else {
+      modalKicker.textContent = "Photo";
+      modalContent.appendChild(renderPhotoContent(project));
+    }
+
+    modalTitle.textContent = project.title;
+
+    modal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+    modal.querySelector(".modal-close").focus();
+  }
+
+  function closeModal() {
+    modal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+    modalContent.innerHTML = ""; // stoppe vidéos/iframes en cours de lecture
+    if (lastFocusedEl) lastFocusedEl.focus();
+  }
+
+  modal.querySelectorAll("[data-close]").forEach((el) =>
+    el.addEventListener("click", closeModal)
+  );
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modal.getAttribute("aria-hidden") === "false") {
+      closeModal();
+    }
+  });
+
+  /* ---------------------------------------------------
+     7. À PROPOS : toggle des expériences
+     --------------------------------------------------- */
+  const expToggle = document.getElementById("exp-toggle");
+  const expList = document.getElementById("exp-list");
+  expToggle.addEventListener("click", () => {
+    const isHidden = expList.hasAttribute("hidden");
+    if (isHidden) {
+      expList.removeAttribute("hidden");
+    } else {
+      expList.setAttribute("hidden", "");
+    }
+    expToggle.setAttribute("aria-expanded", String(isHidden));
+  });
+})();

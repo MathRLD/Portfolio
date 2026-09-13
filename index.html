@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAWLAND — Portfolio | Vidéo, Photo, Graphisme</title>
+<meta name="description" content="RAWLAND — Mathys Roland, créateur de contenu visuel basé à Paris. Vidéo, photo, graphisme.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ===================== NAVIGATION ===================== -->
+<header class="site-header" id="site-header">
+  <div class="container header-inner">
+    <a href="#hero" class="logo">RAWLAND</a>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Ouvrir le menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="main-nav" id="main-nav">
+      <a href="#videos" data-nav>Vidéos</a>
+      <a href="#photos" data-nav>Photos</a>
+      <a href="#graphisme" data-nav>Graphisme</a>
+      <a href="#apropos" data-nav>À propos</a>
+      <a href="#contact" data-nav>Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- ===================== HERO ===================== -->
+  <section class="hero" id="hero">
+    <p class="hero-tag reveal">Créateur de contenu visuel basé à Paris</p>
+
+    <div class="hero-stage">
+      <h1 class="hero-title" id="hero-title" aria-hidden="true">PORTFOLIO</h1>
+
+      <div class="hero-portrait" id="hero-portrait">
+        <img src="assets/images/portrait.jpg" alt="Portrait de Mathys Roland" onerror="this.parentElement.classList.add('img-missing')">
+      </div>
+
+      <!-- Anneau de vignettes-projets qui orbite autour du portrait.
+           Rempli dynamiquement par js/main.js à partir de projects-data.js -->
+      <div class="hero-orbit" id="hero-orbit" aria-hidden="true"></div>
+    </div>
+
+    <a href="#videos" class="scroll-cue" aria-label="Défiler vers le bas">
+      <span></span>
+    </a>
+  </section>
+
+  <!-- ===================== VIDEOS ===================== -->
+  <section class="section section--dark" id="videos">
+    <div class="container section-head reveal">
+      <h2 class="section-title">Vidéos.</h2>
+      <p class="section-sub">Le mouvement au service des histoires et le rythme au cœur des émotions.</p>
+    </div>
+
+    <div class="scroll-row" id="videos-row" data-empty-label="Vidéo à venir">
+      <!-- injecté par js/main.js à partir de js/projects-data.js -->
+    </div>
+  </section>
+
+  <!-- ===================== PHOTOS ===================== -->
+  <section class="section section--light" id="photos">
+    <div class="container section-head reveal">
+      <h2 class="section-title">Photos.</h2>
+      <p class="section-sub">Une immersion visuelle dans le quotidien et l'exceptionnel.</p>
+    </div>
+
+    <div class="container">
+      <div class="grid grid--photos" id="photos-grid" data-empty-label="Photo à venir">
+        <!-- injecté par js/main.js -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== GRAPHISME ===================== -->
+  <section class="section section--dark" id="graphisme">
+    <div class="container section-head reveal">
+      <h2 class="section-title">Graphisme.</h2>
+      <p class="section-sub">Une architecture graphique entre l'évidence du message et l'élégance de la forme.</p>
+    </div>
+
+    <div class="scroll-row" id="graphisme-row" data-empty-label="Projet à venir">
+      <!-- injecté par js/main.js -->
+    </div>
+  </section>
+
+  <!-- ===================== A PROPOS ===================== -->
+  <section class="section section--light" id="apropos">
+    <div class="container about-grid">
+      <h2 class="section-title reveal">À propos.</h2>
+
+      <div class="about-content reveal">
+        <p>
+          Je m'appelle Mathys Roland, créateur de contenu visuel basé à Paris. Je travaille
+          entre vidéo, photographie et graphisme, avec une attention particulière portée
+          au rythme, à la lumière et à la narration visuelle.
+        </p>
+        <p>
+          Mon travail couvre aussi bien des projets pour des marques et institutions
+          (comme SNCF Intercités) que des projets personnels et sportifs — notamment
+          en photographie de football professionnel sous le nom RAWLAND.
+        </p>
+
+        <button class="btn-toggle" id="exp-toggle" aria-expanded="false" aria-controls="exp-list">
+          Expériences
+        </button>
+
+        <ul class="exp-list" id="exp-list" hidden>
+          <li>
+            <strong>Freelance — RAWLAND</strong>
+            <span>2023 — aujourd'hui</span>
+            <p>Photo, vidéo et graphisme pour clients et projets éditoriaux.</p>
+          </li>
+          <li>
+            <strong>SNCF Intercités</strong>
+            <span>2024</span>
+            <p>Réalisation du film "Vigilance Partagée" et contenus de sensibilisation.</p>
+          </li>
+          <li>
+            <strong>Formation</strong>
+            <span>—</span>
+            <p>Projets académiques en design graphique et identité visuelle.</p>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CONTACT ===================== -->
+  <section class="section section--dark" id="contact">
+    <div class="container contact-grid">
+      <div class="reveal">
+        <h2 class="section-title">Contact.</h2>
+        <p class="section-sub">Si vous souhaitez me contacter…</p>
+      </div>
+
+      <ul class="contact-list reveal">
+        <li>
+          <span class="contact-label">Mail.</span>
+          <a href="mailto:mathysroland.pro@gmail.com">mathysroland.pro@gmail.com</a>
+        </li>
+        <li>
+          <span class="contact-label">LinkedIn.</span>
+          <a href="https://www.linkedin.com/in/rolandmathys" target="_blank" rel="noopener">@rolandmathys</a>
+        </li>
+        <li>
+          <span class="contact-label">Instagram.</span>
+          <a href="https://instagram.com/_rawland" target="_blank" rel="noopener">@_rawland</a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="container footer-bottom">
+      <span>© <span id="year"></span> RAWLAND — Mathys Roland</span>
+    </div>
+  </section>
+
+</main>
+
+<!-- ===================== MODALE PROJET ===================== -->
+<div class="modal" id="project-modal" aria-hidden="true">
+  <div class="modal-backdrop" data-close></div>
+  <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <header class="modal-topbar" id="modal-topbar">
+      <div class="modal-topbar-text">
+        <span class="modal-kicker" id="modal-kicker"></span>
+        <h3 id="modal-title"></h3>
+      </div>
+      <button class="modal-close" data-close aria-label="Fermer">&times;</button>
+    </header>
+    <div class="modal-content" id="modal-content">
+      <!-- injecté par js/main.js selon le type de projet -->
+    </div>
+  </div>
+</div>
+
+<script src="js/projects-data.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
