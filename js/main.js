@@ -276,6 +276,23 @@
   document.querySelectorAll(".reveal-item").forEach(observeReveal);
 
   /* ---------------------------------------------------
+     5bis. Molette verticale → défilement horizontal
+     pour les rangées de type .scroll-row
+     --------------------------------------------------- */
+  document.querySelectorAll(".scroll-row").forEach((row) => {
+    row.addEventListener(
+      "wheel",
+      (e) => {
+        if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+        if (row.scrollWidth <= row.clientWidth) return;
+        e.preventDefault();
+        row.scrollLeft += e.deltaY;
+      },
+      { passive: false }
+    );
+  });
+
+  /* ---------------------------------------------------
      6. MODALE PROJET — un gabarit différent par type :
      - vidéo      : poster flouté + bouton lecture, titre en overlay
      - photo      : titre seul, puis galerie en masonry sans texte
