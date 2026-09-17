@@ -231,18 +231,21 @@ a { color: inherit; text-decoration: none; }
   z-index: 3;
   width: clamp(220px, 26vw, 320px);
   aspect-ratio: 3 / 4;
+  filter: drop-shadow(0 25px 45px rgba(0,0,0,0.22));
+}
+.hero-portrait img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.hero-portrait.img-missing {
   border-radius: 28px;
   overflow: hidden;
-  background: var(--grey-mid);
   box-shadow: 0 30px 60px -20px rgba(0,0,0,0.25);
 }
-.hero-portrait img { width: 100%; height: 100%; object-fit: cover; }
 
-/* ---------- orbite de vignettes-projets autour du portrait ---------- */
+/* ---------- orbite de vignettes-projets autour du portrait ----------
+   Pas de z-index ici : chaque vignette porte le sien (voir main.js,
+   2 = derrière / 5 = devant) pour alterner avec .hero-portrait (3). */
 .hero-orbit {
   position: absolute;
   inset: 0;
-  z-index: 2;
   pointer-events: none; /* réactivé item par item en JS */
 }
 
