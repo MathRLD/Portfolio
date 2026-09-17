@@ -224,9 +224,11 @@
       const rect = heroStage.getBoundingClientRect();
       const rx = Math.min(rect.width * 0.44, 300);
       const ry = rx * 0.34;
-      // Anneau décalé vers la droite par rapport au centre du portrait
-      // (moins prononcé en layout mobile empilé, où l'espace manque).
-      const shiftFactor = window.innerWidth <= 880 ? 0.12 : 0.32;
+      // Anneau décalé vers la gauche par rapport au centre du portrait,
+      // pour recentrer l'orbite sur le torse plutôt que sur le buste entier
+      // (le profil du visage tire le centre géométrique vers la droite).
+      // Décalage moins prononcé en layout mobile empilé, où l'espace manque.
+      const shiftFactor = window.innerWidth <= 880 ? -0.1 : -0.3;
       return { cx: rect.width / 2 + rx * shiftFactor, cy: rect.height / 2, rx, ry };
     }
 

@@ -237,7 +237,7 @@ a { color: inherit; text-decoration: none; }
   width: 100%;
   max-width: 460px;
   text-align: left;
-  margin-right: clamp(24px, 6vw, 96px);
+  margin-right: clamp(72px, 12vw, 200px);
   transform: translateY(-48px);
 }
 .hero-tag {
@@ -276,7 +276,7 @@ a { color: inherit; text-decoration: none; }
   text-transform: uppercase;
   transition: transform 0.3s var(--ease), background 0.3s var(--ease);
 }
-.btn-cta:hover { background: var(--dark-2); transform: translateY(-2px); }
+.btn-cta:hover { background: var(--grey-mid); transform: translateY(-2px); }
 .btn-cta:active { transform: translateY(0) scale(0.97); }
 
 .hero-orbit-item {
