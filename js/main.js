@@ -97,21 +97,65 @@
      - une vignette passe alternativement devant/derrière le
        portrait selon sa position sur l'ellipse (profondeur simulée)
      --------------------------------------------------- */
-  const heroTitle = document.getElementById("hero-title");
+  const heroVisual = document.getElementById("hero-visual");
+  const heroBgPhoto = document.getElementById("hero-bg-photo");
   const heroStage = document.querySelector(".hero-stage");
+  const heroPortrait = document.getElementById("hero-portrait");
   const orbitContainer = document.getElementById("hero-orbit");
 
-  let scrollY = window.scrollY;
-  document.addEventListener(
-    "scroll",
-    () => {
-      scrollY = window.scrollY;
-      if (heroTitle && !prefersReducedMotion) {
-        heroTitle.style.transform = `translateY(${scrollY * 0.25}px)`;
-      }
-    },
-    { passive: true }
-  );
+  // Position (en pixels, dans la photo à sa résolution native 1920x1080) du
+  // personnage dans fond_hero_section.jpg, mesurée par corrélation d'image
+  // avec portrait2.png. Sert à superposer le portrait détouré exactement
+  // au même endroit, quelle que soit la taille de l'écran.
+  const PORTRAIT_BBOX = { x: 336, y: 216, w: 481, h: 646 };
+
+  function updateHeroPortraitPosition() {
+    if (!heroVisual || !heroBgPhoto || !heroStage || !heroPortrait) return;
+    const containerW = heroVisual.clientWidth;
+    const containerH = heroVisual.clientHeight;
+    if (!containerW || !containerH) return;
+
+    const naturalW = heroBgPhoto.naturalWidth || 1920;
+    const naturalH = heroBgPhoto.naturalHeight || 1080;
+    const containerRatio = containerW / containerH;
+    const imgRatio = naturalW / naturalH;
+
+    // Reproduit le mapping de object-fit:cover / object-position:left center.
+    let scale, offsetX, offsetY;
+    if (imgRatio > containerRatio) {
+      scale = containerH / naturalH;
+      offsetX = 0;
+      offsetY = 0;
+    } else {
+      scale = containerW / naturalW;
+      offsetX = 0;
+      offsetY = (containerH - naturalH * scale) / 2;
+    }
+
+    const cx = offsetX + (PORTRAIT_BBOX.x + PORTRAIT_BBOX.w / 2) * scale;
+    const cy = offsetY + (PORTRAIT_BBOX.y + PORTRAIT_BBOX.h / 2) * scale;
+    const pw = PORTRAIT_BBOX.w * scale;
+    const ph = PORTRAIT_BBOX.h * scale;
+
+    // L'ancre de l'anneau (hero-stage) est dimensionnée en fonction de la
+    // taille réelle du portrait (et non du viewport) pour que le rayon de
+    // l'anneau reste proportionné au personnage à toute taille d'écran.
+    const stageSize = pw * 2.3;
+
+    heroStage.style.left = `${cx}px`;
+    heroStage.style.top = `${cy}px`;
+    heroStage.style.width = `${stageSize}px`;
+    heroStage.style.height = `${stageSize}px`;
+    heroPortrait.style.width = `${pw}px`;
+    heroPortrait.style.height = `${ph}px`;
+  }
+
+  if (heroBgPhoto && heroBgPhoto.complete) {
+    updateHeroPortraitPosition();
+  } else if (heroBgPhoto) {
+    heroBgPhoto.addEventListener("load", updateHeroPortraitPosition);
+  }
+  window.addEventListener("resize", updateHeroPortraitPosition);
 
   // Récupère jusqu'à `count` projets (tous types confondus, entrelacés)
   // pour peupler l'orbite ; complète avec des cases vides si besoin.
@@ -169,7 +213,7 @@
 
     function ellipseForStage() {
       const rect = heroStage.getBoundingClientRect();
-      const rx = Math.min(rect.width * 0.44, 380);
+      const rx = Math.min(rect.width * 0.44, 300);
       const ry = rx * 0.34;
       return { cx: rect.width / 2, cy: rect.height / 2, rx, ry };
     }

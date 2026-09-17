@@ -35,18 +35,29 @@
 
   <!-- ===================== HERO ===================== -->
   <section class="hero" id="hero">
-    <p class="hero-tag reveal">Créateur de contenu visuel basé à Paris</p>
+    <div class="hero-visual" id="hero-visual">
+      <img class="hero-bg-photo" id="hero-bg-photo" src="assets/images/fond_hero_section.jpg" alt="" aria-hidden="true">
 
-    <div class="hero-stage">
-      <h1 class="hero-title" id="hero-title" aria-hidden="true">PORTFOLIO</h1>
+      <!-- Ancre de positionnement : recentrée en JS (js/main.js) sur l'endroit
+           exact où Mathys apparaît dans la photo de fond, pour que le portrait
+           détouré se superpose parfaitement à son image. Sert aussi de centre
+           à l'anneau de vignettes-projets qui orbite autour de lui. -->
+      <div class="hero-stage" id="hero-stage">
+        <div class="hero-portrait" id="hero-portrait">
+          <img src="assets/images/portrait2.png" alt="Portrait de Mathys Roland" onerror="this.parentElement.classList.add('img-missing')">
+        </div>
 
-      <div class="hero-portrait" id="hero-portrait">
-        <img src="assets/images/portrait.png" alt="Portrait de Mathys Roland" onerror="this.parentElement.classList.add('img-missing')">
+        <!-- Anneau de vignettes-projets qui orbite autour du portrait.
+             Rempli dynamiquement par js/main.js à partir de projects-data.js -->
+        <div class="hero-orbit" id="hero-orbit" aria-hidden="true"></div>
       </div>
+    </div>
 
-      <!-- Anneau de vignettes-projets qui orbite autour du portrait.
-           Rempli dynamiquement par js/main.js à partir de projects-data.js -->
-      <div class="hero-orbit" id="hero-orbit" aria-hidden="true"></div>
+    <div class="hero-content reveal">
+      <p class="hero-tag">Créateur de contenu visuel basé à Paris</p>
+      <h1 class="hero-heading">Le réel,<br>capturé sans filtre.</h1>
+      <p class="hero-desc">Vidéo, photo et graphisme — je raconte des histoires vraies, brutes et sincères, pensées pour marquer les esprits.</p>
+      <a href="#videos" class="btn-cta">Découvrir mes projets</a>
     </div>
 
     <a href="#videos" class="scroll-cue" aria-label="Défiler vers le bas">
@@ -149,7 +160,7 @@
         </li>
         <li>
           <span class="contact-label">LinkedIn.</span>
-          <a href="https://www.linkedin.com/in/rolandmathys" target="_blank" rel="noopener">@rolandmathys</a>
+          <a href="https://www.linkedin.com/in/mathys-roland/" target="_blank" rel="noopener">@rolandmathys</a>
         </li>
         <li>
           <span class="contact-label">Instagram.</span>
