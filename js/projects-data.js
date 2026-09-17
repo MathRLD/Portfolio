@@ -30,6 +30,15 @@ const projectsData = {
   /* ----------------- VIDÉOS ----------------- */
   videos: [
     {
+      id: "stpauli-koln-2026-video",
+      title: "FC St. Pauli — 1. FC Köln",
+      client: "",
+      description: "Vidéo de couverture du match de Bundesliga entre le FC St. Pauli et le 1. FC Köln (17.04.2026) — rythme, action et ambiance de stade en mouvement.",
+      cover: "assets/images/videos/stpauli-cover.jpg",
+      tags: ["Sport", "Football", "Bundesliga", "Montage"],
+      media: { type: "youtube", src: "WOpr0kPQ1hg" }
+    },
+    {
       id: "sncf-intercites",
       title: "Vigilance Partagée",
       client: "SNCF Intercités",
