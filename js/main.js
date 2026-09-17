@@ -107,7 +107,7 @@
   // personnage dans fond_hero_section.jpg, mesurée par corrélation d'image
   // avec portrait2.png. Sert à superposer le portrait détouré exactement
   // au même endroit, quelle que soit la taille de l'écran.
-  const PORTRAIT_BBOX = { x: 336, y: 216, w: 481, h: 646 };
+  const PORTRAIT_BBOX = { x: 338, y: 217, w: 481, h: 646 };
 
   function updateHeroPortraitPosition() {
     if (!heroVisual || !heroBgPhoto || !heroStage || !heroPortrait) return;
@@ -182,8 +182,9 @@
     return picked;
   }
 
-  const ORBIT_COUNT = 6;
+  const ORBIT_COUNT = 8;
   const orbitProjects = new Map(); // élément -> projet associé (pour l'ouverture de la modale)
+  const orbitDeform = new Map(); // élément -> légère déformation figée (coins + rotation)
   const orbitItems = orbitContainer
     ? gatherOrbitProjects(ORBIT_COUNT).map((project) => {
         const el = document.createElement(project ? "button" : "div");
@@ -197,6 +198,14 @@
           // capture de pointeur) : le click natif suffit dans ce cas.
           el.addEventListener("click", () => openModal(project));
         }
+        // Look "un peu moins clean" : coins légèrement irréguliers + un tout
+        // petit tilt fixe propre à chaque vignette, figés une fois pour toutes.
+        const r1 = 14 + Math.random() * 10;
+        const r2 = 14 + Math.random() * 10;
+        const r3 = 14 + Math.random() * 10;
+        const r4 = 14 + Math.random() * 10;
+        el.style.borderRadius = `${r1}px ${r2}px ${r3}px ${r4}px`;
+        orbitDeform.set(el, (Math.random() - 0.5) * 7);
         orbitContainer.appendChild(el);
         return el;
       })
@@ -215,7 +224,10 @@
       const rect = heroStage.getBoundingClientRect();
       const rx = Math.min(rect.width * 0.44, 300);
       const ry = rx * 0.34;
-      return { cx: rect.width / 2, cy: rect.height / 2, rx, ry };
+      // Anneau décalé vers la droite par rapport au centre du portrait
+      // (moins prononcé en layout mobile empilé, où l'espace manque).
+      const shiftFactor = window.innerWidth <= 880 ? 0.12 : 0.32;
+      return { cx: rect.width / 2 + rx * shiftFactor, cy: rect.height / 2, rx, ry };
     }
 
     function renderOrbit(totalAngle) {
@@ -227,7 +239,7 @@
         const z = Math.sin(angle); // -1 (derrière) → 1 (devant)
         const scale = 0.72 + 0.36 * ((z + 1) / 2);
         const opacity = 0.5 + 0.5 * ((z + 1) / 2);
-        const tilt = Math.cos(angle) * 6;
+        const tilt = Math.cos(angle) * 6 + (orbitDeform.get(el) || 0);
         el.style.zIndex = z > 0 ? 5 : 2;
         el.style.opacity = opacity.toFixed(2);
         el.style.transform =
