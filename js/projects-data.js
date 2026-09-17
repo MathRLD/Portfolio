@@ -46,6 +46,33 @@ const projectsData = {
       cover: "assets/images/videos/sncf-intercites-cover.jpg",
       tags: ["Réalisation", "Montage", "Institutionnel"],
       media: { type: "youtube", src: "" } // ex: "dQw4w9WgXcQ"
+    },
+    {
+      id: "sncf-valeurs-eigs",
+      title: "SNCF Intercités — Valeurs EIGS",
+      client: "SNCF Intercités",
+      description: "Film institutionnel réalisé pour SNCF Intercités autour des valeurs portées par l'EIGS — mise en scène du quotidien des équipes à bord et en gare.",
+      cover: "assets/images/videos/valeurs-eigs-cover.jpg",
+      tags: ["Réalisation", "Montage", "Institutionnel", "SNCF"],
+      media: { type: "youtube", src: "pB53WOa4bag" }
+    },
+    {
+      id: "nsmtt-short-film",
+      title: "NSMTT",
+      client: "",
+      description: "Court-métrage tourné autour du tennis de table — échanges, tension de match et complicité entre joueurs captés au plus près de l'action.",
+      cover: "assets/images/videos/nsmtt-cover.jpg",
+      tags: ["Court-métrage", "Sport", "Réalisation"],
+      media: { type: "youtube", src: "fbg9Hu20Xts" }
+    },
+    {
+      id: "viviane-short-film",
+      title: "Là où attend Viviane",
+      client: "SNCF Intercités",
+      description: "Court-métrage pour SNCF Intercités — une traversée de gare et de quai qui suit l'attente et les rencontres du quotidien des voyageurs.",
+      cover: "assets/images/videos/viviane-cover.jpg",
+      tags: ["Court-métrage", "Réalisation", "SNCF"],
+      media: { type: "youtube", src: "470WgFqnpT4" }
     }
     // Ajoute d'autres vidéos ici en copiant le bloc ci-dessus.
   ],

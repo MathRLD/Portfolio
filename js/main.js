@@ -157,36 +157,56 @@
   }
   window.addEventListener("resize", updateHeroPortraitPosition);
 
-  // Récupère jusqu'à `count` projets (tous types confondus, entrelacés)
-  // pour peupler l'orbite ; complète avec des cases vides si besoin.
-  function gatherOrbitProjects(count) {
+  // Récupère jusqu'à `count` projets pour peupler l'orbite : les ids listés
+  // dans `pinnedIds` sont toujours inclus en premier, le reste est complété
+  // en entrelaçant vidéos/photos/graphisme ; complète avec des cases vides
+  // si besoin.
+  function gatherOrbitProjects(count, pinnedIds) {
     const cats = ["videos", "photos", "graphisme"];
     const lists = cats.map((c) =>
       (projectsData[c] || []).map((p) => Object.assign({}, p, { category: c }))
     );
     const picked = [];
+    const usedIds = new Set();
+
+    (pinnedIds || []).forEach((id) => {
+      for (const list of lists) {
+        const found = list.find((p) => p.id === id);
+        if (found && !usedIds.has(found.id)) {
+          picked.push(found);
+          usedIds.add(found.id);
+          break;
+        }
+      }
+    });
+
     let i = 0;
     while (picked.length < count) {
-      let addedAny = false;
+      let sawAny = false;
       for (const list of lists) {
         if (picked.length >= count) break;
-        if (list[i]) {
-          picked.push(list[i]);
-          addedAny = true;
+        const p = list[i];
+        if (!p) continue;
+        sawAny = true;
+        if (!usedIds.has(p.id)) {
+          picked.push(p);
+          usedIds.add(p.id);
         }
       }
       i++;
-      if (!addedAny) break;
+      if (!sawAny) break;
     }
     while (picked.length < count) picked.push(null);
     return picked;
   }
 
   const ORBIT_COUNT = 8;
+  // Projets à toujours faire apparaître dans l'anneau autour du portrait.
+  const ORBIT_PINNED_IDS = ["sncf-valeurs-eigs", "redstar-eag"];
   const orbitProjects = new Map(); // élément -> projet associé (pour l'ouverture de la modale)
   const orbitDeform = new Map(); // élément -> légère déformation figée (coins + rotation)
   const orbitItems = orbitContainer
-    ? gatherOrbitProjects(ORBIT_COUNT).map((project) => {
+    ? gatherOrbitProjects(ORBIT_COUNT, ORBIT_PINNED_IDS).map((project) => {
         const el = document.createElement(project ? "button" : "div");
         el.className = "hero-orbit-item" + (project ? "" : " is-placeholder");
         if (project) {
