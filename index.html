@@ -114,9 +114,14 @@
       <p class="section-sub">Le mouvement au service des histoires et le rythme au cœur des émotions.</p>
     </div>
 
-    <div class="scroll-row" id="videos-row" data-empty-label="Vidéo à venir">
-      <!-- injecté par js/main.js à partir de js/projects-data.js -->
+    <div class="carousel" id="videos-carousel">
+      <button class="carousel-arrow carousel-arrow--prev" type="button" data-carousel-prev aria-label="Vidéo précédente">‹</button>
+      <div class="scroll-row" id="videos-row" data-empty-label="Vidéo à venir">
+        <!-- injecté par js/main.js à partir de js/projects-data.js -->
+      </div>
+      <button class="carousel-arrow carousel-arrow--next" type="button" data-carousel-next aria-label="Vidéo suivante">›</button>
     </div>
+    <div class="carousel-dots" id="videos-dots" aria-hidden="true"></div>
   </section>
 
   <!-- ===================== PHOTOS ===================== -->
@@ -126,10 +131,12 @@
       <p class="section-sub">Une immersion visuelle dans le quotidien ainsi que l'exceptionnel.</p>
     </div>
 
-    <div class="container">
-      <div class="grid grid--photos" id="photos-grid" data-empty-label="Photo à venir">
+    <div class="carousel" id="photos-carousel">
+      <button class="carousel-arrow carousel-arrow--prev" type="button" data-carousel-prev aria-label="Photo précédente">‹</button>
+      <div class="scroll-row scroll-row--photos" id="photos-grid" data-empty-label="Photo à venir">
         <!-- injecté par js/main.js -->
       </div>
+      <button class="carousel-arrow carousel-arrow--next" type="button" data-carousel-next aria-label="Photo suivante">›</button>
     </div>
   </section>
 
@@ -140,9 +147,14 @@
       <p class="section-sub">Une architecture graphique entre l'évidence du message et l'élégance de la forme.</p>
     </div>
 
-    <div class="scroll-row" id="graphisme-row" data-empty-label="Projet à venir">
-      <!-- injecté par js/main.js -->
+    <div class="carousel" id="graphisme-carousel">
+      <button class="carousel-arrow carousel-arrow--prev" type="button" data-carousel-prev aria-label="Projet précédent">‹</button>
+      <div class="scroll-row" id="graphisme-row" data-empty-label="Projet à venir">
+        <!-- injecté par js/main.js -->
+      </div>
+      <button class="carousel-arrow carousel-arrow--next" type="button" data-carousel-next aria-label="Projet suivant">›</button>
     </div>
+    <div class="carousel-dots" id="graphisme-dots" aria-hidden="true"></div>
   </section>
 
   <!-- ===================== A PROPOS ===================== -->
@@ -221,7 +233,7 @@
 <!-- ===================== MODALE PROJET ===================== -->
 <div class="modal" id="project-modal" aria-hidden="true">
   <div class="modal-backdrop" data-close></div>
-  <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal-panel" id="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modal-title">
     <header class="modal-topbar" id="modal-topbar">
       <div class="modal-topbar-text">
         <span class="modal-kicker" id="modal-kicker"></span>

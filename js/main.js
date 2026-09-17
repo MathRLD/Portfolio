@@ -203,9 +203,9 @@
 
   const ORBIT_COUNT = 8;
   // Projets à toujours faire apparaître dans l'anneau autour du portrait,
-  // et projets à ne jamais y faire apparaître.
+  // et projets à ne jamais y faire apparaître (aucun pour l'instant).
   const ORBIT_PINNED_IDS = ["sncf-valeurs-eigs", "redstar-eag", "bobital-2026", "jeune-lion-release-party"];
-  const ORBIT_EXCLUDED_IDS = ["sncf-intercites", "challenge-ecoles"];
+  const ORBIT_EXCLUDED_IDS = [];
   const ORBIT_MASK_COUNT = 4; // voir index.html : #grunge-mask-1 à 4
   const orbitProjects = new Map(); // élément -> projet associé (pour l'ouverture de la modale)
   const orbitDeform = new Map(); // élément -> légère déformation figée (rotation)
@@ -266,7 +266,12 @@
         const scale = 0.72 + 0.36 * ((z + 1) / 2);
         const opacity = 0.5 + 0.5 * ((z + 1) / 2);
         const tilt = Math.cos(angle) * 6 + (orbitDeform.get(el) || 0);
-        el.style.zIndex = z > 0 ? 5 : 2;
+        // Empilement continu (et non un simple binaire devant/derrière) :
+        // deux cartes qui se croisent gardent toujours un ordre cohérent
+        // avec le sens de rotation, y compris au croisement à gauche/droite
+        // du portrait, où l'ancien binaire pouvait les faire passer derrière
+        // de façon incohérente.
+        el.style.zIndex = Math.round(z * 1000);
         el.style.opacity = opacity.toFixed(2);
         el.style.transform =
           `translate(${x}px, ${y}px) translate(-50%, -50%) scale(${scale.toFixed(3)}) rotate(${tilt.toFixed(1)}deg)`;
@@ -382,7 +387,109 @@
   document.querySelectorAll(".reveal-item").forEach(observeReveal);
 
   /* ---------------------------------------------------
-     5bis. Molette verticale → défilement horizontal
+     5bis. Carrousels (Vidéos / Photos / Graphisme) : flèches +
+     points de pagination, avec un clone estompé du premier/dernier
+     élément à chaque extrémité pour suggérer une boucle infinie.
+     Les flèches et les points bouclent réellement (dernier → premier
+     et inversement) ; le scroll tactile natif reste utilisable.
+     --------------------------------------------------- */
+  function setupCarousel(carouselId, rowId, dotsId) {
+    const carousel = document.getElementById(carouselId);
+    const row = document.getElementById(rowId);
+    if (!carousel || !row) return;
+
+    const items = Array.from(row.children);
+    if (!items.length) return;
+
+    const firstClone = items[0].cloneNode(true);
+    const lastClone = items[items.length - 1].cloneNode(true);
+    [firstClone, lastClone].forEach((clone) => {
+      clone.classList.add("is-clone");
+      // Pas d'animation d'apparition au scroll pour un clone décoratif :
+      // il doit être visible (estompé) dès le départ, pas caché en
+      // attendant un IntersectionObserver qui ne l'observera jamais.
+      clone.classList.remove("reveal-item");
+      clone.setAttribute("aria-hidden", "true");
+      clone.tabIndex = -1;
+    });
+    row.insertBefore(lastClone, row.firstChild);
+    row.appendChild(firstClone);
+
+    function scrollToItem(el, behavior) {
+      if (!el) return;
+      const rowRect = row.getBoundingClientRect();
+      const elRect = el.getBoundingClientRect();
+      const padLeft = parseFloat(getComputedStyle(row).paddingLeft) || 0;
+      const target = row.scrollLeft + (elRect.left - rowRect.left) - padLeft;
+      row.scrollTo({ left: target, behavior: behavior || "smooth" });
+    }
+
+    // Au chargement, on saute directement sur le premier élément réel
+    // (le clone de bouclage avant lui ne sert qu'à l'aperçu au scroll manuel).
+    scrollToItem(items[0], "auto");
+
+    function currentIndex() {
+      const rowRect = row.getBoundingClientRect();
+      let best = 0;
+      let bestDist = Infinity;
+      items.forEach((el, i) => {
+        const dist = Math.abs(el.getBoundingClientRect().left - rowRect.left);
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = i;
+        }
+      });
+      return best;
+    }
+
+    const prevBtn = carousel.querySelector("[data-carousel-prev]");
+    const nextBtn = carousel.querySelector("[data-carousel-next]");
+    if (prevBtn) {
+      prevBtn.addEventListener("click", () => {
+        scrollToItem(items[(currentIndex() - 1 + items.length) % items.length]);
+      });
+    }
+    if (nextBtn) {
+      nextBtn.addEventListener("click", () => {
+        scrollToItem(items[(currentIndex() + 1) % items.length]);
+      });
+    }
+
+    const dotsContainer = dotsId ? document.getElementById(dotsId) : null;
+    if (dotsContainer) {
+      const dots = items.map((item, i) => {
+        const dot = document.createElement("button");
+        dot.type = "button";
+        dot.setAttribute("aria-label", `Aller à l'élément ${i + 1}`);
+        dot.addEventListener("click", () => scrollToItem(item));
+        dotsContainer.appendChild(dot);
+        return dot;
+      });
+      dots[0].classList.add("is-active");
+
+      let ticking = false;
+      row.addEventListener(
+        "scroll",
+        () => {
+          if (ticking) return;
+          ticking = true;
+          requestAnimationFrame(() => {
+            const i = currentIndex();
+            dots.forEach((d, di) => d.classList.toggle("is-active", di === i));
+            ticking = false;
+          });
+        },
+        { passive: true }
+      );
+    }
+  }
+
+  setupCarousel("videos-carousel", "videos-row", "videos-dots");
+  setupCarousel("photos-carousel", "photos-grid", null);
+  setupCarousel("graphisme-carousel", "graphisme-row", "graphisme-dots");
+
+  /* ---------------------------------------------------
+     5ter. Molette verticale → défilement horizontal
      pour les rangées de type .scroll-row
      --------------------------------------------------- */
   document.querySelectorAll(".scroll-row").forEach((row) => {
@@ -406,6 +513,7 @@
                     et le reste des visuels en galerie en dessous
      --------------------------------------------------- */
   const modal = document.getElementById("project-modal");
+  const modalPanel = document.getElementById("modal-panel");
   const modalTopbar = document.getElementById("modal-topbar");
   const modalKicker = document.getElementById("modal-kicker");
   const modalTitle = document.getElementById("modal-title");
@@ -513,16 +621,19 @@
     lastFocusedEl = document.activeElement;
     modalContent.innerHTML = "";
     modalTopbar.classList.remove("modal-topbar--on-media");
+    modalPanel.classList.remove("modal-panel--video", "modal-panel--photo");
 
     if (project.category === "videos") {
       modalKicker.textContent = project.client || "Vidéo";
       modalTopbar.classList.add("modal-topbar--on-media");
+      modalPanel.classList.add("modal-panel--video");
       modalContent.appendChild(renderVideoContent(project));
     } else if (project.category === "graphisme") {
       modalKicker.textContent = "Graphisme";
       modalContent.appendChild(renderGraphismeContent(project));
     } else {
       modalKicker.textContent = "Photo";
+      modalPanel.classList.add("modal-panel--photo");
       modalContent.appendChild(renderPhotoContent(project));
     }
 

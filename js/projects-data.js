@@ -39,15 +39,6 @@ const projectsData = {
       media: { type: "youtube", src: "WOpr0kPQ1hg" }
     },
     {
-      id: "sncf-intercites",
-      title: "Vigilance Partagée",
-      client: "SNCF Intercités",
-      description: "Film de sensibilisation à la sécurité pour SNCF Intercités, pensé pour rythmer un message institutionnel avec une réalisation cinématographique.",
-      cover: "assets/images/videos/sncf-intercites-cover.jpg",
-      tags: ["Réalisation", "Montage", "Institutionnel"],
-      media: { type: "youtube", src: "" } // ex: "dQw4w9WgXcQ"
-    },
-    {
       id: "sncf-valeurs-eigs",
       title: "SNCF Intercités — Valeurs EIGS",
       client: "SNCF Intercités",
@@ -274,15 +265,7 @@ const projectsData = {
 
   /* ----------------- GRAPHISME ----------------- */
   graphisme: [
-    {
-      id: "challenge-ecoles",
-      title: "Challenge des écoles",
-      client: "Projet académique",
-      description: "Affiche et déclinaisons graphiques réalisées pour le Challenge des écoles — travail de composition et de charte graphique sportive.",
-      cover: "assets/images/graphisme/challenge-ecoles.jpg",
-      tags: ["Affiche", "Identité visuelle"],
-      images: ["assets/images/graphisme/challenge-ecoles.jpg"]
-    }
-    // Ajoute d'autres projets graphiques ici.
+    // Ajoute des projets graphiques ici en copiant le gabarit d'un objet
+    // "photos" ou "videos" ci-dessus (mêmes champs communs + `images`).
   ]
 };
