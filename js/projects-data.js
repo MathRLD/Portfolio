@@ -53,15 +53,6 @@ const projectsData = {
   /* ----------------- PHOTOS ----------------- */
   photos: [
     {
-      id: "football-1",
-      title: "Match professionnel",
-      client: "",
-      description: "Couverture photo d'un match de football professionnel — action, intensité et ambiance de stade.",
-      cover: "assets/images/photos/football-1.jpg",
-      tags: ["Sport", "Football", "Reportage"],
-      images: ["assets/images/photos/football-1.jpg"]
-    },
-    {
       id: "stpauli-koln-2026",
       title: "FC St. Pauli — 1. FC Köln",
       client: "",
@@ -86,6 +77,167 @@ const projectsData = {
         "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-112.jpg",
         "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-113.jpg",
         "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-125.jpg"
+      ]
+    },
+    {
+      id: "sncf-intercites-lifestyle",
+      title: "SNCF Intercités — Shooting lifestyle",
+      client: "SNCF Intercités",
+      description: "Shooting photo lifestyle à bord d'un train Intercités — lumière naturelle, ambiance de voyage et mise en scène du quotidien des voyageurs.",
+      cover: "assets/images/photos/Shootingsncf1/web/Shooting photo TDN.jpg",
+      tags: ["Lifestyle", "Institutionnel", "SNCF"],
+      images: [
+        "assets/images/photos/Shootingsncf1/web/Shooting photo TDN.jpg",
+        "assets/images/photos/Shootingsncf1/web/Shooting photo TDN-3.jpg",
+        "assets/images/photos/Shootingsncf1/web/Shooting photo TDN-9.jpg",
+        "assets/images/photos/Shootingsncf1/web/Shooting photo TDN-11.jpg",
+        "assets/images/photos/Shootingsncf1/web/Shooting photo TDN-16.jpg",
+        "assets/images/photos/Shootingsncf1/web/Shooting photo TDN-18.jpg",
+        "assets/images/photos/Shootingsncf1/web/Shooting photo TDN-26.jpg",
+        "assets/images/photos/Shootingsncf1/web/Shooting photo TDN-34.jpg"
+      ]
+    },
+    {
+      id: "sncf-intercites-gare",
+      title: "SNCF Intercités — Gares & trains de nuit",
+      client: "SNCF Intercités",
+      description: "Reportage photo en gare et à bord des trains Intercités — jeux de lumière nocturnes et mouvement des rames sur les quais.",
+      cover: "assets/images/photos/Shootingsncf2/web/Photos_Shooting_05_05-35.jpg",
+      tags: ["Reportage", "Institutionnel", "SNCF"],
+      images: [
+        "assets/images/photos/Shootingsncf2/web/Photos_Shooting_05_05-35.jpg",
+        "assets/images/photos/Shootingsncf2/web/Photos_Shooting_05_05-21.jpg",
+        "assets/images/photos/Shootingsncf2/web/Photos_Shooting_05_05-32.jpg",
+        "assets/images/photos/Shootingsncf2/web/Photos_Shooting_05_05-34.jpg",
+        "assets/images/photos/Shootingsncf2/web/Photos_Shooting_05_05-37.jpg",
+        "assets/images/photos/Shootingsncf2/web/Photos_Shooting_05_05-40.jpg",
+        "assets/images/photos/Shootingsncf2/web/Photos_Shooting_05_05-41.jpg"
+      ]
+    },
+    {
+      id: "bobital-2026",
+      title: "Bobital 2026",
+      client: "",
+      description: "Reportage photo d'un événement en plein air à Bobital (2026) — scène, lumière de fin de journée et ambiance de foule captées sur le vif.",
+      cover: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026.jpg",
+      tags: ["Événementiel", "Concert", "Reportage"],
+      images: [
+        "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026.jpg",
+        "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-3.jpg",
+        "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-5.jpg",
+        "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-6.jpg",
+        "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-8.jpg",
+        "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-9.jpg",
+        "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-12.jpg",
+        "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-13.jpg",
+        "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-14.jpg",
+        "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-18.jpg",
+        "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-19.jpg",
+        "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-25.jpg",
+        "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-26.jpg",
+        "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-28.jpg"
+      ]
+    },
+    {
+      id: "jeune-lion-release-party",
+      title: "Jeune Lion — Release Party",
+      client: "",
+      description: "Couverture photo de la release party de Jeune Lion (12.02.2026) — scène, lumières et ambiance de soirée.",
+      cover: "assets/images/photos/jeunelion/web/Releaseparty_Jeune-Lion_12_02_26_@Rawland-17.jpg",
+      tags: ["Événementiel", "Musique", "Reportage"],
+      images: [
+        "assets/images/photos/jeunelion/web/Releaseparty_Jeune-Lion_12_02_26_@Rawland-17.jpg",
+        "assets/images/photos/jeunelion/web/Releaseparty_Jeune-Lion_12_02_26_@Rawland-2.jpg",
+        "assets/images/photos/jeunelion/web/Releaseparty_Jeune-Lion_12_02_26_@Rawland-4.jpg",
+        "assets/images/photos/jeunelion/web/Releaseparty_Jeune-Lion_12_02_26_@Rawland-5.jpg",
+        "assets/images/photos/jeunelion/web/Releaseparty_Jeune-Lion_12_02_26_@Rawland-8.jpg",
+        "assets/images/photos/jeunelion/web/Releaseparty_Jeune-Lion_12_02_26_@Rawland-10.jpg",
+        "assets/images/photos/jeunelion/web/Releaseparty_Jeune-Lion_12_02_26_@Rawland-11.jpg",
+        "assets/images/photos/jeunelion/web/Releaseparty_Jeune-Lion_12_02_26_@Rawland-12.jpg",
+        "assets/images/photos/jeunelion/web/Releaseparty_Jeune-Lion_12_02_26_@Rawland-13.jpg",
+        "assets/images/photos/jeunelion/web/Releaseparty_Jeune-Lion_12_02_26_@Rawland-15.jpg",
+        "assets/images/photos/jeunelion/web/Releaseparty_Jeune-Lion_12_02_26_@Rawland-22.jpg",
+        "assets/images/photos/jeunelion/web/Releaseparty_Jeune-Lion_12_02_26_@Rawland-23.jpg",
+        "assets/images/photos/jeunelion/web/Releaseparty_Jeune-Lion_12_02_26_@Rawland-25.jpg",
+        "assets/images/photos/jeunelion/web/Releaseparty_Jeune-Lion_12_02_26_@Rawland-27.jpg",
+        "assets/images/photos/jeunelion/web/Releaseparty_Jeune-Lion_12_02_26_@Rawland-29.jpg",
+        "assets/images/photos/jeunelion/web/Releaseparty_Jeune-Lion_12_02_26_@Rawland-30.jpg"
+      ]
+    },
+    {
+      id: "redstar-eag",
+      title: "Red Star FC — EA Guingamp",
+      client: "",
+      description: "Reportage photo du match de Ligue 2 entre le Red Star FC et l'En Avant Guingamp (24.04) — intensité du jeu et liesse collective en fin de rencontre.",
+      cover: "assets/images/photos/redstareag/web/RedStarFC_EAG_@Rawland_24_04-99.jpg",
+      tags: ["Sport", "Football", "Ligue 2", "Reportage"],
+      images: [
+        "assets/images/photos/redstareag/web/RedStarFC_EAG_@Rawland_24_04-99.jpg",
+        "assets/images/photos/redstareag/web/RedStarFC_EAG_@Rawland_24_04-13.jpg",
+        "assets/images/photos/redstareag/web/RedStarFC_EAG_@Rawland_24_04-14.jpg",
+        "assets/images/photos/redstareag/web/RedStarFC_EAG_@Rawland_24_04-18.jpg",
+        "assets/images/photos/redstareag/web/RedStarFC_EAG_@Rawland_24_04-19.jpg",
+        "assets/images/photos/redstareag/web/RedStarFC_EAG_@Rawland_24_04-24.jpg",
+        "assets/images/photos/redstareag/web/RedStarFC_EAG_@Rawland_24_04-25.jpg",
+        "assets/images/photos/redstareag/web/RedStarFC_EAG_@Rawland_24_04-27.jpg",
+        "assets/images/photos/redstareag/web/RedStarFC_EAG_@Rawland_24_04-32.jpg",
+        "assets/images/photos/redstareag/web/RedStarFC_EAG_@Rawland_24_04-59.jpg",
+        "assets/images/photos/redstareag/web/RedStarFC_EAG_@Rawland_24_04-81.jpg",
+        "assets/images/photos/redstareag/web/RedStarFC_EAG_@Rawland_24_04-83.jpg",
+        "assets/images/photos/redstareag/web/RedStarFC_EAG_@Rawland_24_04-88.jpg",
+        "assets/images/photos/redstareag/web/RedStar_EAG_@Rawland_24_04-2.jpg",
+        "assets/images/photos/redstareag/web/RedStar_EAG_@Rawland_24_04-14.jpg",
+        "assets/images/photos/redstareag/web/RedStar_EAG_@Rawland_24_04-17.jpg",
+        "assets/images/photos/redstareag/web/RedStar_EAG_@Rawland_24_04-35.jpg",
+        "assets/images/photos/redstareag/web/RedStar_EAG_@Rawland_24_04-39.jpg",
+        "assets/images/photos/redstareag/web/RedStar_EAG_@Rawland_24_04-41.jpg",
+        "assets/images/photos/redstareag/web/RedStar_EAG_@Rawland_24_04-42.jpg",
+        "assets/images/photos/redstareag/web/RedStar_EAG_@Rawland_24_04-49.jpg"
+      ]
+    },
+    {
+      id: "redstar-grenoble",
+      title: "Red Star FC — Grenoble Foot 38",
+      client: "",
+      description: "Reportage photo du match entre le Red Star FC et Grenoble Foot 38 — but, fumigènes et ferveur des tribunes.",
+      cover: "assets/images/photos/redstargrenoble/web/RED_STAR__GRENOBLE_BUT-3.jpg",
+      tags: ["Sport", "Football", "Reportage"],
+      images: [
+        "assets/images/photos/redstargrenoble/web/RED_STAR__GRENOBLE_BUT-3.jpg",
+        "assets/images/photos/redstargrenoble/web/RED_STAR__GRENOBLE_12-6.jpg",
+        "assets/images/photos/redstargrenoble/web/RED_STAR__GRENOBLE_5_-3.jpg",
+        "assets/images/photos/redstargrenoble/web/RED_STAR__GRENOBLE_BUT-6.jpg",
+        "assets/images/photos/redstargrenoble/web/RED_STAR__GRENOBLE_FIN-7.jpg",
+        "assets/images/photos/redstargrenoble/web/RED_STAR__GRENOBLE_FIN-8.jpg",
+        "assets/images/photos/redstargrenoble/web/RED_STAR__GRENOBLE_VF.jpg",
+        "assets/images/photos/redstargrenoble/web/RED_STAR__GRENOBLE_VF-6.jpg",
+        "assets/images/photos/redstargrenoble/web/RED_STAR__GRENOBLE_VF-9.jpg",
+        "assets/images/photos/redstargrenoble/web/RED_STAR__GRENOBLE_VF-17.jpg",
+        "assets/images/photos/redstargrenoble/web/RED_STAR__GRENOBLE_VF-22.jpg",
+        "assets/images/photos/redstargrenoble/web/RED_STAR__GRENOBLE_VF-24.jpg",
+        "assets/images/photos/redstargrenoble/web/RED_STAR__GRENOBLE_fumee-3.jpg",
+        "assets/images/photos/redstargrenoble/web/RED_STAR__GRENOBLE_fumee-5.jpg",
+        "assets/images/photos/redstargrenoble/web/RED_STAR__GRENOBLE_fumee-7.jpg"
+      ]
+    },
+    {
+      id: "redstar-laval",
+      title: "Red Star FC — Stade Lavallois",
+      client: "",
+      description: "Reportage photo du match entre le Red Star FC et le Stade Lavallois — action sur le terrain et ambiance survoltée des supporters.",
+      cover: "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand46.jpg",
+      tags: ["Sport", "Football", "Reportage"],
+      images: [
+        "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand46.jpg",
+        "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand11.jpg",
+        "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand13.jpg",
+        "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand32.jpg",
+        "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand35.jpg",
+        "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand48.jpg",
+        "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand55.jpg",
+        "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand64.jpg",
+        "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand91.jpg",
+        "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand96.jpg"
       ]
     }
     // Ajoute d'autres photos ici. 10 emplacements sont prévus
