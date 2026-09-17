@@ -158,16 +158,17 @@
   window.addEventListener("resize", updateHeroPortraitPosition);
 
   // Récupère jusqu'à `count` projets pour peupler l'orbite : les ids listés
-  // dans `pinnedIds` sont toujours inclus en premier, le reste est complété
-  // en entrelaçant vidéos/photos/graphisme ; complète avec des cases vides
+  // dans `pinnedIds` sont toujours inclus en premier, les ids de
+  // `excludedIds` ne sont jamais repris, le reste est complété en
+  // entrelaçant vidéos/photos/graphisme ; complète avec des cases vides
   // si besoin.
-  function gatherOrbitProjects(count, pinnedIds) {
+  function gatherOrbitProjects(count, pinnedIds, excludedIds) {
     const cats = ["videos", "photos", "graphisme"];
     const lists = cats.map((c) =>
       (projectsData[c] || []).map((p) => Object.assign({}, p, { category: c }))
     );
     const picked = [];
-    const usedIds = new Set();
+    const usedIds = new Set(excludedIds || []);
 
     (pinnedIds || []).forEach((id) => {
       for (const list of lists) {
@@ -201,12 +202,15 @@
   }
 
   const ORBIT_COUNT = 8;
-  // Projets à toujours faire apparaître dans l'anneau autour du portrait.
-  const ORBIT_PINNED_IDS = ["sncf-valeurs-eigs", "redstar-eag"];
+  // Projets à toujours faire apparaître dans l'anneau autour du portrait,
+  // et projets à ne jamais y faire apparaître.
+  const ORBIT_PINNED_IDS = ["sncf-valeurs-eigs", "redstar-eag", "bobital-2026", "jeune-lion-release-party"];
+  const ORBIT_EXCLUDED_IDS = ["sncf-intercites", "challenge-ecoles"];
+  const ORBIT_MASK_COUNT = 4; // voir index.html : #grunge-mask-1 à 4
   const orbitProjects = new Map(); // élément -> projet associé (pour l'ouverture de la modale)
-  const orbitDeform = new Map(); // élément -> légère déformation figée (coins + rotation)
+  const orbitDeform = new Map(); // élément -> légère déformation figée (rotation)
   const orbitItems = orbitContainer
-    ? gatherOrbitProjects(ORBIT_COUNT, ORBIT_PINNED_IDS).map((project) => {
+    ? gatherOrbitProjects(ORBIT_COUNT, ORBIT_PINNED_IDS, ORBIT_EXCLUDED_IDS).map((project, index) => {
         const el = document.createElement(project ? "button" : "div");
         el.className = "hero-orbit-item" + (project ? "" : " is-placeholder");
         if (project) {
@@ -218,13 +222,13 @@
           // capture de pointeur) : le click natif suffit dans ce cas.
           el.addEventListener("click", () => openModal(project));
         }
-        // Look "un peu moins clean" : coins légèrement irréguliers + un tout
-        // petit tilt fixe propre à chaque vignette, figés une fois pour toutes.
-        const r1 = 14 + Math.random() * 10;
-        const r2 = 14 + Math.random() * 10;
-        const r3 = 14 + Math.random() * 10;
-        const r4 = 14 + Math.random() * 10;
-        el.style.borderRadius = `${r1}px ${r2}px ${r3}px ${r4}px`;
+        // Look "un peu moins clean" : contour grunge (masque SVG, voir
+        // index.html) qui varie d'une carte à l'autre + un tout petit tilt
+        // fixe propre à chaque vignette, figés une fois pour toutes. Le
+        // masque ne touche que le contour : l'image à l'intérieur reste nette.
+        const maskId = `grunge-mask-${(index % ORBIT_MASK_COUNT) + 1}`;
+        el.style.webkitMaskImage = `url(#${maskId})`;
+        el.style.maskImage = `url(#${maskId})`;
         orbitDeform.set(el, (Math.random() - 0.5) * 7);
         orbitContainer.appendChild(el);
         return el;

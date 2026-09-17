@@ -295,13 +295,35 @@ a { color: inherit; text-decoration: none; }
   border: none;
   padding: 0;
   transform: translate3d(0,0,0);
-  filter: url(#grunge-edge);
+  /* Le contour grunge vient d'un masque (voir index.html, .hero-orbit-item
+     dans main.js) et non d'un filtre : les bords sont irréguliers mais la
+     photo à l'intérieur reste nette. */
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
 }
 .hero-orbit-item img { width: 100%; height: 100%; object-fit: cover; }
 .hero-orbit-item.is-placeholder { cursor: default; }
 
 .hero-stage.is-dragging { cursor: grabbing; }
 .hero-stage { cursor: grab; }
+
+/* ---------- mentions discrètes en bas de la photo hero ---------- */
+.hero-credit {
+  position: absolute;
+  bottom: 16px;
+  z-index: 2;
+  font-size: 11px;
+  letter-spacing: 0.4px;
+  color: rgba(255,255,255,0.8);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  opacity: 0.85;
+  transition: opacity 0.3s var(--ease);
+}
+.hero-credit:hover { opacity: 1; }
+.hero-credit--left { left: 20px; }
+.hero-credit--right { right: 20px; }
 
 /* placeholder look while there's no real image yet */
 .img-missing {
@@ -811,6 +833,17 @@ a { color: inherit; text-decoration: none; }
     transform: none;
   }
   .hero-orbit-item { width: 80px; }
+
+  /* Barre de scroll verticale inutile en mobile : on la masque. */
+  html, body {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  html::-webkit-scrollbar, body::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
 }
 
 @media (max-width: 720px) {

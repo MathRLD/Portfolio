@@ -14,14 +14,43 @@
 </head>
 <body>
 
-<!-- Filtre SVG partagé : très légère turbulence appliquée aux bords des
-     vignettes de l'anneau (voir .hero-orbit-item), pour casser le côté
-     "trop propre" des coins/border-radius parfaits. -->
+<!-- Masques SVG partagés : très légère turbulence utilisée comme MASQUE
+     (pas comme filtre appliqué au contenu) sur les vignettes de l'anneau
+     (voir .hero-orbit-item) — les bords/coins sont irréguliers mais la
+     photo à l'intérieur reste nette. 4 variantes (seeds différents) pour
+     que les cartes n'aient pas toutes exactement le même contour. -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <filter id="grunge-edge" x="-10%" y="-10%" width="120%" height="120%">
-    <feTurbulence type="fractalNoise" baseFrequency="0.05 0.09" numOctaves="2" seed="7" result="noise"></feTurbulence>
-    <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
-  </filter>
+  <defs>
+    <filter id="grunge-edge-1" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.05 0.09" numOctaves="2" seed="7" result="noise"></feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="9" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+    </filter>
+    <filter id="grunge-edge-2" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.06 0.08" numOctaves="2" seed="23" result="noise"></feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="9" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+    </filter>
+    <filter id="grunge-edge-3" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.045 0.1" numOctaves="2" seed="41" result="noise"></feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="9" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+    </filter>
+    <filter id="grunge-edge-4" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.055 0.075" numOctaves="2" seed="59" result="noise"></feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="9" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+    </filter>
+
+    <mask id="grunge-mask-1" maskContentUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="300" height="400" rx="16" ry="16" fill="#fff" filter="url(#grunge-edge-1)"></rect>
+    </mask>
+    <mask id="grunge-mask-2" maskContentUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="300" height="400" rx="16" ry="16" fill="#fff" filter="url(#grunge-edge-2)"></rect>
+    </mask>
+    <mask id="grunge-mask-3" maskContentUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="300" height="400" rx="16" ry="16" fill="#fff" filter="url(#grunge-edge-3)"></rect>
+    </mask>
+    <mask id="grunge-mask-4" maskContentUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="300" height="400" rx="16" ry="16" fill="#fff" filter="url(#grunge-edge-4)"></rect>
+    </mask>
+  </defs>
 </svg>
 
 <!-- ===================== NAVIGATION ===================== -->
@@ -61,6 +90,9 @@
              Rempli dynamiquement par js/main.js à partir de projects-data.js -->
         <div class="hero-orbit" id="hero-orbit" aria-hidden="true"></div>
       </div>
+
+      <a href="#apropos" class="hero-credit hero-credit--left">Mathys Roland</a>
+      <a href="https://instagram.com/mael.guibre" target="_blank" rel="noopener" class="hero-credit hero-credit--right">Photo : @mael.guibre</a>
     </div>
 
     <div class="hero-content reveal">
