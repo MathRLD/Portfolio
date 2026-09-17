@@ -51,6 +51,33 @@ const projectsData = {
       cover: "assets/images/photos/football-1.jpg",
       tags: ["Sport", "Football", "Reportage"],
       images: ["assets/images/photos/football-1.jpg"]
+    },
+    {
+      id: "stpauli-koln-2026",
+      title: "FC St. Pauli — 1. FC Köln",
+      client: "",
+      description: "Reportage photo du match de Bundesliga entre le FC St. Pauli et le 1. FC Köln (17.04.2026) — intensité du jeu, ambiance de tribune et instantanés capturés au fil du match.",
+      cover: "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-53.jpg",
+      tags: ["Sport", "Football", "Bundesliga", "Reportage"],
+      images: [
+        "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-53.jpg",
+        "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-6.jpg",
+        "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-10.jpg",
+        "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-13.jpg",
+        "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-24.jpg",
+        "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-29.jpg",
+        "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-32.jpg",
+        "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-41.jpg",
+        "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-44.jpg",
+        "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-47.jpg",
+        "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-57.jpg",
+        "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-59.jpg",
+        "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-78.jpg",
+        "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-85.jpg",
+        "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-112.jpg",
+        "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-113.jpg",
+        "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-125.jpg"
+      ]
     }
     // Ajoute d'autres photos ici. 10 emplacements sont prévus
     // dans la grille par défaut ; les cases vides afficheront

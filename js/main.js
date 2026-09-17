@@ -139,6 +139,7 @@
   }
 
   const ORBIT_COUNT = 6;
+  const orbitProjects = new Map(); // élément -> projet associé (pour l'ouverture de la modale)
   const orbitItems = orbitContainer
     ? gatherOrbitProjects(ORBIT_COUNT).map((project) => {
         const el = document.createElement(project ? "button" : "div");
@@ -147,6 +148,9 @@
           el.type = "button";
           el.setAttribute("aria-label", project.title);
           el.innerHTML = `<img src="${project.cover}" alt="" onerror="this.parentElement.classList.add('img-missing')">`;
+          orbitProjects.set(el, project);
+          // Fallback pour le mode "mouvement réduit" (pas de drag, donc pas de
+          // capture de pointeur) : le click natif suffit dans ce cas.
           el.addEventListener("click", () => openModal(project));
         }
         orbitContainer.appendChild(el);
@@ -190,10 +194,22 @@
     if (prefersReducedMotion) {
       renderOrbit(0);
     } else {
+      // Le drag capture le pointeur dès le pointerdown, ce qui empêche le
+      // "click" natif d'atteindre les vignettes : on détecte donc nous-mêmes
+      // un clic (peu/pas de mouvement entre down et up) pour ouvrir la modale.
+      let downTarget = null;
+      let downX = 0;
+      let downY = 0;
+      let didDrag = false;
+
       if (heroStage) {
         heroStage.addEventListener("pointerdown", (e) => {
           isDragging = true;
+          didDrag = false;
           lastX = e.clientX;
+          downX = e.clientX;
+          downY = e.clientY;
+          downTarget = e.target.closest(".hero-orbit-item");
           heroStage.classList.add("is-dragging");
           heroStage.setPointerCapture(e.pointerId);
         });
@@ -202,11 +218,19 @@
           const dx = e.clientX - lastX;
           lastX = e.clientX;
           dragOffset += dx * 0.006;
+          if (Math.abs(e.clientX - downX) > 4 || Math.abs(e.clientY - downY) > 4) {
+            didDrag = true;
+          }
         });
         ["pointerup", "pointerleave", "pointercancel"].forEach((evt) =>
-          heroStage.addEventListener(evt, () => {
+          heroStage.addEventListener(evt, (e) => {
             isDragging = false;
             heroStage.classList.remove("is-dragging");
+            if (evt === "pointerup" && !didDrag && downTarget) {
+              const project = orbitProjects.get(downTarget);
+              if (project) openModal(project);
+            }
+            downTarget = null;
           })
         );
       }
@@ -295,7 +319,7 @@
   /* ---------------------------------------------------
      6. MODALE PROJET — un gabarit différent par type :
      - vidéo      : poster flouté + bouton lecture, titre en overlay
-     - photo      : titre seul, puis galerie en masonry sans texte
+     - photo      : titre, description courte optionnelle, puis galerie en masonry
      - graphisme  : titre, puis image + description côte à côte,
                     et le reste des visuels en galerie en dessous
      --------------------------------------------------- */
@@ -344,11 +368,22 @@
   }
 
   function renderPhotoContent(project) {
+    const wrapper = document.createDocumentFragment();
+
+    if (project.description) {
+      const desc = document.createElement("p");
+      desc.className = "modal-photo-desc";
+      desc.textContent = project.description;
+      wrapper.appendChild(desc);
+    }
+
     const gallery = document.createElement("div");
     gallery.className = "modal-masonry";
     const images = project.images && project.images.length ? project.images : [project.cover];
     gallery.innerHTML = images.map((src) => imgTag(src, project.title)).join("");
-    return gallery;
+    wrapper.appendChild(gallery);
+
+    return wrapper;
   }
 
   function renderGraphismeContent(project) {
