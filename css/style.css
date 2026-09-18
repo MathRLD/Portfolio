@@ -884,7 +884,9 @@ a { color: inherit; text-decoration: none; }
 .modal-masonry {
   columns: 2;
   column-gap: 22px;
-  padding: 10px 10px 20px;
+  /* Marge extérieure = écart entre colonnes + une unité de plus, pour que
+     le bord ne paraisse jamais plus serré que l'espace entre les photos. */
+  padding: 10px 44px 20px;
 }
 .modal-masonry img {
   width: 100%;
