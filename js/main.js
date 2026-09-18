@@ -365,39 +365,24 @@
     return el;
   }
 
-  function fillRow(containerId, list, category, minSlots) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    const emptyLabel = container.dataset.emptyLabel || "À venir";
-
-    list.forEach((project) => {
-      container.appendChild(createCard({ ...project, category }, emptyLabel));
-    });
-
-    const remaining = Math.max(0, minSlots - list.length);
-    for (let i = 0; i < remaining; i++) {
-      container.appendChild(createEmptyCard(emptyLabel));
-    }
-  }
-
-  fillRow("photos-grid", projectsData.photos, "photos", 10);
-  document.querySelectorAll("#photos-grid .reveal-item").forEach(observeReveal);
-
   /* ---------------------------------------------------
-     5bis. Slider infini "vedette" (Vidéos / Graphisme)
+     5bis. Slider infini (Vidéos / Photos / Graphisme)
      ---------------------------------------------------
-     #videos-row / #graphisme-row est la fenêtre fixe (overflow caché) ;
-     #videos-track / #graphisme-track est le rail à l'intérieur, qui
-     contient TROIS exemplaires consécutifs de la liste et glisse via
-     transform. On avance d'une carte à la fois avec une transition ;
-     une fois qu'on a dérivé d'un exemplaire complet dans un sens, on se
-     replace silencieusement (sans transition) au même endroit visuel
-     dans l'exemplaire du milieu — mais seulement une fois la carte
-     sortie hors du champ visible, donc sans saut perceptible. Les deux
-     premières cartes visibles sont mises en avant (.is-featured pour la
-     1re, .is-secondary pour la 2e), via un agrandissement en transform
-     qui ne modifie pas la largeur de mise en page (donc pas la distance
-     de glissement d'une carte à l'autre).
+     #videos-row / #photos-row / #graphisme-row est la fenêtre fixe
+     (overflow caché) ; #videos-track / #photos-track / #graphisme-track
+     est le rail à l'intérieur, qui contient TROIS exemplaires consécutifs
+     de la liste et glisse via transform. On avance d'une carte à la fois
+     avec une transition ; une fois qu'on a dérivé d'un exemplaire complet
+     dans un sens, on se replace silencieusement (sans transition) au même
+     endroit visuel dans l'exemplaire du milieu — mais seulement une fois
+     la carte sortie hors du champ visible, donc sans saut perceptible.
+
+     Deux variantes, pilotées par `opts` :
+     - Vidéos / Graphisme (opts.featured = true) : 4 cartes visibles dont
+       la 2e est mise en avant (.is-featured) via une largeur agrandie.
+     - Photos (opts.featured = false) : plusieurs cartes carrées de même
+       taille (pas de carte agrandie), dont le nombre visible s'adapte
+       aussi à la largeur de la fenêtre (voir visibleCount()).
      --------------------------------------------------- */
   function buildCardFactories(containerId, list, category, minSlots) {
     const container = document.getElementById(containerId);
@@ -410,7 +395,8 @@
     return factories;
   }
 
-  function setupFeaturedSlider(carouselId, viewportId, trackId, slideFactories) {
+  function setupInfiniteSlider(carouselId, viewportId, trackId, slideFactories, opts) {
+    const { featured = true, cardAspect = 10 / 16 } = opts || {};
     const carousel = document.getElementById(carouselId);
     const viewport = document.getElementById(viewportId);
     const track = document.getElementById(trackId);
@@ -443,48 +429,65 @@
     let currentIndex = n; // on démarre sur le premier élément de l'exemplaire du milieu
     let isAnimating = false;
 
-    // Un nombre fixe de cartes visibles à la fois (4 sur desktop, moins sur
-    // petit écran pour rester lisible) : les largeurs sont calculées à
-    // partir de la largeur réelle de la fenêtre visible, pas d'une taille
-    // fixe/vw — ainsi il n'y a jamais un bout de carte suivante qui dépasse
-    // en bord de rangée. On se base sur clientWidth SANS retirer de
-    // padding : overflow-hidden sur .scroll-row masque à la largeur totale
-    // de la boîte, pas à la largeur d'un contenu réduit par un padding
-    // interne.
+    // Un nombre fixe de cartes visibles à la fois (moins sur petit écran
+    // pour rester lisible) : les largeurs sont calculées à partir de la
+    // largeur réelle de la fenêtre visible, pas d'une taille fixe/vw —
+    // ainsi il n'y a jamais un bout de carte suivante qui dépasse en bord
+    // de rangée. On se base sur clientWidth SANS retirer de padding CSS :
+    // overflow-hidden sur .scroll-row masque à la largeur totale de la
+    // boîte (voir .carousel--featured / .carousel--photos .scroll-row,
+    // qui n'ont aucun padding — tout l'espacement est calculé ici et
+    // appliqué via transform, jamais en padding CSS).
     const GAP_RATIO = 0.05; // gap réel, en fraction d'une carte normale
     const FEATURED_RATIO = 1.17; // largeur de la carte vedette, en fraction d'une carte normale
     function visibleCount() {
       const w = viewport.clientWidth;
-      if (w < 560) return 2;
-      if (w < 900) return 3;
-      return 4;
+      if (featured) {
+        if (w < 560) return 2;
+        if (w < 900) return 3;
+        return 4;
+      }
+      if (w < 560) return 1;
+      if (w < 900) return 2;
+      return 3;
     }
     function layout() {
       const count = visibleCount();
-      // (count-1) cartes normales + 1 vedette + (count-1) gaps = largeur dispo
-      const units = (count - 1) * (1 + GAP_RATIO) + FEATURED_RATIO;
-      const cardWidth = viewport.clientWidth / units;
-      const featuredWidth = cardWidth * FEATURED_RATIO;
-      track.style.setProperty("--card-w", `${cardWidth}px`);
-      track.style.setProperty("--card-w-featured", `${featuredWidth}px`);
-      track.style.setProperty("--slot-gap", `${cardWidth * GAP_RATIO}px`);
-      // Hauteur de la fenêtre fixée sur la carte vedette (toujours la plus
-      // grande, aspect-ratio 16/10) : sans ça, pendant la transition, les
-      // deux cartes qui échangent leur rôle passent un instant par une
-      // taille intermédiaire, la carte la plus haute du rail rétrécit
-      // brièvement, et toute la page en dessous (ex. la section Photos)
-      // remonte puis redescend pour suivre.
-      viewport.style.height = `${(featuredWidth * 10) / 16}px`;
+      if (featured) {
+        // (count-1) cartes normales + 1 vedette + (count-1) gaps = largeur dispo
+        const units = (count - 1) * (1 + GAP_RATIO) + FEATURED_RATIO;
+        const cardWidth = viewport.clientWidth / units;
+        const featuredWidth = cardWidth * FEATURED_RATIO;
+        track.style.setProperty("--card-w", `${cardWidth}px`);
+        track.style.setProperty("--card-w-featured", `${featuredWidth}px`);
+        track.style.setProperty("--slot-gap", `${cardWidth * GAP_RATIO}px`);
+        // Hauteur de la fenêtre fixée sur la carte vedette (toujours la plus
+        // grande) : sans ça, pendant la transition, les deux cartes qui
+        // échangent leur rôle passent un instant par une taille
+        // intermédiaire, la carte la plus haute du rail rétrécit
+        // brièvement, et toute la page en dessous remonte puis redescend
+        // pour suivre.
+        viewport.style.height = `${featuredWidth * cardAspect}px`;
+      } else {
+        // Cartes de même taille, réparties uniformément sur toute la largeur.
+        const units = count + (count - 1) * GAP_RATIO;
+        const cardWidth = viewport.clientWidth / units;
+        track.style.setProperty("--card-w", `${cardWidth}px`);
+        track.style.setProperty("--slot-gap", `${cardWidth * GAP_RATIO}px`);
+        viewport.style.height = `${cardWidth * cardAspect}px`;
+      }
     }
     layout();
 
     // La carte mise en avant est toujours la 2e carte visible, donc celle
     // juste après la carte de tête (currentIndex) dans l'ordre du rail.
+    // N'existe qu'en mode "vedette" (Vidéos / Graphisme) : Photos affiche
+    // des cartes toutes de même taille, pas de carte agrandie.
     function updateFeatured() {
-      const featured = ((currentIndex + 1) % n + n) % n;
+      if (!featured) return;
+      const idx = ((currentIndex + 1) % n + n) % n;
       allCards.forEach((card) => {
-        const idx = Number(card.dataset.slideIndex);
-        card.classList.toggle("is-featured", idx === featured);
+        card.classList.toggle("is-featured", Number(card.dataset.slideIndex) === idx);
       });
     }
     updateFeatured();
@@ -553,139 +556,25 @@
     });
   }
 
-  setupFeaturedSlider(
+  setupInfiniteSlider(
     "videos-carousel",
     "videos-row",
     "videos-track",
     buildCardFactories("videos-row", projectsData.videos, "videos", 4)
   );
-  setupFeaturedSlider(
+  setupInfiniteSlider(
     "graphisme-carousel",
     "graphisme-row",
     "graphisme-track",
     buildCardFactories("graphisme-row", projectsData.graphisme, "graphisme", 4)
   );
-
-  /* ---------------------------------------------------
-     5ter. Carrousel Photos : flèches + points de pagination, avec un
-     clone estompé du premier/dernier élément à chaque extrémité pour
-     suggérer une boucle infinie. Les flèches et les points bouclent
-     réellement (dernier → premier et inversement) ; le scroll tactile
-     natif reste utilisable.
-     --------------------------------------------------- */
-  function setupCarousel(carouselId, rowId, dotsId) {
-    const carousel = document.getElementById(carouselId);
-    const row = document.getElementById(rowId);
-    if (!carousel || !row) return;
-
-    const items = Array.from(row.children);
-    if (!items.length) return;
-
-    const firstClone = items[0].cloneNode(true);
-    const lastClone = items[items.length - 1].cloneNode(true);
-    [firstClone, lastClone].forEach((clone) => {
-      clone.classList.add("is-clone");
-      // Pas d'animation d'apparition au scroll pour un clone décoratif :
-      // il doit être visible (estompé) dès le départ, pas caché en
-      // attendant un IntersectionObserver qui ne l'observera jamais.
-      clone.classList.remove("reveal-item");
-      clone.setAttribute("aria-hidden", "true");
-      clone.tabIndex = -1;
-    });
-    row.insertBefore(lastClone, row.firstChild);
-    row.appendChild(firstClone);
-
-    function scrollToItem(el, behavior) {
-      if (!el) return;
-      const rowRect = row.getBoundingClientRect();
-      const elRect = el.getBoundingClientRect();
-      const padLeft = parseFloat(getComputedStyle(row).paddingLeft) || 0;
-      const target = row.scrollLeft + (elRect.left - rowRect.left) - padLeft;
-      row.scrollTo({ left: target, behavior: behavior || "smooth" });
-    }
-
-    // Au chargement, on saute directement sur le premier élément réel
-    // (le clone de bouclage avant lui ne sert qu'à l'aperçu au scroll manuel).
-    scrollToItem(items[0], "auto");
-
-    function currentIndex() {
-      const rowRect = row.getBoundingClientRect();
-      let best = 0;
-      let bestDist = Infinity;
-      items.forEach((el, i) => {
-        const dist = Math.abs(el.getBoundingClientRect().left - rowRect.left);
-        if (dist < bestDist) {
-          bestDist = dist;
-          best = i;
-        }
-      });
-      return best;
-    }
-
-    const prevBtn = carousel.querySelector("[data-carousel-prev]");
-    const nextBtn = carousel.querySelector("[data-carousel-next]");
-    if (prevBtn) {
-      prevBtn.addEventListener("click", () => {
-        scrollToItem(items[(currentIndex() - 1 + items.length) % items.length]);
-      });
-    }
-    if (nextBtn) {
-      nextBtn.addEventListener("click", () => {
-        scrollToItem(items[(currentIndex() + 1) % items.length]);
-      });
-    }
-
-    const dotsContainer = dotsId ? document.getElementById(dotsId) : null;
-    if (dotsContainer) {
-      const dots = items.map((item, i) => {
-        const dot = document.createElement("button");
-        dot.type = "button";
-        dot.setAttribute("aria-label", `Aller à l'élément ${i + 1}`);
-        dot.addEventListener("click", () => scrollToItem(item));
-        dotsContainer.appendChild(dot);
-        return dot;
-      });
-      dots[0].classList.add("is-active");
-
-      let ticking = false;
-      row.addEventListener(
-        "scroll",
-        () => {
-          if (ticking) return;
-          ticking = true;
-          requestAnimationFrame(() => {
-            const i = currentIndex();
-            dots.forEach((d, di) => d.classList.toggle("is-active", di === i));
-            ticking = false;
-          });
-        },
-        { passive: true }
-      );
-    }
-  }
-
-  setupCarousel("photos-carousel", "photos-grid", null);
-
-  /* ---------------------------------------------------
-     5quater. Molette verticale → défilement horizontal
-     pour les rangées de type .scroll-row (Photos uniquement : Vidéos
-     et Graphisme n'ont plus de scroll natif — leur .scroll-row ne fait
-     que masquer le rail transformé, lui appliquer scrollLeft entrerait
-     en conflit avec le transform du rail — seules les flèches naviguent).
-     --------------------------------------------------- */
-  document.querySelectorAll(".scroll-row").forEach((row) => {
-    if (row.closest(".carousel--featured")) return;
-    row.addEventListener(
-      "wheel",
-      (e) => {
-        if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
-        if (row.scrollWidth <= row.clientWidth) return;
-        e.preventDefault();
-        row.scrollLeft += e.deltaY;
-      },
-      { passive: false }
-    );
-  });
+  setupInfiniteSlider(
+    "photos-carousel",
+    "photos-row",
+    "photos-track",
+    buildCardFactories("photos-row", projectsData.photos, "photos", 10),
+    { featured: false, cardAspect: 1 }
+  );
 
   /* ---------------------------------------------------
      6. MODALE PROJET — un gabarit différent par type :

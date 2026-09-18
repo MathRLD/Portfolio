@@ -457,19 +457,18 @@ a { color: inherit; text-decoration: none; }
 }
 .section--light .project-card.is-empty { color: rgba(0,0,0,0.3); background: var(--grey-light); }
 
-.project-card.is-clone { opacity: 0.4; pointer-events: none; }
-
-/* ---------- slider "vedette" (Vidéos / Graphisme) ----------
-   #videos-row / #graphisme-row (.scroll-row) est la "fenêtre" fixe :
-   overflow-x caché, c'est elle qui masque ce qui dépasse. Un masque en
-   dégradé (mask-image) estompe les deux extrémités, pour suggérer que la
-   liste continue au-delà de ce qui est affiché. À l'intérieur,
-   .scroll-track contient TROIS exemplaires consécutifs de la liste et
-   glisse via transform (voir setupFeaturedSlider dans main.js) — c'est
-   ce découplage fenêtre/rail qui permet à une carte de sortir par la
-   gauche ou la droite sans jamais "sauter" : le rail avance en continu,
-   et le rebouclage sur l'exemplaire du milieu se fait seulement une fois
-   la carte hors champ, donc invisible.
+/* ---------- slider infini (Vidéos / Photos / Graphisme) ----------
+   #videos-row / #photos-row / #graphisme-row (.scroll-row) est la
+   "fenêtre" fixe : overflow-x caché, c'est elle qui masque ce qui
+   dépasse. Un masque en dégradé (mask-image) estompe les deux
+   extrémités, pour suggérer que la liste continue au-delà de ce qui est
+   affiché. À l'intérieur, .scroll-track contient TROIS exemplaires
+   consécutifs de la liste et glisse via transform (voir
+   setupInfiniteSlider dans main.js) — c'est ce découplage fenêtre/rail
+   qui permet à une carte de sortir par la gauche ou la droite sans
+   jamais "sauter" : le rail avance en continu, et le rebouclage sur
+   l'exemplaire du milieu se fait seulement une fois la carte hors champ,
+   donc invisible.
 
    Chaque carte est directement l'item flexible du rail (--card-w /
    --card-w-featured / --slot-gap calculées en JS à partir de la largeur
@@ -479,9 +478,12 @@ a { color: inherit; text-decoration: none; }
    toutes les paires de cartes, y compris autour de la carte vedette
    (.is-featured, toujours la 2e carte visible, un peu plus grande —
    elle n'est plus contrainte à un slot partagé avec les autres). */
-.carousel--featured .scroll-row {
+.carousel--featured .scroll-row,
+.carousel--photos .scroll-row {
   overflow-x: hidden;
   scroll-snap-type: none;
+  /* Navigation aux flèches uniquement : aucun scroll/swipe manuel. */
+  touch-action: pan-y;
   -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
   mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
 }
@@ -500,7 +502,7 @@ a { color: inherit; text-decoration: none; }
    — sans ce garde-fou, ce changement serait lui-même transitionné au
    chargement (les cartes "rétréciraient" visiblement à l'affichage). La
    transition n'est activée qu'une fois la mise en page initiale posée
-   (voir setupFeaturedSlider, classe .is-ready ajoutée après le 1er place()). */
+   (voir setupInfiniteSlider, classe .is-ready ajoutée après le 1er place()). */
 .scroll-track.is-ready > .project-card {
   transition: flex-basis 0.45s var(--ease), box-shadow 0.45s var(--ease);
 }
@@ -510,23 +512,29 @@ a { color: inherit; text-decoration: none; }
   box-shadow: 0 24px 44px -14px rgba(0,0,0,0.55);
 }
 
-/* ---------- galerie photos (même principe carrousel, cartes carrées) ---------- */
-.scroll-row--photos .project-card {
-  flex: 0 0 clamp(180px, 24vw, 280px);
+/* ---------- galerie photos (même moteur de carrousel infini que Vidéos /
+   Graphisme — voir setupInfiniteSlider dans main.js — mais sans carte
+   "vedette" agrandie : plusieurs cartes carrées de même taille). */
+.scroll-track--photos > .project-card {
   aspect-ratio: 1 / 1;
   border-radius: 16px;
   background: var(--grey-light);
 }
-.scroll-row--photos .project-card.is-empty { color: rgba(0,0,0,0.28); }
+.scroll-track--photos > .project-card.is-empty { color: rgba(0,0,0,0.28); }
 
-/* ---------- carrousel : flèches + points ----------
+/* ---------- carrousel : flèches ----------
    Enrobe .scroll-row (Vidéos / Photos / Graphisme) pour naviguer par
-   flèches ou points plutôt que de compter sur le scroll tactile seul.
-   "Galerie infinie" : le premier/dernier élément est cloné en aperçu
-   estompé à l'extrémité opposée (voir main.js), et les flèches bouclent
-   toujours vers l'élément réel suivant/précédent. */
+   flèches, qui pilotent le rail infini (voir setupInfiniteSlider). */
 .carousel {
   position: relative;
+}
+/* 15% plus petit que la pleine largeur de la section, et centré : la
+   largeur de .scroll-row pilote directement la taille des cartes calculée
+   en JS (voir layout() dans setupInfiniteSlider), donc réduire cette
+   boîte réduit les cartes proportionnellement. */
+.carousel--photos {
+  max-width: 85%;
+  margin: 0 auto;
 }
 .carousel-arrow {
   position: absolute;
@@ -568,13 +576,19 @@ a { color: inherit; text-decoration: none; }
   border-color: rgba(0,0,0,0.3);
 }
 
-.carousel .scroll-row { padding-left: 56px; padding-right: 56px; }
-/* Le slider "vedette" n'a pas besoin de cette réserve : overflow-hidden
-   masque à la largeur totale de .scroll-row (padding compris), pas à la
-   largeur de son contenu — un padding ici laisserait un éclat de la
-   carte adjacente (hors-champ) dépasser dans cette marge. Les flèches
-   restent positionnées en absolu par-dessus, sans réserver d'espace. */
-.carousel--featured .scroll-row { padding-left: 0; padding-right: 0; }
+/* Vidéos / Graphisme / Photos n'ont pas besoin de padding sur .scroll-row :
+   overflow-hidden masque à la largeur totale de la boîte, et tout
+   l'espacement (carte vedette, marge de chaque côté pour Photos)
+   est calculé en JS via transform sur .scroll-track — un padding CSS ici
+   se cumulerait avec ce calcul et couperait le haut de la carte la plus
+   grande (sa hauteur, fixée en JS pour correspondre exactement, se
+   retrouverait réduite par le padding via box-sizing: border-box). Les
+   flèches restent positionnées en absolu par-dessus, sans réserver
+   d'espace. */
+.carousel--featured .scroll-row,
+.carousel--photos .scroll-row {
+  padding: 0;
+}
 
 .carousel-dots {
   display: flex;
@@ -601,8 +615,6 @@ a { color: inherit; text-decoration: none; }
 
 @media (max-width: 640px) {
   .carousel-arrow { width: 36px; height: 36px; font-size: 18px; }
-  .carousel .scroll-row { padding-left: 44px; padding-right: 44px; }
-  .carousel--featured .scroll-row { padding-left: 0; padding-right: 0; }
 }
 
 /* =====================================================
@@ -758,7 +770,7 @@ a { color: inherit; text-decoration: none; }
 .modal-panel--video { max-width: 1080px; }
 /* Photo : s'étend un peu plus sur les côtés, desktop uniquement. */
 @media (min-width: 901px) {
-  .modal-panel--photo { max-width: 1080px; }
+  .modal-panel--photo { max-width: 1200px; }
 }
 /* ---------- topbar (titre + fermeture) ---------- */
 .modal-topbar {
@@ -871,13 +883,13 @@ a { color: inherit; text-decoration: none; }
 }
 .modal-masonry {
   columns: 2;
-  column-gap: 10px;
+  column-gap: 22px;
   padding: 10px 10px 20px;
 }
 .modal-masonry img {
   width: 100%;
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: 22px;
   border-radius: 12px;
   break-inside: avoid;
 }
