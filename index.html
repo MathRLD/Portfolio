@@ -114,14 +114,15 @@
       <p class="section-sub">Le mouvement au service des histoires et le rythme au cœur des émotions.</p>
     </div>
 
-    <div class="carousel" id="videos-carousel">
+    <div class="carousel carousel--featured" id="videos-carousel">
       <button class="carousel-arrow carousel-arrow--prev" type="button" data-carousel-prev aria-label="Vidéo précédente">‹</button>
       <div class="scroll-row" id="videos-row" data-empty-label="Vidéo à venir">
-        <!-- injecté par js/main.js à partir de js/projects-data.js -->
+        <div class="scroll-track" id="videos-track">
+          <!-- injecté par js/main.js à partir de js/projects-data.js -->
+        </div>
       </div>
       <button class="carousel-arrow carousel-arrow--next" type="button" data-carousel-next aria-label="Vidéo suivante">›</button>
     </div>
-    <div class="carousel-dots" id="videos-dots" aria-hidden="true"></div>
   </section>
 
   <!-- ===================== PHOTOS ===================== -->
@@ -147,14 +148,15 @@
       <p class="section-sub">Une architecture graphique entre l'évidence du message et l'élégance de la forme.</p>
     </div>
 
-    <div class="carousel" id="graphisme-carousel">
+    <div class="carousel carousel--featured" id="graphisme-carousel">
       <button class="carousel-arrow carousel-arrow--prev" type="button" data-carousel-prev aria-label="Projet précédent">‹</button>
       <div class="scroll-row" id="graphisme-row" data-empty-label="Projet à venir">
-        <!-- injecté par js/main.js -->
+        <div class="scroll-track" id="graphisme-track">
+          <!-- injecté par js/main.js -->
+        </div>
       </div>
       <button class="carousel-arrow carousel-arrow--next" type="button" data-carousel-next aria-label="Projet suivant">›</button>
     </div>
-    <div class="carousel-dots" id="graphisme-dots" aria-hidden="true"></div>
   </section>
 
   <!-- ===================== A PROPOS ===================== -->

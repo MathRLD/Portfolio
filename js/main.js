@@ -380,18 +380,198 @@
     }
   }
 
-  fillRow("videos-row", projectsData.videos, "videos", 4);
   fillRow("photos-grid", projectsData.photos, "photos", 10);
-  fillRow("graphisme-row", projectsData.graphisme, "graphisme", 4);
-
-  document.querySelectorAll(".reveal-item").forEach(observeReveal);
+  document.querySelectorAll("#photos-grid .reveal-item").forEach(observeReveal);
 
   /* ---------------------------------------------------
-     5bis. Carrousels (Vidéos / Photos / Graphisme) : flèches +
-     points de pagination, avec un clone estompé du premier/dernier
-     élément à chaque extrémité pour suggérer une boucle infinie.
-     Les flèches et les points bouclent réellement (dernier → premier
-     et inversement) ; le scroll tactile natif reste utilisable.
+     5bis. Slider infini "vedette" (Vidéos / Graphisme)
+     ---------------------------------------------------
+     #videos-row / #graphisme-row est la fenêtre fixe (overflow caché) ;
+     #videos-track / #graphisme-track est le rail à l'intérieur, qui
+     contient TROIS exemplaires consécutifs de la liste et glisse via
+     transform. On avance d'une carte à la fois avec une transition ;
+     une fois qu'on a dérivé d'un exemplaire complet dans un sens, on se
+     replace silencieusement (sans transition) au même endroit visuel
+     dans l'exemplaire du milieu — mais seulement une fois la carte
+     sortie hors du champ visible, donc sans saut perceptible. Les deux
+     premières cartes visibles sont mises en avant (.is-featured pour la
+     1re, .is-secondary pour la 2e), via un agrandissement en transform
+     qui ne modifie pas la largeur de mise en page (donc pas la distance
+     de glissement d'une carte à l'autre).
+     --------------------------------------------------- */
+  function buildCardFactories(containerId, list, category, minSlots) {
+    const container = document.getElementById(containerId);
+    const emptyLabel = container?.dataset.emptyLabel || "À venir";
+    const factories = list.map((project) => () => createCard({ ...project, category }, emptyLabel));
+    const remaining = Math.max(0, minSlots - list.length);
+    for (let i = 0; i < remaining; i++) {
+      factories.push(() => createEmptyCard(emptyLabel));
+    }
+    return factories;
+  }
+
+  function setupFeaturedSlider(carouselId, viewportId, trackId, slideFactories) {
+    const carousel = document.getElementById(carouselId);
+    const viewport = document.getElementById(viewportId);
+    const track = document.getElementById(trackId);
+    if (!carousel || !viewport || !track) return;
+
+    const n = slideFactories.length;
+    if (!n) return;
+
+    // Chaque carte est directement l'item flexible du rail (pas de slot
+    // intermédiaire) : sa largeur (normale ou vedette, voir CSS) est donc
+    // sa vraie largeur de mise en page, et le gap flex (--slot-gap) est
+    // une valeur UNIQUE partagée par toutes les paires de cartes — l'écart
+    // est donc rigoureusement identique partout, y compris autour de la
+    // carte vedette. La position de chaque carte se calcule en sommant les
+    // largeurs RÉELLEMENT rendues qui la précèdent (voir place()), ce qui
+    // reste correct même si la carte vedette (plus large) se trouve parmi
+    // elles pour un exemplaire donné.
+    const copies = [[], [], []];
+    for (let c = 0; c < 3; c++) {
+      slideFactories.forEach((factory, i) => {
+        const card = factory();
+        card.dataset.slideIndex = i; // identité logique (0..n-1), la même dans les 3 exemplaires
+        track.appendChild(card);
+        copies[c].push(card);
+      });
+    }
+    const allCards = copies.flat();
+    allCards.forEach((card) => observeReveal(card));
+
+    let currentIndex = n; // on démarre sur le premier élément de l'exemplaire du milieu
+    let isAnimating = false;
+
+    // Un nombre fixe de cartes visibles à la fois (4 sur desktop, moins sur
+    // petit écran pour rester lisible) : les largeurs sont calculées à
+    // partir de la largeur réelle de la fenêtre visible, pas d'une taille
+    // fixe/vw — ainsi il n'y a jamais un bout de carte suivante qui dépasse
+    // en bord de rangée. On se base sur clientWidth SANS retirer de
+    // padding : overflow-hidden sur .scroll-row masque à la largeur totale
+    // de la boîte, pas à la largeur d'un contenu réduit par un padding
+    // interne.
+    const GAP_RATIO = 0.05; // gap réel, en fraction d'une carte normale
+    const FEATURED_RATIO = 1.17; // largeur de la carte vedette, en fraction d'une carte normale
+    function visibleCount() {
+      const w = viewport.clientWidth;
+      if (w < 560) return 2;
+      if (w < 900) return 3;
+      return 4;
+    }
+    function layout() {
+      const count = visibleCount();
+      // (count-1) cartes normales + 1 vedette + (count-1) gaps = largeur dispo
+      const units = (count - 1) * (1 + GAP_RATIO) + FEATURED_RATIO;
+      const cardWidth = viewport.clientWidth / units;
+      const featuredWidth = cardWidth * FEATURED_RATIO;
+      track.style.setProperty("--card-w", `${cardWidth}px`);
+      track.style.setProperty("--card-w-featured", `${featuredWidth}px`);
+      track.style.setProperty("--slot-gap", `${cardWidth * GAP_RATIO}px`);
+      // Hauteur de la fenêtre fixée sur la carte vedette (toujours la plus
+      // grande, aspect-ratio 16/10) : sans ça, pendant la transition, les
+      // deux cartes qui échangent leur rôle passent un instant par une
+      // taille intermédiaire, la carte la plus haute du rail rétrécit
+      // brièvement, et toute la page en dessous (ex. la section Photos)
+      // remonte puis redescend pour suivre.
+      viewport.style.height = `${(featuredWidth * 10) / 16}px`;
+    }
+    layout();
+
+    // La carte mise en avant est toujours la 2e carte visible, donc celle
+    // juste après la carte de tête (currentIndex) dans l'ordre du rail.
+    function updateFeatured() {
+      const featured = ((currentIndex + 1) % n + n) % n;
+      allCards.forEach((card) => {
+        const idx = Number(card.dataset.slideIndex);
+        card.classList.toggle("is-featured", idx === featured);
+      });
+    }
+    updateFeatured();
+
+    // Décalage cumulé jusqu'à currentIndex, à partir des largeurs
+    // RÉELLEMENT rendues (offsetWidth) — correct même quand une carte plus
+    // large que la normale se trouve parmi celles qui précèdent.
+    function offsetFor(index) {
+      const gapPx = parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap) || 0;
+      let offset = 0;
+      for (let i = 0; i < index; i++) {
+        offset += allCards[i].offsetWidth + gapPx;
+      }
+      return offset;
+    }
+
+    function place(animate) {
+      track.style.transition = animate && !prefersReducedMotion ? "transform 0.45s var(--ease)" : "none";
+      track.style.transform = `translateX(${-offsetFor(currentIndex)}px)`;
+    }
+    place(false);
+    // N'active la transition des cartes (largeur/ombre) qu'une fois la
+    // mise en page initiale posée — sinon ce premier calcul de style
+    // serait lui-même animé (voir la règle .scroll-track.is-ready en CSS).
+    track.classList.add("is-ready");
+
+    function settle() {
+      if (currentIndex >= 2 * n) currentIndex -= n;
+      else if (currentIndex < n) currentIndex += n;
+      place(false);
+      isAnimating = false;
+    }
+
+    function onTrackTransitionEnd(e) {
+      if (e.target !== track) return; // ignore les transitions des cartes (flex-basis) qui remontent ici
+      track.removeEventListener("transitionend", onTrackTransitionEnd);
+      settle();
+    }
+
+    function animateTo(targetIndex) {
+      if (isAnimating || targetIndex === currentIndex) return;
+      currentIndex = targetIndex;
+      if (prefersReducedMotion) {
+        updateFeatured();
+        settle();
+        return;
+      }
+      isAnimating = true;
+      updateFeatured();
+      place(true);
+      track.addEventListener("transitionend", onTrackTransitionEnd);
+    }
+
+    function step(dir) {
+      animateTo(currentIndex + dir);
+    }
+
+    const prevBtn = carousel.querySelector("[data-carousel-prev]");
+    const nextBtn = carousel.querySelector("[data-carousel-next]");
+    if (prevBtn) prevBtn.addEventListener("click", () => step(-1));
+    if (nextBtn) nextBtn.addEventListener("click", () => step(1));
+
+    window.addEventListener("resize", () => {
+      layout();
+      place(false);
+    });
+  }
+
+  setupFeaturedSlider(
+    "videos-carousel",
+    "videos-row",
+    "videos-track",
+    buildCardFactories("videos-row", projectsData.videos, "videos", 4)
+  );
+  setupFeaturedSlider(
+    "graphisme-carousel",
+    "graphisme-row",
+    "graphisme-track",
+    buildCardFactories("graphisme-row", projectsData.graphisme, "graphisme", 4)
+  );
+
+  /* ---------------------------------------------------
+     5ter. Carrousel Photos : flèches + points de pagination, avec un
+     clone estompé du premier/dernier élément à chaque extrémité pour
+     suggérer une boucle infinie. Les flèches et les points bouclent
+     réellement (dernier → premier et inversement) ; le scroll tactile
+     natif reste utilisable.
      --------------------------------------------------- */
   function setupCarousel(carouselId, rowId, dotsId) {
     const carousel = document.getElementById(carouselId);
@@ -484,15 +664,17 @@
     }
   }
 
-  setupCarousel("videos-carousel", "videos-row", "videos-dots");
   setupCarousel("photos-carousel", "photos-grid", null);
-  setupCarousel("graphisme-carousel", "graphisme-row", "graphisme-dots");
 
   /* ---------------------------------------------------
-     5ter. Molette verticale → défilement horizontal
-     pour les rangées de type .scroll-row
+     5quater. Molette verticale → défilement horizontal
+     pour les rangées de type .scroll-row (Photos uniquement : Vidéos
+     et Graphisme n'ont plus de scroll natif — leur .scroll-row ne fait
+     que masquer le rail transformé, lui appliquer scrollLeft entrerait
+     en conflit avec le transform du rail — seules les flèches naviguent).
      --------------------------------------------------- */
   document.querySelectorAll(".scroll-row").forEach((row) => {
+    if (row.closest(".carousel--featured")) return;
     row.addEventListener(
       "wheel",
       (e) => {

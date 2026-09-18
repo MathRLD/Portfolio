@@ -459,6 +459,57 @@ a { color: inherit; text-decoration: none; }
 
 .project-card.is-clone { opacity: 0.4; pointer-events: none; }
 
+/* ---------- slider "vedette" (Vidéos / Graphisme) ----------
+   #videos-row / #graphisme-row (.scroll-row) est la "fenêtre" fixe :
+   overflow-x caché, c'est elle qui masque ce qui dépasse. Un masque en
+   dégradé (mask-image) estompe les deux extrémités, pour suggérer que la
+   liste continue au-delà de ce qui est affiché. À l'intérieur,
+   .scroll-track contient TROIS exemplaires consécutifs de la liste et
+   glisse via transform (voir setupFeaturedSlider dans main.js) — c'est
+   ce découplage fenêtre/rail qui permet à une carte de sortir par la
+   gauche ou la droite sans jamais "sauter" : le rail avance en continu,
+   et le rebouclage sur l'exemplaire du milieu se fait seulement une fois
+   la carte hors champ, donc invisible.
+
+   Chaque carte est directement l'item flexible du rail (--card-w /
+   --card-w-featured / --slot-gap calculées en JS à partir de la largeur
+   de la fenêtre visible, pour qu'un nombre fixe de cartes tienne toujours
+   exactement dans la largeur disponible). Le vrai gap flex étant une
+   valeur unique partagée, l'écart est rigoureusement identique entre
+   toutes les paires de cartes, y compris autour de la carte vedette
+   (.is-featured, toujours la 2e carte visible, un peu plus grande —
+   elle n'est plus contrainte à un slot partagé avec les autres). */
+.carousel--featured .scroll-row {
+  overflow-x: hidden;
+  scroll-snap-type: none;
+  -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+}
+.scroll-track {
+  display: flex;
+  align-items: center;
+  gap: var(--slot-gap, 24px);
+}
+.scroll-track > .project-card {
+  flex: 0 0 auto;
+  flex-basis: var(--card-w, clamp(260px, 34vw, 460px));
+  aspect-ratio: 16 / 10;
+}
+/* Le passage de --card-w (posé en JS dès la construction du rail) fait
+   changer la valeur héritée de flex-basis dès le premier calcul de style
+   — sans ce garde-fou, ce changement serait lui-même transitionné au
+   chargement (les cartes "rétréciraient" visiblement à l'affichage). La
+   transition n'est activée qu'une fois la mise en page initiale posée
+   (voir setupFeaturedSlider, classe .is-ready ajoutée après le 1er place()). */
+.scroll-track.is-ready > .project-card {
+  transition: flex-basis 0.45s var(--ease), box-shadow 0.45s var(--ease);
+}
+.scroll-track > .project-card.is-featured {
+  flex-basis: var(--card-w-featured, clamp(300px, 40vw, 540px));
+  z-index: 2;
+  box-shadow: 0 24px 44px -14px rgba(0,0,0,0.55);
+}
+
 /* ---------- galerie photos (même principe carrousel, cartes carrées) ---------- */
 .scroll-row--photos .project-card {
   flex: 0 0 clamp(180px, 24vw, 280px);
@@ -482,34 +533,48 @@ a { color: inherit; text-decoration: none; }
   top: 50%;
   transform: translateY(-50%);
   z-index: 3;
-  width: 44px;
-  height: 44px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  border: none;
+  border: 1px solid rgba(255,255,255,0.45);
   background: rgba(17,17,17,0.55);
-  color: var(--white);
+  color: rgba(255,255,255,0.95);
+  opacity: 0.8;
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
+  font-size: 26px;
   line-height: 1;
   cursor: pointer;
-  transition: background 0.25s var(--ease), transform 0.25s var(--ease);
+  transition: background 0.25s var(--ease), transform 0.25s var(--ease), opacity 0.25s var(--ease), border-color 0.25s var(--ease);
 }
-.carousel-arrow:hover { background: rgba(17,17,17,0.85); }
+.carousel-arrow:hover {
+  background: rgba(17,17,17,0.6);
+  border-color: rgba(255,255,255,0.55);
+  opacity: 1;
+}
 .carousel-arrow:active { transform: translateY(-50%) scale(0.92); }
-.carousel-arrow--prev { left: 8px; }
-.carousel-arrow--next { right: 8px; }
+.carousel-arrow--prev { left: 24px; }
+.carousel-arrow--next { right: 24px; }
 .section--light .carousel-arrow {
-  background: rgba(255,255,255,0.85);
-  color: var(--black);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.14);
+  background: rgba(255,255,255,0.8);
+  border-color: rgba(0,0,0,0.2);
+  color: rgba(0,0,0,0.8);
 }
-.section--light .carousel-arrow:hover { background: var(--white); }
+.section--light .carousel-arrow:hover {
+  background: var(--white);
+  border-color: rgba(0,0,0,0.3);
+}
 
 .carousel .scroll-row { padding-left: 56px; padding-right: 56px; }
+/* Le slider "vedette" n'a pas besoin de cette réserve : overflow-hidden
+   masque à la largeur totale de .scroll-row (padding compris), pas à la
+   largeur de son contenu — un padding ici laisserait un éclat de la
+   carte adjacente (hors-champ) dépasser dans cette marge. Les flèches
+   restent positionnées en absolu par-dessus, sans réserver d'espace. */
+.carousel--featured .scroll-row { padding-left: 0; padding-right: 0; }
 
 .carousel-dots {
   display: flex;
@@ -537,6 +602,7 @@ a { color: inherit; text-decoration: none; }
 @media (max-width: 640px) {
   .carousel-arrow { width: 36px; height: 36px; font-size: 18px; }
   .carousel .scroll-row { padding-left: 44px; padding-right: 44px; }
+  .carousel--featured .scroll-row { padding-left: 0; padding-right: 0; }
 }
 
 /* =====================================================
