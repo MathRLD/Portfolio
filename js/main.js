@@ -628,7 +628,7 @@
     "photos-carousel",
     "photos-row",
     "photos-track",
-    buildCardFactories("photos-row", projectsData.photos, "photos", 10),
+    buildCardFactories("photos-row", projectsData.photos, "photos", 0),
     { featured: false, cardAspect: 1 }
   );
 
