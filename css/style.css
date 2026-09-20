@@ -228,6 +228,13 @@ a { color: inherit; text-decoration: none; }
   position: absolute;
   inset: 0;
   pointer-events: none; /* réactivé item par item en JS */
+  /* Pas de `perspective` ici : cette propriété crée un nouveau contexte
+     d'empilement, ce qui figerait TOUTES les vignettes en un seul bloc
+     devant ou derrière .hero-portrait, empêchant justement celles qui
+     sont à l'arrière de l'anneau de passer derrière le portrait. Le
+     point de fuite du rotateY est donc posé individuellement dans le
+     transform de chaque vignette (voir renderOrbit dans main.js), pas
+     ici sur le conteneur partagé. */
 }
 
 /* ---------- contenu texte à droite ---------- */
@@ -288,11 +295,12 @@ a { color: inherit; text-decoration: none; }
   border-radius: 16px;
   overflow: hidden;
   background: var(--grey-mid);
-  box-shadow: 0 18px 34px -14px rgba(0,0,0,0.35);
+  box-shadow: 0 16px 40px -20px rgba(0,0,0,0.18);
   will-change: transform, opacity;
   cursor: pointer;
   pointer-events: auto;
   border: none;
+  backface-visibility: hidden;
   padding: 0;
   transform: translate3d(0,0,0);
   /* Le contour grunge vient d'un masque (voir index.html, .hero-orbit-item
@@ -480,7 +488,11 @@ a { color: inherit; text-decoration: none; }
    elle n'est plus contrainte à un slot partagé avec les autres). */
 .carousel--featured .scroll-row,
 .carousel--photos .scroll-row {
-  overflow-x: hidden;
+  /* overflow-y explicite : sans ça, la valeur "visible" par défaut se
+     recalcule en "auto" dès que overflow-x n'est pas "visible" (règle
+     CSS), ce qui rendait la rangée scrollable verticalement au moindre
+     dépassement d'1px (transition de carte, arrondi de sous-pixel). */
+  overflow: hidden;
   scroll-snap-type: none;
   /* Navigation aux flèches uniquement : aucun scroll/swipe manuel. */
   touch-action: pan-y;
@@ -590,27 +602,44 @@ a { color: inherit; text-decoration: none; }
   padding: 0;
 }
 
+/* Indicateur de progression sous le carrousel : petit point par
+   diapositive, celui de la diapositive active s'étire en pastille.
+   `top: 105%` (plutôt que `bottom`) le place à 5% de la hauteur de la
+   carte SOUS elle, pour ne jamais empiéter sur son contenu. */
 .carousel-dots {
+  position: absolute;
+  top: 105%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
   display: flex;
-  justify-content: center;
   align-items: center;
   gap: 8px;
-  margin-top: 4px;
+  padding: 8px;
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 999px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 .carousel-dots button {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
   border: none;
   padding: 0;
-  background: rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.5);
   cursor: pointer;
-  transition: background 0.25s var(--ease), transform 0.25s var(--ease);
+  transition: width 0.25s var(--ease), background 0.25s var(--ease);
 }
-.carousel-dots button:hover { background: rgba(255,255,255,0.5); }
-.carousel-dots button.is-active { background: var(--white); transform: scale(1.35); }
-.section--light .carousel-dots button { background: rgba(0,0,0,0.18); }
-.section--light .carousel-dots button:hover { background: rgba(0,0,0,0.32); }
+.carousel-dots button:hover { background: rgba(255,255,255,0.75); }
+.carousel-dots button.is-active { width: 26px; background: var(--white); }
+.section--light .carousel-dots {
+  background: rgba(0,0,0,0.08);
+  border-color: rgba(0,0,0,0.15);
+}
+.section--light .carousel-dots button { background: rgba(0,0,0,0.28); }
+.section--light .carousel-dots button:hover { background: rgba(0,0,0,0.45); }
 .section--light .carousel-dots button.is-active { background: var(--black); }
 
 @media (max-width: 640px) {

@@ -240,9 +240,11 @@
     let autoAngle = 0;
     let dragOffset = 0;
     let isDragging = false;
-    let hoverPause = false;
+    let hoveredEl = null; // vignette actuellement survolée (ralentit l'orbite, se grossit elle-même)
     let lastX = 0;
     let lastT = performance.now();
+    const hoverAmount = new Map(); // el -> 0..1, lissé image par image vers 1 (survolée) ou 0
+    orbitItems.forEach((el) => hoverAmount.set(el, 0));
 
     function ellipseForStage() {
       const rect = heroStage.getBoundingClientRect();
@@ -256,30 +258,56 @@
       return { cx: rect.width / 2 + rx * shiftFactor, cy: rect.height / 2, rx, ry };
     }
 
-    function renderOrbit(totalAngle) {
+    function renderOrbit(totalAngle, dt) {
       const { cx, cy, rx, ry } = ellipseForStage();
       orbitItems.forEach((el, i) => {
         const angle = totalAngle + (i * (Math.PI * 2)) / N;
         const x = cx + rx * Math.cos(angle);
         const y = cy + ry * Math.sin(angle);
         const z = Math.sin(angle); // -1 (derrière) → 1 (devant)
-        const scale = 0.72 + 0.36 * ((z + 1) / 2);
+        // Écart de taille plus marqué entre l'avant et l'arrière de l'anneau.
+        const baseScale = 0.58 + 0.55 * ((z + 1) / 2);
         const opacity = 0.5 + 0.5 * ((z + 1) / 2);
         const tilt = Math.cos(angle) * 6 + (orbitDeform.get(el) || 0);
+        // Effet 3D : la vignette pivote sur elle-même (rotateY) selon sa
+        // position dans l'anneau — de face au centre (devant ou derrière,
+        // cos(angle)=0), de profil sur les côtés (cos(angle)=±1) — comme si
+        // elle suivait réellement la courbe de l'ellipse au lieu de rester
+        // plaquée face à l'écran.
+        const rotY = -Math.cos(angle) * 22;
+
+        // Lissage du survol (0 → 1 sur la vignette pointée, retombe à 0
+        // ailleurs) : évite un saut de taille brutal à l'entrée/sortie.
+        const target = el === hoveredEl ? 1 : 0;
+        const cur = hoverAmount.get(el) || 0;
+        const next = cur + (target - cur) * Math.min(1, (dt || 0.016) * 10);
+        hoverAmount.set(el, next);
+        const scale = baseScale * (1 + next * 0.22);
+
         // Empilement continu (et non un simple binaire devant/derrière) :
         // deux cartes qui se croisent gardent toujours un ordre cohérent
         // avec le sens de rotation, y compris au croisement à gauche/droite
         // du portrait, où l'ancien binaire pouvait les faire passer derrière
-        // de façon incohérente.
+        // de façon incohérente. Basé uniquement sur z (jamais sur le survol,
+        // voir `next`) : une vignette à l'arrière reste TOUJOURS derrière le
+        // portrait (z-index 0, voir .hero-portrait), même agrandie au survol.
         el.style.zIndex = Math.round(z * 1000);
         el.style.opacity = opacity.toFixed(2);
+        // perspective() juste avant rotateY (pas en tête de chaîne) :
+        // posé là, son point de fuite se retrouve centré sur la vignette
+        // elle-même (une fois déjà positionnée par les translate/scale/
+        // rotate qui précèdent), au lieu de déformer aussi ce
+        // positionnement. Et posé ici plutôt qu'en CSS sur le conteneur
+        // parent (voir .hero-orbit), pour ne pas créer un contexte
+        // d'empilement partagé qui figerait tout l'anneau devant ou
+        // derrière le portrait en un seul bloc.
         el.style.transform =
-          `translate(${x}px, ${y}px) translate(-50%, -50%) scale(${scale.toFixed(3)}) rotate(${tilt.toFixed(1)}deg)`;
+          `translate(${x}px, ${y}px) translate(-50%, -50%) scale(${scale.toFixed(3)}) rotate(${tilt.toFixed(1)}deg) perspective(1400px) rotateY(${rotY.toFixed(1)}deg)`;
       });
     }
 
     if (prefersReducedMotion) {
-      renderOrbit(0);
+      renderOrbit(0, 0);
     } else {
       // Le drag capture le pointeur dès le pointerdown, ce qui empêche le
       // "click" natif d'atteindre les vignettes : on détecte donc nous-mêmes
@@ -323,17 +351,21 @@
       }
 
       orbitItems.forEach((el) => {
-        el.addEventListener("pointerenter", () => (hoverPause = true));
-        el.addEventListener("pointerleave", () => (hoverPause = false));
+        el.addEventListener("pointerenter", () => (hoveredEl = el));
+        el.addEventListener("pointerleave", () => {
+          if (hoveredEl === el) hoveredEl = null;
+        });
       });
 
       function tick(t) {
         const dt = (t - lastT) / 1000;
         lastT = t;
-        if (!isDragging && !hoverPause) {
-          autoAngle += dt * 0.28; // vitesse de rotation automatique
+        // Le survol ralentit l'orbite plutôt que de la stopper net.
+        const speedFactor = hoveredEl ? 0.15 : 1;
+        if (!isDragging) {
+          autoAngle += dt * 0.28 * speedFactor; // vitesse de rotation automatique
         }
-        renderOrbit(autoAngle + dragOffset);
+        renderOrbit(autoAngle + dragOffset, dt);
         requestAnimationFrame(tick);
       }
       requestAnimationFrame(tick);
@@ -492,6 +524,29 @@
     }
     updateFeatured();
 
+    // Indicateur de progression (points, celui de la diapositive active
+    // s'étire en pastille) : un point par diapositive réelle (0..n-1),
+    // cliquable pour y sauter directement. Purement additif : n'affecte
+    // pas la navigation aux flèches ni le défilement infini lui-même.
+    const dotsWrap = document.createElement("div");
+    dotsWrap.className = "carousel-dots";
+    const dots = [];
+    for (let i = 0; i < n; i++) {
+      const dot = document.createElement("button");
+      dot.type = "button";
+      dot.setAttribute("aria-label", `Aller à l'élément ${i + 1}`);
+      dot.addEventListener("click", () => animateTo(n + i));
+      dotsWrap.appendChild(dot);
+      dots.push(dot);
+    }
+    carousel.appendChild(dotsWrap);
+
+    function updateDots() {
+      const active = ((currentIndex % n) + n) % n;
+      dots.forEach((d, i) => d.classList.toggle("is-active", i === active));
+    }
+    updateDots();
+
     // Décalage cumulé jusqu'à currentIndex, à partir des largeurs
     // RÉELLEMENT rendues (offsetWidth) — correct même quand une carte plus
     // large que la normale se trouve parmi celles qui précèdent.
@@ -530,6 +585,7 @@
     function animateTo(targetIndex) {
       if (isAnimating || targetIndex === currentIndex) return;
       currentIndex = targetIndex;
+      updateDots();
       if (prefersReducedMotion) {
         updateFeatured();
         settle();
