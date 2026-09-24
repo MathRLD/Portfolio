@@ -1229,6 +1229,33 @@ img.logo-item {
 }
 .review-card figcaption strong { font-size: 15px; }
 .review-card figcaption span { font-size: 13px; color: var(--grey-text); }
+.review-card .review-author { font-size: 15px; font-weight: 700; }
+a.review-author:hover { text-decoration: underline; }
+.review-stars {
+  margin-bottom: 14px;
+  font-size: 16px;
+  letter-spacing: 2px;
+  color: var(--black);
+}
+
+.reviews-link {
+  display: table;
+  margin: 40px auto 0;
+  padding: 14px 26px;
+  border: 1px solid var(--black);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  transition: background 0.25s var(--ease), color 0.25s var(--ease);
+}
+.reviews-link span {
+  display: inline-block;
+  margin-left: 6px;
+  transition: transform 0.25s var(--ease);
+}
+.reviews-link:hover { background: var(--black); color: var(--white); }
+.reviews-link:hover span { transform: translateX(4px); }
 
 @media (prefers-reduced-motion: reduce) {
   .logo-track { animation: none; }

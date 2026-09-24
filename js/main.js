@@ -853,6 +853,86 @@
   }
 
   /* ---------------------------------------------------
+     7c. AVIS GOOGLE (API Places, New)
+     Remplace les cartes d'exemple par les vrais avis de la fiche
+     Google. Sans clé / Place ID, ou si l'appel échoue, les cartes
+     HTML restent affichées telles quelles.
+     La clé est visible dans le code : la restreindre dans Google
+     Cloud (référents HTTP = domaine du site, API = Places API (New)).
+     --------------------------------------------------- */
+  const GOOGLE_REVIEWS = {
+    apiKey: "",   // clé API Google Cloud
+    placeId: "",  // Place ID de la fiche (ex. "ChIJ...")
+    max: 3,       // nombre de cartes affichées (l'API en renvoie 5 max)
+  };
+
+  async function loadGoogleReviews() {
+    const grid = document.querySelector(".reviews-grid");
+    const link = document.querySelector(".reviews-link");
+    if (!grid || !GOOGLE_REVIEWS.apiKey || !GOOGLE_REVIEWS.placeId) return;
+
+    try {
+      const res = await fetch(
+        `https://places.googleapis.com/v1/places/${GOOGLE_REVIEWS.placeId}?languageCode=fr`,
+        {
+          headers: {
+            "X-Goog-Api-Key": GOOGLE_REVIEWS.apiKey,
+            "X-Goog-FieldMask": "rating,userRatingCount,reviews,googleMapsUri",
+          },
+        }
+      );
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const place = await res.json();
+      const reviews = (place.reviews || [])
+        .filter((r) => r.text && r.text.text)
+        .slice(0, GOOGLE_REVIEWS.max);
+      if (!reviews.length) return;
+
+      grid.innerHTML = "";
+      reviews.forEach((r) => {
+        const card = document.createElement("figure");
+        card.className = "review-card reveal";
+
+        const stars = document.createElement("div");
+        stars.className = "review-stars";
+        stars.textContent = "★".repeat(r.rating || 5);
+        stars.setAttribute("aria-label", `${r.rating || 5} sur 5`);
+
+        const quote = document.createElement("blockquote");
+        quote.textContent = `« ${r.text.text} »`;
+
+        const caption = document.createElement("figcaption");
+        const author = r.authorAttribution || {};
+        const name = document.createElement(author.uri ? "a" : "strong");
+        name.className = "review-author";
+        name.textContent = author.displayName || "Client Google";
+        if (author.uri) {
+          name.href = author.uri;
+          name.target = "_blank";
+          name.rel = "noopener";
+        }
+        const meta = document.createElement("span");
+        meta.textContent = `${r.relativePublishTimeDescription || ""} · Avis Google`;
+        caption.append(name, meta);
+
+        const top = document.createElement("div");
+        top.append(stars, quote);
+        card.append(top, caption);
+        grid.appendChild(card);
+        observeReveal(card);
+      });
+
+      if (link && place.userRatingCount) {
+        const rating = place.rating ? ` · ${place.rating.toLocaleString("fr-FR")} ★` : "";
+        link.firstChild.textContent = `Voir les ${place.userRatingCount} avis sur Google${rating} `;
+      }
+    } catch (err) {
+      console.warn("Avis Google indisponibles :", err);
+    }
+  }
+  loadGoogleReviews();
+
+  /* ---------------------------------------------------
      8. CURSEUR PERSONNALISÉ
      Un point (position exacte) + un anneau qui suit avec un
      léger retard élastique, et se transforme en pastille
