@@ -24,6 +24,10 @@
       if (r.top <= probeY && r.bottom >= probeY) onDark = true;
     });
     header.classList.toggle("on-dark", onDark);
+
+    // pas de fond tant que le header est au-dessus du hero
+    const heroEl = document.getElementById("hero");
+    header.classList.toggle("on-hero", !!heroEl && heroEl.getBoundingClientRect().bottom > probeY);
   }
   document.addEventListener("scroll", updateHeaderState, { passive: true });
   updateHeaderState();
@@ -801,4 +805,103 @@
     }
     expToggle.setAttribute("aria-expanded", String(isHidden));
   });
+
+  /* ---------------------------------------------------
+     7b. BANDEAU LOGOS : boucle infinie
+     On duplique la liste autant de fois que nécessaire pour
+     couvrir 2x la largeur de l'écran, puis on fait défiler
+     la piste d'exactement une liste : le raccord est invisible
+     et il n'y a jamais de trou blanc, quelle que soit la largeur.
+     --------------------------------------------------- */
+  const logoTrack = document.querySelector(".logo-track");
+  if (logoTrack) {
+    const logoSource = logoTrack.querySelector(".logo-list");
+    const LOGO_SPEED = 60; // px par seconde
+
+    function buildLogoLoop() {
+      logoTrack.querySelectorAll(".logo-list[data-clone]").forEach((el) => el.remove());
+      const listW = logoSource.getBoundingClientRect().width;
+      if (!listW) return;
+      const copies = Math.ceil((window.innerWidth * 2) / listW);
+      for (let i = 0; i < copies; i++) {
+        const clone = logoSource.cloneNode(true);
+        clone.setAttribute("data-clone", "");
+        clone.setAttribute("aria-hidden", "true");
+        clone.querySelectorAll("img").forEach((img) => (img.alt = ""));
+        logoTrack.appendChild(clone);
+      }
+      logoTrack.style.setProperty("--logo-shift", `-${listW}px`);
+      logoTrack.style.setProperty("--logo-duration", `${listW / LOGO_SPEED}s`);
+    }
+
+    buildLogoLoop();
+    window.addEventListener("load", buildLogoLoop);
+    let logoResizeTimer;
+    window.addEventListener("resize", () => {
+      clearTimeout(logoResizeTimer);
+      logoResizeTimer = setTimeout(buildLogoLoop, 150);
+    });
+  }
+
+  /* ---------------------------------------------------
+     8. CURSEUR PERSONNALISÉ
+     Un point (position exacte) + un anneau qui suit avec un
+     léger retard élastique, et se transforme en pastille
+     "Voir" au survol des vignettes/cartes de projet.
+     N'active jamais sur écran tactile (pointer: coarse) ni en
+     mode mouvement réduit.
+     --------------------------------------------------- */
+  if (!prefersReducedMotion && window.matchMedia("(pointer: fine)").matches) {
+    const cursorDot = document.createElement("div");
+    cursorDot.className = "cursor-dot";
+    const cursorRing = document.createElement("div");
+    cursorRing.className = "cursor-ring";
+    const cursorLabel = document.createElement("span");
+    cursorRing.appendChild(cursorLabel);
+    document.body.appendChild(cursorDot);
+    document.body.appendChild(cursorRing);
+    document.body.classList.add("has-custom-cursor");
+
+    const VIEW_TARGETS = ".project-card:not(.is-empty), .hero-orbit-item:not(.is-placeholder)";
+    const HOVER_TARGETS = "a, button";
+
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
+    let ringX = mouseX;
+    let ringY = mouseY;
+
+    function onMouseMove(e) {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      cursorDot.style.transform = `translate(${mouseX}px, ${mouseY}px)`;
+
+      const viewEl = e.target.closest(VIEW_TARGETS);
+      const linkEl = !viewEl && e.target.closest(HOVER_TARGETS);
+      cursorRing.classList.toggle("is-view", !!viewEl);
+      cursorRing.classList.toggle("is-hover", !!linkEl);
+      cursorLabel.textContent = viewEl ? "Voir" : "";
+    }
+    window.addEventListener("mousemove", onMouseMove);
+
+    document.addEventListener("mousedown", () => cursorRing.classList.add("is-active"));
+    document.addEventListener("mouseup", () => cursorRing.classList.remove("is-active"));
+    document.addEventListener("mouseleave", () => {
+      cursorDot.classList.add("is-hidden");
+      cursorRing.classList.add("is-hidden");
+    });
+    document.addEventListener("mouseenter", () => {
+      cursorDot.classList.remove("is-hidden");
+      cursorRing.classList.remove("is-hidden");
+    });
+
+    // L'anneau suit le point avec un léger retard (lerp), le point lui
+    // reste collé exactement à la position réelle de la souris.
+    function tickCursor() {
+      ringX += (mouseX - ringX) * 0.2;
+      ringY += (mouseY - ringY) * 0.2;
+      cursorRing.style.transform = `translate(${ringX}px, ${ringY}px)`;
+      requestAnimationFrame(tickCursor);
+    }
+    requestAnimationFrame(tickCursor);
+  }
 })();
