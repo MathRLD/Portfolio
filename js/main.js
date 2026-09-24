@@ -432,7 +432,10 @@
   }
 
   function setupInfiniteSlider(carouselId, viewportId, trackId, slideFactories, opts) {
-    const { featured = true, cardAspect = 10 / 16 } = opts || {};
+    // bleed < 1 : les cartes sont dimensionnées sur cette fraction de la
+    // largeur, centrées, et les cartes voisines dépassent jusqu'aux bords.
+    const { featured = true, cardAspect = 10 / 16, bleed = 1 } = opts || {};
+    let sideOffset = 0;
     const carousel = document.getElementById(carouselId);
     const viewport = document.getElementById(viewportId);
     const track = document.getElementById(trackId);
@@ -477,7 +480,7 @@
     const GAP_RATIO = 0.05; // gap réel, en fraction d'une carte normale
     const FEATURED_RATIO = 1.17; // largeur de la carte vedette, en fraction d'une carte normale
     function visibleCount() {
-      const w = viewport.clientWidth;
+      const w = viewport.clientWidth * bleed;
       if (featured) {
         if (w < 560) return 2;
         if (w < 900) return 3;
@@ -489,10 +492,12 @@
     }
     function layout() {
       const count = visibleCount();
+      const baseW = viewport.clientWidth * bleed;
+      sideOffset = (viewport.clientWidth - baseW) / 2;
       if (featured) {
         // (count-1) cartes normales + 1 vedette + (count-1) gaps = largeur dispo
         const units = (count - 1) * (1 + GAP_RATIO) + FEATURED_RATIO;
-        const cardWidth = viewport.clientWidth / units;
+        const cardWidth = baseW / units;
         const featuredWidth = cardWidth * FEATURED_RATIO;
         track.style.setProperty("--card-w", `${cardWidth}px`);
         track.style.setProperty("--card-w-featured", `${featuredWidth}px`);
@@ -507,7 +512,7 @@
       } else {
         // Cartes de même taille, réparties uniformément sur toute la largeur.
         const units = count + (count - 1) * GAP_RATIO;
-        const cardWidth = viewport.clientWidth / units;
+        const cardWidth = baseW / units;
         track.style.setProperty("--card-w", `${cardWidth}px`);
         track.style.setProperty("--slot-gap", `${cardWidth * GAP_RATIO}px`);
         viewport.style.height = `${cardWidth * cardAspect}px`;
@@ -565,7 +570,7 @@
 
     function place(animate) {
       track.style.transition = animate && !prefersReducedMotion ? "transform 0.45s var(--ease)" : "none";
-      track.style.transform = `translateX(${-offsetFor(currentIndex)}px)`;
+      track.style.transform = `translateX(${sideOffset - offsetFor(currentIndex)}px)`;
     }
     place(false);
     // N'active la transition des cartes (largeur/ombre) qu'une fois la
@@ -633,7 +638,7 @@
     "photos-row",
     "photos-track",
     buildCardFactories("photos-row", projectsData.photos, "photos", 0),
-    { featured: false, cardAspect: 1 }
+    { featured: false, cardAspect: 1, bleed: 0.85 }
   );
 
   /* ---------------------------------------------------

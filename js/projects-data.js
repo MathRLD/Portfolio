@@ -270,7 +270,7 @@ const projectsData = {
       title: "France Euro — Affiches",
       client: "",
       description: "Création d'affiches et de mockups de présentation autour du thème France / Euro.",
-      cover: "assets/images/graphisme/FranceEuro/France_affiche1.jpg",
+      cover: "assets/images/graphisme/FranceEuro/Francemockup2.jpg",
       tags: ["Affiche", "Mockup", "Graphisme"],
       images: [
         "assets/images/graphisme/FranceEuro/France_affiche1.jpg",
@@ -284,13 +284,14 @@ const projectsData = {
       title: "LinkyJob — Goodies",
       client: "",
       description: "Déclinaison de l'identité visuelle sur des supports goodies : stylo, tote bag, lanyard.",
-      cover: "assets/images/graphisme/LinkyJob/Mockup.jpg",
+      cover: "assets/images/graphisme/LinkyJob/Minimal Perspective Logo Mockup.jpg",
       tags: ["Identité visuelle", "Goodies", "Mockup"],
       images: [
         "assets/images/graphisme/LinkyJob/Mockup.jpg",
         "assets/images/graphisme/LinkyJob/Free_Pen_Mockup_5.jpg",
         "assets/images/graphisme/LinkyJob/Free_Tote_Bag_Mockup_on_the_Floor.jpg",
-        "assets/images/graphisme/LinkyJob/Lanyard Mockup.jpg"
+        "assets/images/graphisme/LinkyJob/Lanyard Mockup.jpg",
+        "assets/images/graphisme/LinkyJob/Minimal Perspective Logo Mockup.jpg"
       ]
     },
     {
@@ -310,10 +311,11 @@ const projectsData = {
       title: "SNCF Intercités — Affiche sécurité",
       client: "SNCF Intercités",
       description: "Affiche de sensibilisation à la sécurité pour SNCF Intercités.",
-      cover: "assets/images/graphisme/SNCF/Affiche_Secu_Mathys_VF.jpg",
+      cover: "assets/images/graphisme/SNCF/Affiche_Secu_Mathys_VF_mockup.jpg",
       tags: ["Affiche", "Institutionnel", "SNCF"],
       images: [
-        "assets/images/graphisme/SNCF/Affiche_Secu_Mathys_VF.jpg"
+        "assets/images/graphisme/SNCF/Affiche_Secu_Mathys_VF.jpg",
+        "assets/images/graphisme/SNCF/Affiche_Secu_Mathys_VF_mockup.jpg"
       ]
     },
     {
@@ -321,14 +323,15 @@ const projectsData = {
       title: "Te Ora Naho — Identité visuelle",
       client: "",
       description: "Création de logo et déclinaisons visuelles pour Te Ora Naho.",
-      cover: "assets/images/graphisme/TeOraNaho/logo.jpg",
+      cover: "assets/images/graphisme/TeOraNaho/6.jpg",
       tags: ["Logo", "Identité visuelle"],
       images: [
         "assets/images/graphisme/TeOraNaho/logo.jpg",
         "assets/images/graphisme/TeOraNaho/1.jpg",
         "assets/images/graphisme/TeOraNaho/2.jpg",
         "assets/images/graphisme/TeOraNaho/3.jpg",
-        "assets/images/graphisme/TeOraNaho/5.jpg"
+        "assets/images/graphisme/TeOraNaho/5.jpg",
+        "assets/images/graphisme/TeOraNaho/6.jpg"
       ]
     },
     {
@@ -336,11 +339,12 @@ const projectsData = {
       title: "Workshop Ping — Affiches",
       client: "Cercle Paul Bert",
       description: "Affiches de communication pour des événements de tennis de table (match régional, journée portes ouvertes).",
-      cover: "assets/images/graphisme/Workshop_Ping/MatchRégional3_V1.jpg",
+      cover: "assets/images/graphisme/Workshop_Ping/mockupping.jpg",
       tags: ["Affiche", "Sport", "Tennis de table"],
       images: [
         "assets/images/graphisme/Workshop_Ping/MatchRégional3_V1.jpg",
-        "assets/images/graphisme/Workshop_Ping/Portes_Ouvertes_30_05.jpg"
+        "assets/images/graphisme/Workshop_Ping/Portes_Ouvertes_30_05.jpg",
+        "assets/images/graphisme/Workshop_Ping/mockupping.jpg"
       ]
     }
     // Ajoute d'autres projets graphiques ici en copiant le gabarit d'un

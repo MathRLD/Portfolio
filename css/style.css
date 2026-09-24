@@ -550,14 +550,15 @@ a { color: inherit; text-decoration: none; }
 .carousel {
   position: relative;
 }
-/* 15% plus petit que la pleine largeur de la section, et centré : la
-   largeur de .scroll-row pilote directement la taille des cartes calculée
-   en JS (voir layout() dans setupInfiniteSlider), donc réduire cette
-   boîte réduit les cartes proportionnellement. */
-.carousel--photos {
-  max-width: 85%;
-  margin: 0 auto;
+/* Photos : pleine largeur, sans dégradé. Les cartes sont dimensionnées sur
+   85% de la largeur (option `bleed` de setupInfiniteSlider) et centrées ;
+   les cartes voisines dépassent jusqu'aux bords de la page. */
+.carousel--photos .scroll-row {
+  -webkit-mask-image: none;
+  mask-image: none;
 }
+.carousel--photos .carousel-arrow--prev { left: max(16px, calc(7.5% - 28px)); }
+.carousel--photos .carousel-arrow--next { right: max(16px, calc(7.5% - 28px)); }
 .carousel-arrow {
   position: absolute;
   top: 50%;
