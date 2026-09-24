@@ -1,6 +1,6 @@
-# RAWLAND — Portfolio
+# RAWLAND - Portfolio
 
-Portfolio en une page pour Mathys Roland (RAWLAND) — vidéo, photo, graphisme.
+Portfolio en une page pour Mathys Roland (RAWLAND) - vidéo, photo, graphisme.
 Site statique en **HTML / CSS / JavaScript vanilla**, sans framework ni étape de build.
 
 ## Structure du projet
@@ -36,7 +36,7 @@ trois tableaux (`videos`, `photos`, `graphisme`). Pour ajouter un projet :
 
 1. Dépose ton image (ou vidéo) dans le bon sous-dossier de `assets/images/`.
 2. Copie un objet existant dans `projects-data.js` et modifie ses champs
-   (`title`, `description`, `cover`, `images`, `tags`, etc. — chaque champ est
+   (`title`, `description`, `cover`, `images`, `tags`, etc. - chaque champ est
    commenté en haut du fichier).
 3. Sauvegarde : la carte apparaît automatiquement sur le site, avec sa popup.
 
@@ -100,7 +100,7 @@ Les vignettes qui tournent autour de ton portrait dans le hero (effet "anneaux
 de Saturne") ne sont pas des images à part : elles sont piochées automatiquement
 parmi les projets de `js/projects-data.js` (jusqu'à 6, tous types confondus).
 Plus tu ajoutes de vrais projets avec une image `cover`, plus l'orbite se
-remplit d'elle-même — pas besoin de fichier séparé à gérer.
+remplit d'elle-même - pas besoin de fichier séparé à gérer.
 
 Un clic sur une vignette de l'orbite ouvre directement la popup du projet
 correspondant. L'orbite tourne doucement toute seule, peut être tournée à la

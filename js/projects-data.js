@@ -31,18 +31,18 @@ const projectsData = {
   videos: [
     {
       id: "stpauli-koln-2026-video",
-      title: "FC St. Pauli — 1. FC Köln",
+      title: "FC St. Pauli - 1. FC Köln",
       client: "",
-      description: "Vidéo de couverture du match de Bundesliga entre le FC St. Pauli et le 1. FC Köln (17.04.2026) — rythme, action et ambiance de stade en mouvement.",
+      description: "Vidéo de couverture du match de Bundesliga entre le FC St. Pauli et le 1. FC Köln (17.04.2026) - rythme, action et ambiance de stade en mouvement.",
       cover: "assets/images/videos/stpauli-cover.jpg",
       tags: ["Sport", "Football", "Bundesliga", "Montage"],
       media: { type: "youtube", src: "WOpr0kPQ1hg" }
     },
     {
       id: "sncf-valeurs-eigs",
-      title: "SNCF Intercités — Valeurs EIGS",
+      title: "SNCF Intercités - Valeurs EIGS",
       client: "SNCF Intercités",
-      description: "Film institutionnel réalisé pour SNCF Intercités autour des valeurs portées par l'EIGS — mise en scène du quotidien des équipes à bord et en gare.",
+      description: "Film institutionnel réalisé pour SNCF Intercités autour des valeurs portées par l'EIGS - mise en scène du quotidien des équipes à bord et en gare.",
       cover: "assets/images/videos/valeurs-eigs-cover.jpg",
       tags: ["Réalisation", "Montage", "Institutionnel", "SNCF"],
       media: { type: "youtube", src: "pB53WOa4bag" }
@@ -51,7 +51,7 @@ const projectsData = {
       id: "nsmtt-short-film",
       title: "NSMTT",
       client: "",
-      description: "Court-métrage tourné autour du tennis de table — échanges, tension de match et complicité entre joueurs captés au plus près de l'action.",
+      description: "Court-métrage tourné autour du tennis de table - échanges, tension de match et complicité entre joueurs captés au plus près de l'action.",
       cover: "assets/images/videos/nsmtt-cover.jpg",
       tags: ["Court-métrage", "Sport", "Réalisation"],
       media: { type: "youtube", src: "fbg9Hu20Xts" }
@@ -60,7 +60,7 @@ const projectsData = {
       id: "viviane-short-film",
       title: "Là où attend Viviane",
       client: "SNCF Intercités",
-      description: "Court-métrage pour SNCF Intercités — une traversée de gare et de quai qui suit l'attente et les rencontres du quotidien des voyageurs.",
+      description: "Court-métrage pour SNCF Intercités - une traversée de gare et de quai qui suit l'attente et les rencontres du quotidien des voyageurs.",
       cover: "assets/images/videos/viviane-cover.jpg",
       tags: ["Court-métrage", "Réalisation", "SNCF"],
       media: { type: "youtube", src: "470WgFqnpT4" }
@@ -72,9 +72,9 @@ const projectsData = {
   photos: [
     {
       id: "stpauli-koln-2026",
-      title: "FC St. Pauli — 1. FC Köln",
+      title: "FC St. Pauli - 1. FC Köln",
       client: "",
-      description: "Reportage photo du match de Bundesliga entre le FC St. Pauli et le 1. FC Köln (17.04.2026) — intensité du jeu, ambiance de tribune et instantanés capturés au fil du match.",
+      description: "Reportage photo du match de Bundesliga entre le FC St. Pauli et le 1. FC Köln (17.04.2026) - intensité du jeu, ambiance de tribune et instantanés capturés au fil du match.",
       cover: "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-53.jpg",
       tags: ["Sport", "Football", "Bundesliga", "Reportage"],
       images: [
@@ -99,9 +99,9 @@ const projectsData = {
     },
     {
       id: "sncf-intercites-lifestyle",
-      title: "SNCF Intercités — Shooting lifestyle",
+      title: "SNCF Intercités - Shooting lifestyle",
       client: "SNCF Intercités",
-      description: "Shooting photo lifestyle à bord d'un train Intercités — lumière naturelle, ambiance de voyage et mise en scène du quotidien des voyageurs.",
+      description: "Shooting photo lifestyle à bord d'un train Intercités - lumière naturelle, ambiance de voyage et mise en scène du quotidien des voyageurs.",
       cover: "assets/images/photos/Shootingsncf1/web/Shooting photo TDN.jpg",
       tags: ["Lifestyle", "Institutionnel", "SNCF"],
       images: [
@@ -117,9 +117,9 @@ const projectsData = {
     },
     {
       id: "sncf-intercites-gare",
-      title: "SNCF Intercités — Gares & trains de nuit",
+      title: "SNCF Intercités - Gares & trains de nuit",
       client: "SNCF Intercités",
-      description: "Reportage photo en gare et à bord des trains Intercités — jeux de lumière nocturnes et mouvement des rames sur les quais.",
+      description: "Reportage photo en gare et à bord des trains Intercités - jeux de lumière nocturnes et mouvement des rames sur les quais.",
       cover: "assets/images/photos/Shootingsncf2/web/Photos_Shooting_05_05-35.jpg",
       tags: ["Reportage", "Institutionnel", "SNCF"],
       images: [
@@ -136,7 +136,7 @@ const projectsData = {
       id: "bobital-2026",
       title: "Bobital 2026",
       client: "",
-      description: "Reportage photo d'un événement en plein air à Bobital (2026) — scène, lumière de fin de journée et ambiance de foule captées sur le vif.",
+      description: "Reportage photo d'un événement en plein air à Bobital (2026) - scène, lumière de fin de journée et ambiance de foule captées sur le vif.",
       cover: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026.jpg",
       tags: ["Événementiel", "Concert", "Reportage"],
       images: [
@@ -158,9 +158,9 @@ const projectsData = {
     },
     {
       id: "jeune-lion-release-party",
-      title: "Jeune Lion — Release Party",
+      title: "Jeune Lion - Release Party",
       client: "",
-      description: "Couverture photo de la release party de Jeune Lion (12.02.2026) — scène, lumières et ambiance de soirée.",
+      description: "Couverture photo de la release party de Jeune Lion (12.02.2026) - scène, lumières et ambiance de soirée.",
       cover: "assets/images/photos/jeunelion/web/Releaseparty_Jeune-Lion_12_02_26_@Rawland-17.jpg",
       tags: ["Événementiel", "Musique", "Reportage"],
       images: [
@@ -184,9 +184,9 @@ const projectsData = {
     },
     {
       id: "redstar-eag",
-      title: "Red Star FC — EA Guingamp",
+      title: "Red Star FC - EA Guingamp",
       client: "",
-      description: "Reportage photo du match de Ligue 2 entre le Red Star FC et l'En Avant Guingamp (24.04) — intensité du jeu et liesse collective en fin de rencontre.",
+      description: "Reportage photo du match de Ligue 2 entre le Red Star FC et l'En Avant Guingamp (24.04) - intensité du jeu et liesse collective en fin de rencontre.",
       cover: "assets/images/photos/redstareag/web/RedStarFC_EAG_@Rawland_24_04-99.jpg",
       tags: ["Sport", "Football", "Ligue 2", "Reportage"],
       images: [
@@ -215,9 +215,9 @@ const projectsData = {
     },
     {
       id: "redstar-grenoble",
-      title: "Red Star FC — Grenoble Foot 38",
+      title: "Red Star FC - Grenoble Foot 38",
       client: "",
-      description: "Reportage photo du match entre le Red Star FC et Grenoble Foot 38 — but, fumigènes et ferveur des tribunes.",
+      description: "Reportage photo du match entre le Red Star FC et Grenoble Foot 38 - but, fumigènes et ferveur des tribunes.",
       cover: "assets/images/photos/redstargrenoble/web/RED_STAR__GRENOBLE_BUT-3.jpg",
       tags: ["Sport", "Football", "Reportage"],
       images: [
@@ -240,9 +240,9 @@ const projectsData = {
     },
     {
       id: "redstar-laval",
-      title: "Red Star FC — Stade Lavallois",
+      title: "Red Star FC - Stade Lavallois",
       client: "",
-      description: "Reportage photo du match entre le Red Star FC et le Stade Lavallois — action sur le terrain et ambiance survoltée des supporters.",
+      description: "Reportage photo du match entre le Red Star FC et le Stade Lavallois - action sur le terrain et ambiance survoltée des supporters.",
       cover: "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand46.jpg",
       tags: ["Sport", "Football", "Reportage"],
       images: [
@@ -267,7 +267,7 @@ const projectsData = {
   graphisme: [
     {
       id: "france-euro-affiches",
-      title: "France Euro — Affiches",
+      title: "France Euro - Affiches",
       client: "",
       description: "Création d'affiches et de mockups de présentation autour du thème France / Euro.",
       cover: "assets/images/graphisme/FranceEuro/Francemockup2.jpg",
@@ -281,7 +281,7 @@ const projectsData = {
     },
     {
       id: "linkyjob-goodies",
-      title: "LinkyJob — Goodies",
+      title: "LinkyJob - Goodies",
       client: "",
       description: "Déclinaison de l'identité visuelle sur des supports goodies : stylo, tote bag, lanyard.",
       cover: "assets/images/graphisme/LinkyJob/Minimal Perspective Logo Mockup.jpg",
@@ -296,7 +296,7 @@ const projectsData = {
     },
     {
       id: "rebrand-as-roma",
-      title: "Rebrand — AS Roma",
+      title: "Rebrand - AS Roma",
       client: "",
       description: "Projet de refonte du logo et de l'identité visuelle du club de football AS Roma.",
       cover: "assets/images/graphisme/Rebrand_As_Roma/MockupAsroma.jpg",
@@ -308,7 +308,7 @@ const projectsData = {
     },
     {
       id: "sncf-affiche-securite",
-      title: "SNCF Intercités — Affiche sécurité",
+      title: "SNCF Intercités - Affiche sécurité",
       client: "SNCF Intercités",
       description: "Affiche de sensibilisation à la sécurité pour SNCF Intercités.",
       cover: "assets/images/graphisme/SNCF/Affiche_Secu_Mathys_VF_mockup.jpg",
@@ -320,7 +320,7 @@ const projectsData = {
     },
     {
       id: "te-ora-naho",
-      title: "Te Ora Naho — Identité visuelle",
+      title: "Te Ora Naho - Identité visuelle",
       client: "",
       description: "Création de logo et déclinaisons visuelles pour Te Ora Naho.",
       cover: "assets/images/graphisme/TeOraNaho/6.jpg",
@@ -336,7 +336,7 @@ const projectsData = {
     },
     {
       id: "workshop-ping-affiches",
-      title: "Workshop Ping — Affiches",
+      title: "Workshop Ping - Affiches",
       client: "Cercle Paul Bert",
       description: "Affiches de communication pour des événements de tennis de table (match régional, journée portes ouvertes).",
       cover: "assets/images/graphisme/Workshop_Ping/mockupping.jpg",

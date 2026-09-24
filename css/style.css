@@ -1,5 +1,5 @@
 /* =====================================================
-   RAWLAND — Portfolio
+   RAWLAND - Portfolio
    Style éditorial noir & blanc, gros titres condensés.
    ===================================================== */
 
@@ -482,7 +482,7 @@ a { color: inherit; text-decoration: none; }
    extrémités, pour suggérer que la liste continue au-delà de ce qui est
    affiché. À l'intérieur, .scroll-track contient TROIS exemplaires
    consécutifs de la liste et glisse via transform (voir
-   setupInfiniteSlider dans main.js) — c'est ce découplage fenêtre/rail
+   setupInfiniteSlider dans main.js) - c'est ce découplage fenêtre/rail
    qui permet à une carte de sortir par la gauche ou la droite sans
    jamais "sauter" : le rail avance en continu, et le rebouclage sur
    l'exemplaire du milieu se fait seulement une fois la carte hors champ,
@@ -494,7 +494,7 @@ a { color: inherit; text-decoration: none; }
    exactement dans la largeur disponible). Le vrai gap flex étant une
    valeur unique partagée, l'écart est rigoureusement identique entre
    toutes les paires de cartes, y compris autour de la carte vedette
-   (.is-featured, toujours la 2e carte visible, un peu plus grande —
+   (.is-featured, toujours la 2e carte visible, un peu plus grande -
    elle n'est plus contrainte à un slot partagé avec les autres). */
 .carousel--featured .scroll-row,
 .carousel--photos .scroll-row {
@@ -521,7 +521,7 @@ a { color: inherit; text-decoration: none; }
 }
 /* Le passage de --card-w (posé en JS dès la construction du rail) fait
    changer la valeur héritée de flex-basis dès le premier calcul de style
-   — sans ce garde-fou, ce changement serait lui-même transitionné au
+   - sans ce garde-fou, ce changement serait lui-même transitionné au
    chargement (les cartes "rétréciraient" visiblement à l'affichage). La
    transition n'est activée qu'une fois la mise en page initiale posée
    (voir setupInfiniteSlider, classe .is-ready ajoutée après le 1er place()). */
@@ -535,7 +535,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ---------- galerie photos (même moteur de carrousel infini que Vidéos /
-   Graphisme — voir setupInfiniteSlider dans main.js — mais sans carte
+   Graphisme - voir setupInfiniteSlider dans main.js - mais sans carte
    "vedette" agrandie : plusieurs cartes carrées de même taille). */
 .scroll-track--photos > .project-card {
   aspect-ratio: 1 / 1;
@@ -602,7 +602,7 @@ a { color: inherit; text-decoration: none; }
 /* Vidéos / Graphisme / Photos n'ont pas besoin de padding sur .scroll-row :
    overflow-hidden masque à la largeur totale de la boîte, et tout
    l'espacement (carte vedette, marge de chaque côté pour Photos)
-   est calculé en JS via transform sur .scroll-track — un padding CSS ici
+   est calculé en JS via transform sur .scroll-track - un padding CSS ici
    se cumulerait avec ce calcul et couperait le haut de la carte la plus
    grande (sa hauteur, fixée en JS pour correspondre exactement, se
    retrouverait réduite par le padding via box-sizing: border-box). Les
@@ -1337,7 +1337,7 @@ a.review-author:hover { text-decoration: underline; }
 /* =====================================================
    CURSEUR PERSONNALISÉ
    Point + anneau qui suit avec un léger retard élastique.
-   mix-blend-mode: difference — reste blanc sur fond sombre,
+   mix-blend-mode: difference - reste blanc sur fond sombre,
    noir sur fond clair, sans avoir à traquer la section active.
    Activé en JS uniquement sur pointeur fin (souris), jamais
    au toucher : voir main.js, section 8.

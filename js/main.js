@@ -1,5 +1,5 @@
 /* =====================================================
-   main.js — logique du portfolio RAWLAND
+   main.js - logique du portfolio RAWLAND
    ===================================================== */
 (function () {
   "use strict";
@@ -274,8 +274,8 @@
         const opacity = 0.5 + 0.5 * ((z + 1) / 2);
         const tilt = Math.cos(angle) * 6 + (orbitDeform.get(el) || 0);
         // Effet 3D : la vignette pivote sur elle-même (rotateY) selon sa
-        // position dans l'anneau — de face au centre (devant ou derrière,
-        // cos(angle)=0), de profil sur les côtés (cos(angle)=±1) — comme si
+        // position dans l'anneau - de face au centre (devant ou derrière,
+        // cos(angle)=0), de profil sur les côtés (cos(angle)=±1) - comme si
         // elle suivait réellement la courbe de l'ellipse au lieu de rester
         // plaquée face à l'écran.
         const rotY = -Math.cos(angle) * 22;
@@ -410,7 +410,7 @@
      de la liste et glisse via transform. On avance d'une carte à la fois
      avec une transition ; une fois qu'on a dérivé d'un exemplaire complet
      dans un sens, on se replace silencieusement (sans transition) au même
-     endroit visuel dans l'exemplaire du milieu — mais seulement une fois
+     endroit visuel dans l'exemplaire du milieu - mais seulement une fois
      la carte sortie hors du champ visible, donc sans saut perceptible.
 
      Deux variantes, pilotées par `opts` :
@@ -447,7 +447,7 @@
     // Chaque carte est directement l'item flexible du rail (pas de slot
     // intermédiaire) : sa largeur (normale ou vedette, voir CSS) est donc
     // sa vraie largeur de mise en page, et le gap flex (--slot-gap) est
-    // une valeur UNIQUE partagée par toutes les paires de cartes — l'écart
+    // une valeur UNIQUE partagée par toutes les paires de cartes - l'écart
     // est donc rigoureusement identique partout, y compris autour de la
     // carte vedette. La position de chaque carte se calcule en sommant les
     // largeurs RÉELLEMENT rendues qui la précèdent (voir place()), ce qui
@@ -470,12 +470,12 @@
 
     // Un nombre fixe de cartes visibles à la fois (moins sur petit écran
     // pour rester lisible) : les largeurs sont calculées à partir de la
-    // largeur réelle de la fenêtre visible, pas d'une taille fixe/vw —
+    // largeur réelle de la fenêtre visible, pas d'une taille fixe/vw -
     // ainsi il n'y a jamais un bout de carte suivante qui dépasse en bord
     // de rangée. On se base sur clientWidth SANS retirer de padding CSS :
     // overflow-hidden sur .scroll-row masque à la largeur totale de la
     // boîte (voir .carousel--featured / .carousel--photos .scroll-row,
-    // qui n'ont aucun padding — tout l'espacement est calculé ici et
+    // qui n'ont aucun padding - tout l'espacement est calculé ici et
     // appliqué via transform, jamais en padding CSS).
     const GAP_RATIO = 0.05; // gap réel, en fraction d'une carte normale
     const FEATURED_RATIO = 1.17; // largeur de la carte vedette, en fraction d'une carte normale
@@ -557,7 +557,7 @@
     updateDots();
 
     // Décalage cumulé jusqu'à currentIndex, à partir des largeurs
-    // RÉELLEMENT rendues (offsetWidth) — correct même quand une carte plus
+    // RÉELLEMENT rendues (offsetWidth) - correct même quand une carte plus
     // large que la normale se trouve parmi celles qui précèdent.
     function offsetFor(index) {
       const gapPx = parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap) || 0;
@@ -574,7 +574,7 @@
     }
     place(false);
     // N'active la transition des cartes (largeur/ombre) qu'une fois la
-    // mise en page initiale posée — sinon ce premier calcul de style
+    // mise en page initiale posée - sinon ce premier calcul de style
     // serait lui-même animé (voir la règle .scroll-track.is-ready en CSS).
     track.classList.add("is-ready");
 
@@ -642,7 +642,7 @@
   );
 
   /* ---------------------------------------------------
-     6. MODALE PROJET — un gabarit différent par type :
+     6. MODALE PROJET - un gabarit différent par type :
      - vidéo      : poster flouté + bouton lecture, titre en overlay
      - photo      : titre, description courte optionnelle, puis galerie en masonry
      - graphisme  : titre, puis image + description côte à côte,
