@@ -757,7 +757,11 @@
     lastFocusedEl = document.activeElement;
     modalContent.innerHTML = "";
     modalTopbar.classList.remove("modal-topbar--on-media");
-    modalPanel.classList.remove("modal-panel--video", "modal-panel--photo");
+    modalPanel.classList.remove("modal-panel--video", "modal-panel--photo", "modal-panel--gallery");
+    // photo + graphisme : panneau sombre à angles droits (voir CSS)
+    const isGallery = project.category === "photos" || project.category === "graphisme";
+    modal.classList.toggle("modal--gallery", isGallery);
+    modalPanel.classList.toggle("modal-panel--gallery", isGallery);
 
     if (project.category === "videos") {
       modalKicker.textContent = project.client || "Vidéo";
