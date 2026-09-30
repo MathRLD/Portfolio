@@ -47,6 +47,7 @@
     a.addEventListener("click", () => {
       mainNav.classList.remove("is-open");
       navToggle.classList.remove("is-open");
+      navToggle.setAttribute("aria-expanded", "false");
     })
   );
 
@@ -130,6 +131,15 @@
       scale = containerH / naturalH;
       offsetX = 0;
       offsetY = 0;
+      // Layout mobile empilé (photo plus haute que large) : on recadre la
+      // photo pour centrer Mathys horizontalement, sans jamais laisser de
+      // bande vide sur un bord - l'anneau de vignettes, centré sur lui, se
+      // retrouve ainsi centré dans l'image.
+      if (window.innerWidth <= 880) {
+        const personX = (PORTRAIT_BBOX.x + PORTRAIT_BBOX.w / 2) * scale;
+        const minOffset = containerW - naturalW * scale;
+        offsetX = Math.min(0, Math.max(minOffset, containerW / 2 - personX));
+      }
     } else {
       scale = containerW / naturalW;
       offsetX = 0;
@@ -145,6 +155,8 @@
     // taille réelle du portrait (et non du viewport) pour que le rayon de
     // l'anneau reste proportionné au personnage à toute taille d'écran.
     const stageSize = pw * 2.3;
+
+    heroBgPhoto.style.objectPosition = offsetX ? `${offsetX}px center` : "";
 
     heroStage.style.left = `${cx}px`;
     heroStage.style.top = `${cy}px`;
@@ -252,13 +264,18 @@
 
     function ellipseForStage() {
       const rect = heroStage.getBoundingClientRect();
-      const rx = Math.min(rect.width * 0.44, 300);
+      const isStacked = window.innerWidth <= 880;
+      // En mobile, l'anneau doit tenir dans la largeur de la photo : on
+      // retire la demi-largeur d'une vignette (agrandie à l'avant) de chaque côté.
+      const maxRx = isStacked ? heroVisual.clientWidth / 2 - 52 : 300;
+      const rx = Math.min(rect.width * 0.44, maxRx);
       const ry = rx * 0.34;
       // Anneau décalé vers la gauche par rapport au centre du portrait,
       // pour recentrer l'orbite sur le torse plutôt que sur le buste entier
       // (le profil du visage tire le centre géométrique vers la droite).
-      // Décalage moins prononcé en layout mobile empilé, où l'espace manque.
-      const shiftFactor = window.innerWidth <= 880 ? -0.1 : -0.3;
+      // Pas de décalage en layout mobile empilé : l'anneau reste centré
+      // dans l'image.
+      const shiftFactor = isStacked ? 0 : -0.3;
       return { cx: rect.width / 2 + rx * shiftFactor, cy: rect.height / 2, rx, ry };
     }
 
@@ -434,7 +451,10 @@
   function setupInfiniteSlider(carouselId, viewportId, trackId, slideFactories, opts) {
     // bleed < 1 : les cartes sont dimensionnées sur cette fraction de la
     // largeur, centrées, et les cartes voisines dépassent jusqu'aux bords.
-    const { featured = true, cardAspect = 10 / 16, bleed = 1 } = opts || {};
+    // cardScale > 1 : cartes élargies d'autant sans toucher à l'écart entre
+    // elles ; la rangée reste centrée et les cartes des bords débordent
+    // (estompées par le masque en dégradé).
+    const { featured = true, cardAspect = 10 / 16, bleed = 1, cardScale = 1 } = opts || {};
     let sideOffset = 0;
     const carousel = document.getElementById(carouselId);
     const viewport = document.getElementById(viewportId);
@@ -463,7 +483,18 @@
       });
     }
     const allCards = copies.flat();
-    allCards.forEach((card) => observeReveal(card));
+    // Apparition déclenchée par la rangée entière, pas carte par carte : une
+    // carte à peine visible en bord de rangée (le bout du suivant en mobile)
+    // n'atteindrait jamais le seuil de l'observer et resterait invisible.
+    if (prefersReducedMotion) {
+      allCards.forEach((card) => card.classList.add("is-visible"));
+    } else {
+      new IntersectionObserver((entries, obs) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        allCards.forEach((card) => card.classList.add("is-visible"));
+        obs.disconnect();
+      }, { threshold: 0.15 }).observe(viewport);
+    }
 
     let currentIndex = n; // on démarre sur le premier élément de l'exemplaire du milieu
     let isAnimating = false;
@@ -478,7 +509,7 @@
     // qui n'ont aucun padding - tout l'espacement est calculé ici et
     // appliqué via transform, jamais en padding CSS).
     const GAP_RATIO = 0.05; // gap réel, en fraction d'une carte normale
-    const FEATURED_RATIO = 1.17; // largeur de la carte vedette, en fraction d'une carte normale
+    const FEATURED_RATIO = 1.32; // largeur de la carte vedette, en fraction d'une carte normale
     function visibleCount() {
       const w = viewport.clientWidth * bleed;
       if (featured) {
@@ -490,18 +521,40 @@
       if (w < 900) return 2;
       return 3;
     }
+    // Mode "single" (Vidéos / Graphisme sur mobile) : un seul projet visible
+    // à la fois, calé à gauche, et le bout (~10%) du suivant à droite pour
+    // inviter à faire défiler. Toutes les cartes ont la même taille ; la
+    // carte mise en avant est alors la carte de tête elle-même.
+    const SINGLE_MAX_W = 640;
+    const SINGLE_GAP = 0.04; // marge gauche et écart, en fraction de la largeur
+    const SINGLE_CARD = 0.82; // largeur d'une carte ; le reste (~10%) = bout du suivant
+    function isSingle() {
+      return featured && viewport.clientWidth < SINGLE_MAX_W;
+    }
     function layout() {
       const count = visibleCount();
       const baseW = viewport.clientWidth * bleed;
       sideOffset = (viewport.clientWidth - baseW) / 2;
-      if (featured) {
+      if (isSingle()) {
+        const w = viewport.clientWidth;
+        const cardWidth = w * SINGLE_CARD;
+        sideOffset = w * SINGLE_GAP;
+        track.style.setProperty("--card-w", `${cardWidth}px`);
+        track.style.setProperty("--card-w-featured", `${cardWidth}px`);
+        track.style.setProperty("--slot-gap", `${w * SINGLE_GAP}px`);
+        viewport.style.height = `${cardWidth * cardAspect}px`;
+      } else if (featured) {
         // (count-1) cartes normales + 1 vedette + (count-1) gaps = largeur dispo
         const units = (count - 1) * (1 + GAP_RATIO) + FEATURED_RATIO;
-        const cardWidth = baseW / units;
+        const fitWidth = baseW / units;
+        const gap = fitWidth * GAP_RATIO;
+        const cardWidth = fitWidth * cardScale;
         const featuredWidth = cardWidth * FEATURED_RATIO;
+        const rowWidth = (count - 1) * (cardWidth + gap) + featuredWidth;
+        sideOffset += (baseW - rowWidth) / 2;
         track.style.setProperty("--card-w", `${cardWidth}px`);
         track.style.setProperty("--card-w-featured", `${featuredWidth}px`);
-        track.style.setProperty("--slot-gap", `${cardWidth * GAP_RATIO}px`);
+        track.style.setProperty("--slot-gap", `${gap}px`);
         // Hauteur de la fenêtre fixée sur la carte vedette (toujours la plus
         // grande) : sans ça, pendant la transition, les deux cartes qui
         // échangent leur rôle passent un instant par une taille
@@ -520,13 +573,14 @@
     }
     layout();
 
-    // La carte mise en avant est toujours la 2e carte visible, donc celle
-    // juste après la carte de tête (currentIndex) dans l'ordre du rail.
+    // La carte mise en avant est la 2e carte visible, donc celle juste après
+    // la carte de tête (currentIndex) dans l'ordre du rail - sauf en mode
+    // "single" où c'est la carte de tête elle-même.
     // N'existe qu'en mode "vedette" (Vidéos / Graphisme) : Photos affiche
     // des cartes toutes de même taille, pas de carte agrandie.
     function updateFeatured() {
       if (!featured) return;
-      const idx = ((currentIndex + 1) % n + n) % n;
+      const idx = ((currentIndex + (isSingle() ? 0 : 1)) % n + n) % n;
       allCards.forEach((card) => {
         card.classList.toggle("is-featured", Number(card.dataset.slideIndex) === idx);
       });
@@ -615,8 +669,37 @@
     if (prevBtn) prevBtn.addEventListener("click", () => step(-1));
     if (nextBtn) nextBtn.addEventListener("click", () => step(1));
 
+    // Swipe horizontal au doigt (mobile). touch-action: pan-y (voir CSS)
+    // laisse le scroll vertical de la page au navigateur. Un swipe ne doit
+    // pas ouvrir la carte sous le doigt : le clic qui suit est avalé.
+    let touchX = null;
+    let touchY = 0;
+    let justSwiped = false;
+    viewport.addEventListener("touchstart", (e) => {
+      touchX = e.touches[0].clientX;
+      touchY = e.touches[0].clientY;
+    }, { passive: true });
+    viewport.addEventListener("touchend", (e) => {
+      if (touchX === null) return;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - touchX;
+      const dy = t.clientY - touchY;
+      touchX = null;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+        justSwiped = true;
+        setTimeout(() => (justSwiped = false), 400);
+        step(dx < 0 ? 1 : -1);
+      }
+    }, { passive: true });
+    viewport.addEventListener("click", (e) => {
+      if (!justSwiped) return;
+      e.preventDefault();
+      e.stopPropagation();
+    }, true);
+
     window.addEventListener("resize", () => {
       layout();
+      updateFeatured();
       place(false);
     });
   }
@@ -625,7 +708,8 @@
     "videos-carousel",
     "videos-row",
     "videos-track",
-    buildCardFactories("videos-row", projectsData.videos, "videos", 4)
+    buildCardFactories("videos-row", projectsData.videos, "videos", 4),
+    { cardScale: 1.12 }
   );
   setupInfiniteSlider(
     "graphisme-carousel",
