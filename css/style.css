@@ -288,7 +288,7 @@ a { color: inherit; text-decoration: none; }
   align-items: center;
   gap: 10px;
   padding: 16px 30px;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--white);
   border: 1.5px solid var(--black);
   color: var(--black);
@@ -715,7 +715,7 @@ a { color: inherit; text-decoration: none; }
 .btn-toggle {
   margin-top: 12px;
   padding: 12px 24px;
-  border-radius: 999px;
+  border-radius: 0;
   border: 1.5px solid var(--black);
   background: transparent;
   color: var(--black);
@@ -1346,7 +1346,7 @@ a.review-author:hover { text-decoration: underline; }
     flex-direction: column;
     justify-content: flex-start;
     align-items: stretch;
-    padding: calc(var(--header-h) + 24px) 24px 72px;
+    padding: var(--header-h) 24px 72px; /* photo collée sous le header, sans bande */
   }
   .hero-visual {
     position: relative;
