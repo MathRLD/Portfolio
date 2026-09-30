@@ -669,38 +669,79 @@
     if (prevBtn) prevBtn.addEventListener("click", () => step(-1));
     if (nextBtn) nextBtn.addEventListener("click", () => step(1));
 
-    // Swipe horizontal au doigt (mobile). touch-action: pan-y (voir CSS)
-    // laisse le scroll vertical de la page au navigateur. Un swipe ne doit
-    // pas ouvrir la carte sous le doigt : le clic qui suit est avalé.
-    let touchX = null;
-    let touchY = 0;
-    let justSwiped = false;
+    // Défilement à la main (mobile) : le rail suit le doigt, puis se cale
+    // au relâchement sur la carte la plus proche (ou la suivante/précédente
+    // si le geste est un coup de doigt rapide). touch-action: pan-y (voir
+    // CSS) laisse le scroll vertical de la page au navigateur : on ne prend
+    // la main que si le geste part franchement à l'horizontale. Un glisser
+    // ne doit pas ouvrir la carte sous le doigt : le clic qui suit est avalé.
+    let drag = null; // { x, y, t, base, horizontal }
+    let justDragged = false;
+    // Position réellement affichée (y compris en plein retour en place
+    // animé), pour que le rail reparte exactement de là sous le doigt.
+    function currentTranslate() {
+      const m = getComputedStyle(track).transform;
+      return m && m !== "none" ? new DOMMatrix(m).m41 : sideOffset - offsetFor(currentIndex);
+    }
     viewport.addEventListener("touchstart", (e) => {
-      touchX = e.touches[0].clientX;
-      touchY = e.touches[0].clientY;
+      if (isAnimating || e.touches.length > 1) return;
+      const t = e.touches[0];
+      drag = { x: t.clientX, y: t.clientY, t: performance.now(), base: currentTranslate(), horizontal: null };
     }, { passive: true });
-    viewport.addEventListener("touchend", (e) => {
-      if (touchX === null) return;
-      const t = e.changedTouches[0];
-      const dx = t.clientX - touchX;
-      const dy = t.clientY - touchY;
-      touchX = null;
-      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
-        justSwiped = true;
-        setTimeout(() => (justSwiped = false), 400);
-        step(dx < 0 ? 1 : -1);
+    viewport.addEventListener("touchmove", (e) => {
+      if (!drag) return;
+      const t = e.touches[0];
+      const dx = t.clientX - drag.x;
+      const dy = t.clientY - drag.y;
+      if (drag.horizontal === null) {
+        if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+        drag.horizontal = Math.abs(dx) > Math.abs(dy);
+        if (!drag.horizontal) { drag = null; return; }
+        track.style.transition = "none";
       }
+      track.style.transform = `translateX(${drag.base + dx}px)`;
     }, { passive: true });
+    function endDrag(e) {
+      if (!drag) return;
+      const d = drag;
+      drag = null;
+      if (!d.horizontal) return;
+      const dx = e.changedTouches[0].clientX - d.x;
+      const dt = performance.now() - d.t;
+      const gapPx = parseFloat(getComputedStyle(track).columnGap) || 0;
+      const stepW = allCards[currentIndex].offsetWidth + gapPx;
+      let steps = Math.round(-dx / stepW);
+      const isFlick = dt < 300 && Math.abs(dx) > 30;
+      if (steps === 0 && (isFlick || Math.abs(dx) > stepW * 0.25)) steps = dx < 0 ? 1 : -1;
+      steps = Math.max(-(n - 1), Math.min(n - 1, steps));
+      justDragged = true;
+      setTimeout(() => (justDragged = false), 400);
+      if (steps) animateTo(currentIndex + steps);
+      else place(true); // pas assez loin : retour en place
+    }
+    viewport.addEventListener("touchend", endDrag, { passive: true });
+    viewport.addEventListener("touchcancel", endDrag, { passive: true });
     viewport.addEventListener("click", (e) => {
-      if (!justSwiped) return;
+      if (!justDragged) return;
       e.preventDefault();
       e.stopPropagation();
     }, true);
 
+    // Ne recalcule qu'au changement de LARGEUR : sur mobile, la barre
+    // d'adresse qui apparaît/disparaît au scroll déclenche des "resize" en
+    // hauteur seule, qui couperaient une animation en cours (et laisseraient
+    // le carrousel bloqué, transitionend n'arrivant jamais).
+    let lastWidth = viewport.clientWidth;
     window.addEventListener("resize", () => {
+      if (viewport.clientWidth === lastWidth) return;
+      lastWidth = viewport.clientWidth;
+      if (isAnimating) {
+        track.removeEventListener("transitionend", onTrackTransitionEnd);
+        isAnimating = false;
+      }
       layout();
       updateFeatured();
-      place(false);
+      settle();
     });
   }
 

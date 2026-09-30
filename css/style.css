@@ -691,9 +691,8 @@ a { color: inherit; text-decoration: none; }
   }
   .carousel--featured .carousel-arrow--prev { left: 8px; }
   .carousel--featured .carousel-arrow--next { right: 8px; }
-  .carousel--featured .project-card .card-overlay { padding: 12px 14px; }
-  .carousel--featured .project-card .card-title { font-size: 15px; }
-  .carousel--featured .project-card .card-client { font-size: 10px; margin-top: 2px; }
+  /* Pas de titre sur les vignettes en mobile : l'image seule. */
+  .carousel--featured .project-card .card-overlay { display: none; }
 }
 
 /* =====================================================
@@ -1361,6 +1360,16 @@ a.review-author:hover { text-decoration: underline; }
     transform: none;
   }
   .hero-orbit-item { width: 80px; }
+
+  /* Header toujours avec un fond en mobile : le hero empilé est long et
+     son texte défilerait sous un header transparent, illisible. */
+  .site-header,
+  .site-header.on-hero {
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  .site-header.on-dark { background: rgba(17, 17, 17, 0.92); }
 
   /* Barre de scroll verticale inutile en mobile : on la masque.
      overflow-x: clip en filet de sécurité : seuls les carrousels (qui
