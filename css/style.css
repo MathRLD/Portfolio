@@ -20,8 +20,8 @@
 
   --container-w: 1240px;
 
-  --accent: #57ffe9;
-  --accent-glow: rgba(87, 255, 233, 0.55);
+  --accent: #a7c3de;
+  --accent-glow: rgba(167, 195, 222, 0.4);
 }
 
 * { box-sizing: border-box; }
