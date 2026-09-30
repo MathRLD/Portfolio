@@ -9,7 +9,7 @@
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#0a0a0a">
 <link rel="canonical" href="https://mathysroland.com/">
-<link rel="icon" type="image/png" href="assets/images/portrait2.png">
+<link rel="icon" type="image/png" href="assets/images/favicon.png">
 
 <!-- Partage réseaux sociaux (Open Graph / X) -->
 <meta property="og:type" content="profile">
@@ -92,7 +92,11 @@
 
 <!-- ?v= : à changer à chaque mise en ligne, pour que les navigateurs (qui
      gardent CSS/JS en cache 10 min sur GitHub Pages) rechargent les fichiers. -->
-<link rel="stylesheet" href="css/style.css?v=20260930e">
+<!-- Classe "js" posée avant tout affichage : le fondu des images (voir
+     .is-loaded dans style.css) ne s'applique que si JS tourne, sinon elles
+     resteraient invisibles. -->
+<script>document.documentElement.classList.add("js");</script>
+<link rel="stylesheet" href="css/style.css?v=20260930f">
 </head>
 <body>
 
@@ -157,7 +161,7 @@
   <!-- ===================== HERO ===================== -->
   <section class="hero" id="hero">
     <div class="hero-visual" id="hero-visual">
-      <img class="hero-bg-photo" id="hero-bg-photo" src="assets/images/fond_hero_section.jpg" alt="" aria-hidden="true">
+      <img class="hero-bg-photo" id="hero-bg-photo" src="assets/images/fond_hero_section.webp" alt="" aria-hidden="true" fetchpriority="high" onload="this.classList.add('is-loaded')">
 
       <!-- Ancre de positionnement : recentrée en JS (js/main.js) sur l'endroit
            exact où Mathys apparaît dans la photo de fond, pour que le portrait
@@ -165,7 +169,7 @@
            à l'anneau de vignettes-projets qui orbite autour de lui. -->
       <div class="hero-stage" id="hero-stage">
         <div class="hero-portrait" id="hero-portrait">
-          <img src="assets/images/portrait2.png" alt="Mathys Roland (RAWLAND), photographe, vidéaste et graphiste freelance à Paris" onerror="this.parentElement.classList.add('img-missing')">
+          <img src="assets/images/portrait2.webp" fetchpriority="high" onload="this.classList.add('is-loaded')" alt="Mathys Roland (RAWLAND), photographe, vidéaste et graphiste freelance à Paris" onerror="this.parentElement.classList.add('img-missing')">
         </div>
 
         <!-- Anneau de vignettes-projets qui orbite autour du portrait.
@@ -349,7 +353,7 @@
         </li>
         <li>
           <span class="contact-label">Instagram.</span>
-          <a href="https://instagram.com/_rawland" target="_blank" rel="noopener"><img class="contact-icon" src="assets/images/logo_travail/Instagram_logo_2016.svg.webp" alt="" aria-hidden="true">@_rawland</a>
+          <a href="https://instagram.com/_rawland" target="_blank" rel="noopener"><img class="contact-icon" src="assets/images/logo_travail/instagram-icon-64.webp" alt="" aria-hidden="true">@_rawland</a>
         </li>
       </ul>
     </div>
@@ -378,7 +382,7 @@
   </div>
 </div>
 
-<script src="js/projects-data.js?v=20260930e"></script>
-<script src="js/main.js?v=20260930e"></script>
+<script src="js/projects-data.js?v=20260930f"></script>
+<script src="js/main.js?v=20260930f"></script>
 </body>
 </html>

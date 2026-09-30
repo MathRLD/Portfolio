@@ -13,7 +13,11 @@
    - title       : titre affiché sur la carte et la popup
    - client      : nom du client / contexte (optionnel, "" si aucun)
    - description : texte affiché dans la popup
-   - cover       : chemin de l'image de couverture (carte)
+   - cover       : chemin de l'image de couverture (popup)
+   - thumb       : version allégée de cover pour les cartes des
+                   carrousels et l'anneau du hero (optionnel :
+                   si absent, cover est utilisée à la place).
+                   WebP ~1000px de large, dans assets/images/thumbs/
    - tags        : liste de mots-clés affichés dans la popup
 
    Champ spécifique aux vidéos :
@@ -35,6 +39,7 @@ const projectsData = {
       client: "",
       description: "Vidéo de couverture du match de Bundesliga entre le FC St. Pauli et le 1. FC Köln (17.04.2026) - rythme, action et ambiance de stade en mouvement.",
       cover: "assets/images/videos/stpauli-cover.jpg",
+      thumb: "assets/images/thumbs/stpauli-koln-2026-video.webp",
       tags: ["Sport", "Football", "Bundesliga", "Montage"],
       media: { type: "youtube", src: "WOpr0kPQ1hg" }
     },
@@ -44,6 +49,7 @@ const projectsData = {
       client: "SNCF Intercités",
       description: "Film institutionnel réalisé pour SNCF Intercités autour des valeurs portées par l'EIGS - mise en scène du quotidien des équipes à bord et en gare.",
       cover: "assets/images/videos/valeurs-eigs-cover.jpg",
+      thumb: "assets/images/thumbs/sncf-valeurs-eigs.webp",
       tags: ["Réalisation", "Montage", "Institutionnel", "SNCF"],
       media: { type: "youtube", src: "pB53WOa4bag" }
     },
@@ -53,6 +59,7 @@ const projectsData = {
       client: "",
       description: "Court-métrage tourné autour du tennis de table - échanges, tension de match et complicité entre joueurs captés au plus près de l'action.",
       cover: "assets/images/videos/nsmtt-cover.jpg",
+      thumb: "assets/images/thumbs/nsmtt-short-film.webp",
       tags: ["Court-métrage", "Sport", "Réalisation"],
       media: { type: "youtube", src: "fbg9Hu20Xts" }
     },
@@ -62,6 +69,7 @@ const projectsData = {
       client: "SNCF Intercités",
       description: "Court-métrage pour SNCF Intercités - une traversée de gare et de quai qui suit l'attente et les rencontres du quotidien des voyageurs.",
       cover: "assets/images/videos/viviane-cover.jpg",
+      thumb: "assets/images/thumbs/viviane-short-film.webp",
       tags: ["Court-métrage", "Réalisation", "SNCF"],
       media: { type: "youtube", src: "470WgFqnpT4" }
     }
@@ -76,6 +84,7 @@ const projectsData = {
       client: "",
       description: "Reportage photo du match de Bundesliga entre le FC St. Pauli et le 1. FC Köln (17.04.2026) - intensité du jeu, ambiance de tribune et instantanés capturés au fil du match.",
       cover: "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-53.jpg",
+      thumb: "assets/images/thumbs/stpauli-koln-2026.webp",
       tags: ["Sport", "Football", "Bundesliga", "Reportage"],
       images: [
         "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-53.jpg",
@@ -103,6 +112,7 @@ const projectsData = {
       client: "SNCF Intercités",
       description: "Shooting photo lifestyle à bord d'un train Intercités - lumière naturelle, ambiance de voyage et mise en scène du quotidien des voyageurs.",
       cover: "assets/images/photos/Shootingsncf1/web/Shooting photo TDN.jpg",
+      thumb: "assets/images/thumbs/sncf-intercites-lifestyle.webp",
       tags: ["Lifestyle", "Institutionnel", "SNCF"],
       images: [
         "assets/images/photos/Shootingsncf1/web/Shooting photo TDN.jpg",
@@ -121,6 +131,7 @@ const projectsData = {
       client: "SNCF Intercités",
       description: "Reportage photo en gare et à bord des trains Intercités - jeux de lumière nocturnes et mouvement des rames sur les quais.",
       cover: "assets/images/photos/Shootingsncf2/web/Photos_Shooting_05_05-35.jpg",
+      thumb: "assets/images/thumbs/sncf-intercites-gare.webp",
       tags: ["Reportage", "Institutionnel", "SNCF"],
       images: [
         "assets/images/photos/Shootingsncf2/web/Photos_Shooting_05_05-35.jpg",
@@ -138,6 +149,7 @@ const projectsData = {
       client: "",
       description: "Reportage photo d'un événement en plein air à Bobital (2026) - scène, lumière de fin de journée et ambiance de foule captées sur le vif.",
       cover: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026.jpg",
+      thumb: "assets/images/thumbs/bobital-2026.webp",
       tags: ["Événementiel", "Concert", "Reportage"],
       images: [
         "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026.jpg",
@@ -162,6 +174,7 @@ const projectsData = {
       client: "",
       description: "Couverture photo de la release party de Jeune Lion (12.02.2026) - scène, lumières et ambiance de soirée.",
       cover: "assets/images/photos/jeunelion/web/Releaseparty_Jeune-Lion_12_02_26_@Rawland-17.jpg",
+      thumb: "assets/images/thumbs/jeune-lion-release-party.webp",
       tags: ["Événementiel", "Musique", "Reportage"],
       images: [
         "assets/images/photos/jeunelion/web/Releaseparty_Jeune-Lion_12_02_26_@Rawland-17.jpg",
@@ -188,6 +201,7 @@ const projectsData = {
       client: "",
       description: "Reportage photo du match de Ligue 2 entre le Red Star FC et l'En Avant Guingamp (24.04) - intensité du jeu et liesse collective en fin de rencontre.",
       cover: "assets/images/photos/redstareag/web/RedStarFC_EAG_@Rawland_24_04-99.jpg",
+      thumb: "assets/images/thumbs/redstar-eag.webp",
       tags: ["Sport", "Football", "Ligue 2", "Reportage"],
       images: [
         "assets/images/photos/redstareag/web/RedStarFC_EAG_@Rawland_24_04-99.jpg",
@@ -219,6 +233,7 @@ const projectsData = {
       client: "",
       description: "Reportage photo du match entre le Red Star FC et Grenoble Foot 38 - but, fumigènes et ferveur des tribunes.",
       cover: "assets/images/photos/redstargrenoble/web/RED_STAR__GRENOBLE_BUT-3.jpg",
+      thumb: "assets/images/thumbs/redstar-grenoble.webp",
       tags: ["Sport", "Football", "Reportage"],
       images: [
         "assets/images/photos/redstargrenoble/web/RED_STAR__GRENOBLE_BUT-3.jpg",
@@ -244,6 +259,7 @@ const projectsData = {
       client: "",
       description: "Reportage photo du match entre le Red Star FC et le Stade Lavallois - action sur le terrain et ambiance survoltée des supporters.",
       cover: "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand46.jpg",
+      thumb: "assets/images/thumbs/redstar-laval.webp",
       tags: ["Sport", "Football", "Reportage"],
       images: [
         "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand46.jpg",
@@ -271,6 +287,7 @@ const projectsData = {
       client: "",
       description: "Création d'affiches et de mockups de présentation autour du thème France / Euro.",
       cover: "assets/images/graphisme/FranceEuro/Francemockup2.jpg",
+      thumb: "assets/images/thumbs/france-euro-affiches.webp",
       tags: ["Affiche", "Mockup", "Graphisme"],
       images: [
         "assets/images/graphisme/FranceEuro/France_affiche1.jpg",
@@ -285,6 +302,7 @@ const projectsData = {
       client: "",
       description: "Déclinaison de l'identité visuelle sur des supports goodies : stylo, tote bag, lanyard.",
       cover: "assets/images/graphisme/LinkyJob/Minimal Perspective Logo Mockup.jpg",
+      thumb: "assets/images/thumbs/linkyjob-goodies.webp",
       tags: ["Identité visuelle", "Goodies", "Mockup"],
       images: [
         "assets/images/graphisme/LinkyJob/Mockup.jpg",
@@ -300,6 +318,7 @@ const projectsData = {
       client: "",
       description: "Projet de refonte du logo et de l'identité visuelle du club de football AS Roma.",
       cover: "assets/images/graphisme/Rebrand_As_Roma/MockupAsroma.jpg",
+      thumb: "assets/images/thumbs/rebrand-as-roma.webp",
       tags: ["Identité visuelle", "Logo", "Rebrand"],
       images: [
         "assets/images/graphisme/Rebrand_As_Roma/MockupAsroma.jpg",
@@ -312,6 +331,7 @@ const projectsData = {
       client: "SNCF Intercités",
       description: "Affiche de sensibilisation à la sécurité pour SNCF Intercités.",
       cover: "assets/images/graphisme/SNCF/Affiche_Secu_Mathys_VF_mockup.jpg",
+      thumb: "assets/images/thumbs/sncf-affiche-securite.webp",
       tags: ["Affiche", "Institutionnel", "SNCF"],
       images: [
         "assets/images/graphisme/SNCF/Affiche_Secu_Mathys_VF.jpg",
@@ -324,6 +344,7 @@ const projectsData = {
       client: "",
       description: "Création de logo et déclinaisons visuelles pour Te Ora Naho.",
       cover: "assets/images/graphisme/TeOraNaho/6.jpg",
+      thumb: "assets/images/thumbs/te-ora-naho.webp",
       tags: ["Logo", "Identité visuelle"],
       images: [
         "assets/images/graphisme/TeOraNaho/logo.jpg",
@@ -340,6 +361,7 @@ const projectsData = {
       client: "Cercle Paul Bert",
       description: "Affiches de communication pour des événements de tennis de table (match régional, journée portes ouvertes).",
       cover: "assets/images/graphisme/Workshop_Ping/mockupping.jpg",
+      thumb: "assets/images/thumbs/workshop-ping-affiches.webp",
       tags: ["Affiche", "Sport", "Tennis de table"],
       images: [
         "assets/images/graphisme/Workshop_Ping/MatchRégional3_V1.jpg",

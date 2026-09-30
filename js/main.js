@@ -232,7 +232,7 @@
         if (project) {
           el.type = "button";
           el.setAttribute("aria-label", project.title);
-          el.innerHTML = `<img src="${project.cover}" alt="" onerror="this.parentElement.classList.add('img-missing')">`;
+          el.innerHTML = `<img src="${project.thumb || project.cover}" alt="" decoding="async" onload="this.classList.add('is-loaded')" onerror="this.parentElement.classList.add('img-missing')">`;
           orbitProjects.set(el, project);
           // Fallback pour le mode "mouvement réduit" (pas de drag, donc pas de
           // capture de pointeur) : le click natif suffit dans ce cas.
@@ -400,8 +400,10 @@
     const card = document.createElement("button");
     card.type = "button";
     card.className = "project-card reveal-item";
+    // data-src et non src : l'image n'est réellement chargée qu'à l'approche
+    // du carrousel (voir setupInfiniteSlider), pour laisser la priorité au hero.
     card.innerHTML = `
-      <img src="${project.cover}" alt="${project.title}" onerror="this.parentElement.classList.add('img-missing')">
+      <img data-src="${project.thumb || project.cover}" alt="${project.title}" decoding="async" onload="this.classList.add('is-loaded')" onerror="this.parentElement.classList.add('img-missing')">
       <div class="card-overlay">
         <span class="card-title">${project.title}</span>
         ${project.client ? `<span class="card-client">${project.client}</span>` : ""}
@@ -483,6 +485,25 @@
       });
     }
     const allCards = copies.flat();
+
+    // Chargement des images à l'approche du carrousel (~1 écran avant), et
+    // pour TOUTES ses cartes d'un coup : pas le loading="lazy" natif, qui ne
+    // chargerait une carte masquée par le rail qu'au moment où elle entre
+    // dans le champ - elle apparaîtrait vide pendant le glisser.
+    const loadImages = () =>
+      track.querySelectorAll("img[data-src]").forEach((img) => {
+        img.src = img.dataset.src;
+        img.removeAttribute("data-src");
+      });
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver((entries, obs) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        loadImages();
+        obs.disconnect();
+      }, { rootMargin: "100% 0px" }).observe(viewport);
+    } else {
+      loadImages();
+    }
     // Apparition déclenchée par la rangée entière, pas carte par carte : une
     // carte à peine visible en bord de rangée (le bout du suivant en mobile)
     // n'atteindrait jamais le seuil de l'observer et resterait invisible.
@@ -787,8 +808,10 @@
   function vimeoEmbedUrl(id) {
     return `https://player.vimeo.com/video/${id}?autoplay=1`;
   }
+  // loading="lazy" : dans les galeries des popups, seules les images proches
+  // de la zone visible sont téléchargées, pas toute la galerie d'un coup.
   function imgTag(src, alt) {
-    return `<img src="${src}" alt="${alt || ""}" onerror="this.parentElement.classList.add('img-missing')">`;
+    return `<img src="${src}" alt="${alt || ""}" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('img-missing')">`;
   }
 
   function renderVideoContent(project) {
