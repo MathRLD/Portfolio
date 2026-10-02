@@ -222,11 +222,10 @@
   // et projets à ne jamais y faire apparaître (aucun pour l'instant).
   const ORBIT_PINNED_IDS = ["sncf-valeurs-eigs", "redstar-eag", "bobital-2026", "jeune-lion-release-party"];
   const ORBIT_EXCLUDED_IDS = [];
-  const ORBIT_MASK_COUNT = 4; // voir index.html : #grunge-mask-1 à 4
   const orbitProjects = new Map(); // élément -> projet associé (pour l'ouverture de la modale)
   const orbitDeform = new Map(); // élément -> légère déformation figée (rotation)
   const orbitItems = orbitContainer
-    ? gatherOrbitProjects(ORBIT_COUNT, ORBIT_PINNED_IDS, ORBIT_EXCLUDED_IDS).map((project, index) => {
+    ? gatherOrbitProjects(ORBIT_COUNT, ORBIT_PINNED_IDS, ORBIT_EXCLUDED_IDS).map((project) => {
         const el = document.createElement(project ? "button" : "div");
         el.className = "hero-orbit-item" + (project ? "" : " is-placeholder");
         if (project) {
@@ -238,13 +237,8 @@
           // capture de pointeur) : le click natif suffit dans ce cas.
           el.addEventListener("click", () => openModal(project));
         }
-        // Look "un peu moins clean" : contour grunge (masque SVG, voir
-        // index.html) qui varie d'une carte à l'autre + un tout petit tilt
-        // fixe propre à chaque vignette, figés une fois pour toutes. Le
-        // masque ne touche que le contour : l'image à l'intérieur reste nette.
-        const maskId = `grunge-mask-${(index % ORBIT_MASK_COUNT) + 1}`;
-        el.style.webkitMaskImage = `url(#${maskId})`;
-        el.style.maskImage = `url(#${maskId})`;
+        // Look "un peu moins clean" : un tout petit tilt fixe propre à
+        // chaque vignette, figé une fois pour toutes.
         orbitDeform.set(el, (Math.random() - 0.5) * 7);
         orbitContainer.appendChild(el);
         return el;
@@ -409,6 +403,7 @@
         ${project.client ? `<span class="card-client">${project.client}</span>` : ""}
       </div>
     `;
+    straightenText(card.querySelector(".card-title"));
     card.addEventListener("click", () => openModal(project));
     return card;
   }
@@ -928,6 +923,7 @@
     }
 
     modalTitle.textContent = project.title;
+    straightenText(modalTitle);
 
     modal.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";

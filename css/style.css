@@ -3,6 +3,32 @@
    Style éditorial noir & blanc, gros titres condensés.
    ===================================================== */
 
+/* Round 8 (titres) : webfont sous licence atipo, hébergée sur le site.
+   - plage 100-900 : une seule graisse, ça évite que le navigateur fabrique
+     un faux gras sur les h1/h2/h3 (gras par défaut).
+   - size-adjust : à taille égale, Round 8 a des capitales ~22 % plus
+     petites qu'Anton (l'ancienne typo des titres). On compense ici une
+     fois pour toutes, au lieu de retoucher chaque font-size du fichier.
+     C'est le seul réglage à modifier pour grossir/réduire tous les titres. */
+@font-face {
+  font-family: "Round 8";
+  src: url("../assets/webfonts/round8-four.woff2") format("woff2"),
+       url("../assets/webfonts/round8-four.woff") format("woff");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  size-adjust: 122%;
+}
+
+/* Round 8 FOUR est penchée de 11° : skew inverse, mot par mot (voir
+   js/upright.js). Origine près de la ligne de base pour que le texte
+   reste aligné sur son bord gauche. */
+.upright {
+  display: inline-block;
+  transform: skewX(11deg);
+  transform-origin: 0 80%;
+}
+
 :root {
   --black: #111111;
   --dark: #1c1c1c;
@@ -12,8 +38,8 @@
   --grey-mid: #d9d9d6;
   --grey-text: #8a8a86;
 
-  --font-display: "Anton", sans-serif;
-  --font-body: "Inter", sans-serif;
+  --font-display: "Round 8", "Arial Narrow", sans-serif;
+  --font-body: "Manrope", sans-serif;
 
   --ease: cubic-bezier(0.23, 1, 0.32, 1);
   --header-h: 84px;
@@ -121,9 +147,13 @@ a { color: inherit; text-decoration: none; }
 }
 
 .logo {
-  font-family: var(--font-display);
-  font-size: 22px;
-  letter-spacing: 1px;
+  display: block;
+  line-height: 0;
+}
+.logo-svg {
+  display: block;
+  height: 40px;
+  width: auto;
 }
 
 .main-nav {
@@ -332,13 +362,6 @@ a { color: inherit; text-decoration: none; }
   backface-visibility: hidden;
   padding: 0;
   transform: translate3d(0,0,0);
-  /* Le contour grunge vient d'un masque (voir index.html, .hero-orbit-item
-     dans main.js) et non d'un filtre : les bords sont irréguliers mais la
-     photo à l'intérieur reste nette. */
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-size: 100% 100%;
-  mask-size: 100% 100%;
 }
 .hero-orbit-item img { width: 100%; height: 100%; object-fit: cover; }
 .hero-orbit-item.is-placeholder { cursor: default; }
@@ -825,10 +848,13 @@ a { color: inherit; text-decoration: none; }
   border-bottom: 1px solid rgba(255,255,255,0.12);
   padding-bottom: 14px;
 }
+/* Manrope et non la typo des titres : Round 8, très condensée et
+   italique, devient illisible à cette taille. */
 .contact-label {
-  font-family: var(--font-display);
-  font-size: 13px;
-  letter-spacing: 1px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
   color: rgba(255,255,255,0.5);
   min-width: 110px;
 }
@@ -851,7 +877,72 @@ a { color: inherit; text-decoration: none; }
   padding-top: 24px;
   font-size: 12px;
   color: rgba(255,255,255,0.4);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 24px;
 }
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+}
+.footer-links a { transition: color 0.25s var(--ease); }
+.footer-links a:hover { color: var(--white); }
+
+/* =====================================================
+   PAGE MENTIONS LÉGALES (mentions-legales.html)
+   ===================================================== */
+.legal-header {
+  padding: 28px 0;
+  border-bottom: 1px solid var(--grey-mid);
+}
+.legal-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.legal-back {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: opacity 0.25s var(--ease);
+}
+.legal-back:hover { opacity: 0.6; }
+
+.legal {
+  max-width: 760px;
+  padding-top: 80px;
+  padding-bottom: 96px;
+}
+.legal .section-title { margin-bottom: 48px; }
+.legal-block { margin-bottom: 40px; }
+.legal-block h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 20px;
+  letter-spacing: 0.5px;
+  margin: 0 0 12px;
+}
+.legal-block p {
+  font-size: 15px;
+  line-height: 1.7;
+  color: #444;
+  margin: 0 0 12px;
+}
+.legal-block a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.legal-block a:hover { color: var(--black); opacity: 0.6; }
+
+.legal-footer {
+  background: var(--dark);
+  padding-bottom: 24px;
+}
+.legal-footer .footer-bottom { border-top: none; }
 
 /* =====================================================
    MODALE PROJET
@@ -1460,6 +1551,7 @@ a.review-author:hover { text-decoration: underline; }
     font-weight: 400;
     letter-spacing: 0.5px;
     opacity: 1;
+    transform: skewX(11deg); /* Round 8 redressée (voir .upright) */
   }
   /* Header opaque tant que le menu est ouvert (même au-dessus du hero,
      où il est normalement transparent). */
@@ -1529,7 +1621,7 @@ a.review-author:hover { text-decoration: underline; }
 
 .cursor-ring span {
   opacity: 0;
-  transform: scale(0.6);
+  transform: scale(0.6) skewX(11deg); /* skewX : Round 8 redressée */
   font-family: var(--font-display);
   font-size: 11px;
   letter-spacing: 0.5px;
@@ -1553,7 +1645,7 @@ a.review-author:hover { text-decoration: underline; }
 }
 .cursor-ring.is-view span {
   opacity: 1;
-  transform: scale(1);
+  transform: scale(1) skewX(11deg);
 }
 
 .cursor-ring.is-active {

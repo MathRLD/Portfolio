@@ -9,7 +9,8 @@
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#0a0a0a">
 <link rel="canonical" href="https://mathysroland.com/">
-<link rel="icon" type="image/png" href="assets/images/favicon.png">
+<link rel="icon" type="image/png" sizes="96x96" href="assets/images/favicon.png">
+<link rel="icon" type="image/svg+xml" sizes="any" href="assets/images/favicon.svg">
 
 <!-- Partage réseaux sociaux (Open Graph / X) -->
 <meta property="og:type" content="profile">
@@ -88,7 +89,8 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+<link rel="preload" href="assets/webfonts/round8-four.woff2" as="font" type="font/woff2" crossorigin>
 
 <!-- ?v= : à changer à chaque mise en ligne, pour que les navigateurs (qui
      gardent CSS/JS en cache 10 min sur GitHub Pages) rechargent les fichiers. -->
@@ -96,53 +98,25 @@
      .is-loaded dans style.css) ne s'applique que si JS tourne, sinon elles
      resteraient invisibles. -->
 <script>document.documentElement.classList.add("js");</script>
-<link rel="stylesheet" href="css/style.css?v=20260930f">
+<link rel="stylesheet" href="css/style.css?v=20261002a">
 </head>
 <body>
-
-<!-- Masques SVG partagés : très légère turbulence utilisée comme MASQUE
-     (pas comme filtre appliqué au contenu) sur les vignettes de l'anneau
-     (voir .hero-orbit-item) - les bords/coins sont irréguliers mais la
-     photo à l'intérieur reste nette. 4 variantes (seeds différents) pour
-     que les cartes n'aient pas toutes exactement le même contour. -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <defs>
-    <filter id="grunge-edge-1" x="-10%" y="-10%" width="120%" height="120%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.05 0.09" numOctaves="2" seed="7" result="noise"></feTurbulence>
-      <feDisplacementMap in="SourceGraphic" in2="noise" scale="9" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
-    </filter>
-    <filter id="grunge-edge-2" x="-10%" y="-10%" width="120%" height="120%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.06 0.08" numOctaves="2" seed="23" result="noise"></feTurbulence>
-      <feDisplacementMap in="SourceGraphic" in2="noise" scale="9" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
-    </filter>
-    <filter id="grunge-edge-3" x="-10%" y="-10%" width="120%" height="120%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.045 0.1" numOctaves="2" seed="41" result="noise"></feTurbulence>
-      <feDisplacementMap in="SourceGraphic" in2="noise" scale="9" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
-    </filter>
-    <filter id="grunge-edge-4" x="-10%" y="-10%" width="120%" height="120%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.055 0.075" numOctaves="2" seed="59" result="noise"></feTurbulence>
-      <feDisplacementMap in="SourceGraphic" in2="noise" scale="9" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
-    </filter>
-
-    <mask id="grunge-mask-1" maskContentUnits="userSpaceOnUse">
-      <rect x="0" y="0" width="300" height="400" rx="16" ry="16" fill="#fff" filter="url(#grunge-edge-1)"></rect>
-    </mask>
-    <mask id="grunge-mask-2" maskContentUnits="userSpaceOnUse">
-      <rect x="0" y="0" width="300" height="400" rx="16" ry="16" fill="#fff" filter="url(#grunge-edge-2)"></rect>
-    </mask>
-    <mask id="grunge-mask-3" maskContentUnits="userSpaceOnUse">
-      <rect x="0" y="0" width="300" height="400" rx="16" ry="16" fill="#fff" filter="url(#grunge-edge-3)"></rect>
-    </mask>
-    <mask id="grunge-mask-4" maskContentUnits="userSpaceOnUse">
-      <rect x="0" y="0" width="300" height="400" rx="16" ry="16" fill="#fff" filter="url(#grunge-edge-4)"></rect>
-    </mask>
-  </defs>
-</svg>
 
 <!-- ===================== NAVIGATION ===================== -->
 <header class="site-header" id="site-header">
   <div class="container header-inner">
-    <a href="#hero" class="logo" aria-label="RAWLAND, Mathys Roland : accueil">RAWLAND</a>
+    <a href="#hero" class="logo" aria-label="RAWLAND, Mathys Roland : accueil">
+      <!-- logo inline (source : assets/Logo/LogoV1.svg) : currentColor suit la couleur du header -->
+      <svg class="logo-svg" viewBox="0 0 741.01 215.72" fill="currentColor" aria-hidden="true" focusable="false">
+        <path d="M143.33,105.16l22.99-38.31-3.91-18.92-25.74-18.43L45.64.6l26.28,33.28L0,215.72l67.01-74.1,25.19,62.92,34.42-45.68-21.78-29.53,38.48-24.18ZM96.68,98.41l-4.48-2.29,11.1-35.81,26.5,5.85-33.12,32.24Z"/>
+        <path d="M229.4,42.29l-124.55,173.43h60.7l40.99-64.64,25.23,59.13,56.76-1.58-59.13-166.34ZM202.03,132.95l16.16-26.01,11.83,26.01h-27.99Z"/>
+        <polygon points="242.54 25.39 303.51 210.91 329.76 157 347.65 210.91 404.41 29.59 362.37 48.51 342.92 124.72 325.05 109.48 314.54 122.61 281.43 42.29 242.54 25.39"/>
+        <path d="M417.03,25.39l-55.18,182.36s51.42-26.8,94.51-4.2l-9.46-51.59s-32.06-1.4-38.89,12.26S462.75,12.34,462.75,12.34l-45.72,13.05Z"/>
+        <path d="M482.19,12.34l-54.57,127.71,30.92-4.24,21.85,65.48,67.5-.89L482.19,12.34ZM466.8,112.81l14.6-29.48,14.61,29.48h-29.21Z"/>
+        <polygon points="500.06 12.34 562.6 199.87 570.49 140.48 604.12 199.87 634.17 165.71 586.25 20.66 567.07 20.13 589.93 136.8 525.95 25.39 500.06 12.34"/>
+        <path d="M741.01,172.63l-98.28-139.17S583.15.71,582.21,0l27.15,34.51,42.08,135.4-12.6,21.07,102.17-18.35ZM694.01,161.5l-18.4,4.21-16.29-40.99,34.69,36.78Z"/>
+      </svg>
+    </a>
     <button class="nav-toggle" id="nav-toggle" aria-label="Ouvrir le menu" aria-expanded="false">
       <span></span><span></span><span></span>
     </button>
@@ -319,7 +293,9 @@
        Logos dans assets/images/logo_travail/.
        La liste est dupliquée en JS (main.js, 7b) pour la boucle infinie. -->
   <div class="logo-band">
-    <p class="logo-band-title">Ils m'ont <br>fait confiance.</p>
+    <!-- span : le titre est en flex, sans lui chaque mot redressé (upright.js)
+         deviendrait un élément flex et les espaces / le <br> disparaîtraient. -->
+    <p class="logo-band-title"><span>Ils m'ont <br>fait confiance.</span></p>
     <div class="logo-track">
       <ul class="logo-list">
         <li><img class="logo-item" src="assets/images/logo_travail/Logo_SNCF_(2011).svg.webp" alt="SNCF"></li>
@@ -360,6 +336,10 @@
 
     <div class="container footer-bottom">
       <span>© <span id="year"></span> RAWLAND - Mathys Roland</span>
+      <span class="footer-links">
+        <a href="mentions-legales.html">Mentions légales</a>
+        <span>Design by Mathys ROLAND</span>
+      </span>
     </div>
   </section>
 
@@ -382,7 +362,8 @@
   </div>
 </div>
 
-<script src="js/projects-data.js?v=20260930f"></script>
-<script src="js/main.js?v=20260930f"></script>
+<script src="js/upright.js?v=20261002a"></script>
+<script src="js/projects-data.js?v=20261002a"></script>
+<script src="js/main.js?v=20261002a"></script>
 </body>
 </html>

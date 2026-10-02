@@ -3,3 +3,7 @@ Thumbs.db
 *.log
 node_modules/
 .vscode/
+
+# Kit Round 8 d'origine (police desktop + PDF de licence) : ne pas publier.
+# Le site utilise uniquement assets/webfonts/.
+assets/Fonts/
