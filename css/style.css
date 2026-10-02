@@ -906,6 +906,12 @@ a { color: inherit; text-decoration: none; }
 }
 /* Vidéo : popup large pour un lecteur confortable. */
 .modal-panel--video { max-width: 1280px; }
+/* Vidéo verticale (Shorts, Reels) : popup portrait, aussi large que
+   possible tant que le lecteur 9:16 tient dans la hauteur du panneau. */
+.modal-panel--vertical {
+  max-width: calc(88vh * 9 / 16);
+  overflow: hidden;
+}
 /* Photo : s'étend un peu plus sur les côtés, desktop uniquement. */
 @media (min-width: 901px) {
   .modal-panel--photo { max-width: 1200px; }
@@ -975,6 +981,11 @@ a { color: inherit; text-decoration: none; }
   background: var(--dark-2);
   border-radius: 24px 24px 0 0;
   overflow: hidden;
+}
+.modal-video-stage--vertical {
+  aspect-ratio: 9/16;
+  max-height: 88vh;
+  border-radius: 24px;
 }
 .modal-video-stage img {
   width: 100%; height: 100%;

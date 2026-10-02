@@ -818,6 +818,7 @@
     const media = project.media || {};
     const stage = document.createElement("div");
     stage.className = "modal-video-stage";
+    if (media.vertical) stage.classList.add("modal-video-stage--vertical");
     stage.innerHTML = imgTag(project.cover, project.title);
 
     if (media.src) {
@@ -905,7 +906,7 @@
     lastFocusedEl = document.activeElement;
     modalContent.innerHTML = "";
     modalTopbar.classList.remove("modal-topbar--on-media");
-    modalPanel.classList.remove("modal-panel--video", "modal-panel--photo", "modal-panel--gallery");
+    modalPanel.classList.remove("modal-panel--video", "modal-panel--vertical", "modal-panel--photo", "modal-panel--gallery");
     // photo + graphisme : panneau sombre à angles droits (voir CSS)
     const isGallery = project.category === "photos" || project.category === "graphisme";
     modal.classList.toggle("modal--gallery", isGallery);
@@ -915,6 +916,7 @@
       modalKicker.textContent = project.client || "Vidéo";
       modalTopbar.classList.add("modal-topbar--on-media");
       modalPanel.classList.add("modal-panel--video");
+      modalPanel.classList.toggle("modal-panel--vertical", !!(project.media && project.media.vertical));
       modalContent.appendChild(renderVideoContent(project));
     } else if (project.category === "graphisme") {
       modalKicker.textContent = "Graphisme";

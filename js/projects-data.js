@@ -23,6 +23,9 @@
    Champ spécifique aux vidéos :
    - media.type  : "youtube" | "vimeo" | "file"
    - media.src   : ID YouTube/Vimeo, ou chemin vers un fichier vidéo
+   - media.vertical : true pour une vidéo verticale 9:16 (Shorts,
+                   Reels…) : la popup s'affiche alors en portrait.
+                   Dans ce cas, cover doit aussi être verticale.
 
    Champ spécifique aux photos / graphisme :
    - images      : liste de chemins d'images pour la galerie
@@ -72,6 +75,16 @@ const projectsData = {
       thumb: "assets/images/thumbs/viviane-short-film.webp",
       tags: ["Court-métrage", "Réalisation", "SNCF"],
       media: { type: "youtube", src: "470WgFqnpT4" }
+    },
+    {
+      id: "further-joe-juice-vlog",
+      title: "Vlog Shooting",
+      client: "Further Athletics x Joe & The Juice",
+      description: "Vlog format vertical d'un shooting Further Athletics x Joe & The Juice à Paris - coulisses, rencontres et énergie de la journée captées caméra à l'épaule.",
+      cover: "assets/images/videos/further-joe-juice-cover.jpg",
+      thumb: "assets/images/thumbs/further-joe-juice-vlog.webp",
+      tags: ["Vlog", "Short", "Coulisses", "Montage"],
+      media: { type: "youtube", src: "_vUNS86Ek4M", vertical: true }
     }
     // Ajoute d'autres vidéos ici en copiant le bloc ci-dessus.
   ],
