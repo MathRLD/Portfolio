@@ -90,7 +90,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap" rel="stylesheet">
-<link rel="preload" href="assets/webfonts/round8-four.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/webfonts/ClashDisplay-Bold.woff2" as="font" type="font/woff2" crossorigin>
 
 <!-- ?v= : à changer à chaque mise en ligne, pour que les navigateurs (qui
      gardent CSS/JS en cache 10 min sur GitHub Pages) rechargent les fichiers. -->
@@ -98,7 +98,7 @@
      .is-loaded dans style.css) ne s'applique que si JS tourne, sinon elles
      resteraient invisibles. -->
 <script>document.documentElement.classList.add("js");</script>
-<link rel="stylesheet" href="css/style.css?v=20261002a">
+<link rel="stylesheet" href="css/style.css?v=20261002b">
 </head>
 <body>
 
@@ -108,13 +108,15 @@
     <a href="#hero" class="logo" aria-label="RAWLAND, Mathys Roland : accueil">
       <!-- logo inline (source : assets/Logo/LogoV1.svg) : currentColor suit la couleur du header -->
       <svg class="logo-svg" viewBox="0 0 741.01 215.72" fill="currentColor" aria-hidden="true" focusable="false">
-        <path d="M143.33,105.16l22.99-38.31-3.91-18.92-25.74-18.43L45.64.6l26.28,33.28L0,215.72l67.01-74.1,25.19,62.92,34.42-45.68-21.78-29.53,38.48-24.18ZM96.68,98.41l-4.48-2.29,11.1-35.81,26.5,5.85-33.12,32.24Z"/>
-        <path d="M229.4,42.29l-124.55,173.43h60.7l40.99-64.64,25.23,59.13,56.76-1.58-59.13-166.34ZM202.03,132.95l16.16-26.01,11.83,26.01h-27.99Z"/>
-        <polygon points="242.54 25.39 303.51 210.91 329.76 157 347.65 210.91 404.41 29.59 362.37 48.51 342.92 124.72 325.05 109.48 314.54 122.61 281.43 42.29 242.54 25.39"/>
-        <path d="M417.03,25.39l-55.18,182.36s51.42-26.8,94.51-4.2l-9.46-51.59s-32.06-1.4-38.89,12.26S462.75,12.34,462.75,12.34l-45.72,13.05Z"/>
-        <path d="M482.19,12.34l-54.57,127.71,30.92-4.24,21.85,65.48,67.5-.89L482.19,12.34ZM466.8,112.81l14.6-29.48,14.61,29.48h-29.21Z"/>
-        <polygon points="500.06 12.34 562.6 199.87 570.49 140.48 604.12 199.87 634.17 165.71 586.25 20.66 567.07 20.13 589.93 136.8 525.95 25.39 500.06 12.34"/>
-        <path d="M741.01,172.63l-98.28-139.17S583.15.71,582.21,0l27.15,34.51,42.08,135.4-12.6,21.07,102.17-18.35ZM694.01,161.5l-18.4,4.21-16.29-40.99,34.69,36.78Z"/>
+        <g id="logo-rawland">
+          <path d="M143.33,105.16l22.99-38.31-3.91-18.92-25.74-18.43L45.64.6l26.28,33.28L0,215.72l67.01-74.1,25.19,62.92,34.42-45.68-21.78-29.53,38.48-24.18ZM96.68,98.41l-4.48-2.29,11.1-35.81,26.5,5.85-33.12,32.24Z"/>
+          <path d="M229.4,42.29l-124.55,173.43h60.7l40.99-64.64,25.23,59.13,56.76-1.58-59.13-166.34ZM202.03,132.95l16.16-26.01,11.83,26.01h-27.99Z"/>
+          <polygon points="242.54 25.39 303.51 210.91 329.76 157 347.65 210.91 404.41 29.59 362.37 48.51 342.92 124.72 325.05 109.48 314.54 122.61 281.43 42.29 242.54 25.39"/>
+          <path d="M417.03,25.39l-55.18,182.36s51.42-26.8,94.51-4.2l-9.46-51.59s-32.06-1.4-38.89,12.26S462.75,12.34,462.75,12.34l-45.72,13.05Z"/>
+          <path d="M482.19,12.34l-54.57,127.71,30.92-4.24,21.85,65.48,67.5-.89L482.19,12.34ZM466.8,112.81l14.6-29.48,14.61,29.48h-29.21Z"/>
+          <polygon points="500.06 12.34 562.6 199.87 570.49 140.48 604.12 199.87 634.17 165.71 586.25 20.66 567.07 20.13 589.93 136.8 525.95 25.39 500.06 12.34"/>
+          <path d="M741.01,172.63l-98.28-139.17S583.15.71,582.21,0l27.15,34.51,42.08,135.4-12.6,21.07,102.17-18.35ZM694.01,161.5l-18.4,4.21-16.29-40.99,34.69,36.78Z"/>
+        </g>
       </svg>
     </a>
     <button class="nav-toggle" id="nav-toggle" aria-label="Ouvrir le menu" aria-expanded="false">
@@ -157,7 +159,9 @@
 
     <div class="hero-content reveal">
       <p class="hero-tag">Mathys Roland · Photographe, vidéaste &amp; graphiste freelance à Paris</p>
-      <h1 class="hero-heading">Le monde selon RAWLAND.</h1>
+      <h1 class="hero-heading">Le monde selon
+        <span class="hero-logo"><span class="visually-hidden">RAWLAND</span><svg viewBox="0 0 741.01 215.72" fill="currentColor" aria-hidden="true" focusable="false"><use href="#logo-rawland"></use></svg>.</span>
+      </h1>
       <p class="hero-desc">Vidéo, photo et graphisme, je raconte des histoires et crée les souvenirs.</p>
       <a href="#videos" class="btn-cta">Découvrir mes projets</a>
     </div>
@@ -249,7 +253,7 @@
 
         <ul class="exp-list" id="exp-list" hidden>
           <li>
-            <span class="exp-logo exp-logo--mono" aria-hidden="true">R</span>
+            <img class="exp-logo" src="assets/Logo/logo_R.svg" alt="" loading="lazy">
             <strong>Freelance - RAWLAND</strong>
             <span>2025 - aujourd'hui</span>
             <p>Photo, vidéo et graphisme pour clients divers</p>
@@ -293,9 +297,7 @@
        Logos dans assets/images/logo_travail/.
        La liste est dupliquée en JS (main.js, 7b) pour la boucle infinie. -->
   <div class="logo-band">
-    <!-- span : le titre est en flex, sans lui chaque mot redressé (upright.js)
-         deviendrait un élément flex et les espaces / le <br> disparaîtraient. -->
-    <p class="logo-band-title"><span>Ils m'ont <br>fait confiance.</span></p>
+    <p class="logo-band-title">Ils m'ont <br>fait confiance.</p>
     <div class="logo-track">
       <ul class="logo-list">
         <li><img class="logo-item" src="assets/images/logo_travail/Logo_SNCF_(2011).svg.webp" alt="SNCF"></li>
@@ -362,8 +364,7 @@
   </div>
 </div>
 
-<script src="js/upright.js?v=20261002a"></script>
-<script src="js/projects-data.js?v=20261002a"></script>
-<script src="js/main.js?v=20261002a"></script>
+<script src="js/projects-data.js?v=20261002b"></script>
+<script src="js/main.js?v=20261002b"></script>
 </body>
 </html>

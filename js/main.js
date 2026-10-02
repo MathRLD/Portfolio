@@ -403,7 +403,6 @@
         ${project.client ? `<span class="card-client">${project.client}</span>` : ""}
       </div>
     `;
-    straightenText(card.querySelector(".card-title"));
     card.addEventListener("click", () => openModal(project));
     return card;
   }
@@ -923,7 +922,6 @@
     }
 
     modalTitle.textContent = project.title;
-    straightenText(modalTitle);
 
     modal.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";

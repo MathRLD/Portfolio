@@ -3,30 +3,16 @@
    Style éditorial noir & blanc, gros titres condensés.
    ===================================================== */
 
-/* Round 8 (titres) : webfont sous licence atipo, hébergée sur le site.
-   - plage 100-900 : une seule graisse, ça évite que le navigateur fabrique
-     un faux gras sur les h1/h2/h3 (gras par défaut).
-   - size-adjust : à taille égale, Round 8 a des capitales ~22 % plus
-     petites qu'Anton (l'ancienne typo des titres). On compense ici une
-     fois pour toutes, au lieu de retoucher chaque font-size du fichier.
-     C'est le seul réglage à modifier pour grossir/réduire tous les titres. */
+/* Clash Display (titres) : Fontshare, licence ITF FFL, auto-hébergée.
+   Seule la graisse Bold est chargée : la plage 100-900 la sert pour
+   toutes les graisses demandées par le CSS, sans faux gras. */
 @font-face {
-  font-family: "Round 8";
-  src: url("../assets/webfonts/round8-four.woff2") format("woff2"),
-       url("../assets/webfonts/round8-four.woff") format("woff");
+  font-family: "Clash Display";
+  src: url("../assets/webfonts/ClashDisplay-Bold.woff2") format("woff2"),
+       url("../assets/webfonts/ClashDisplay-Bold.woff") format("woff");
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
-  size-adjust: 122%;
-}
-
-/* Round 8 FOUR est penchée de 11° : skew inverse, mot par mot (voir
-   js/upright.js). Origine près de la ligne de base pour que le texte
-   reste aligné sur son bord gauche. */
-.upright {
-  display: inline-block;
-  transform: skewX(11deg);
-  transform-origin: 0 80%;
 }
 
 :root {
@@ -38,7 +24,13 @@
   --grey-mid: #d9d9d6;
   --grey-text: #8a8a86;
 
-  --font-display: "Round 8", "Arial Narrow", sans-serif;
+  --font-display: "Clash Display", sans-serif;
+  /* Approche des titres en Clash Display : plus c'est négatif, plus les
+     lettres sont resserrées. Les petits libellés gardent leur propre
+     espacement (lisibilité). Le word-spacing rend aux espaces ce que le
+     resserrement leur enlève, sinon les mots se collent. */
+  --display-tracking: -0.02em;
+  --display-word-spacing: 0.08em;
   --font-body: "Manrope", sans-serif;
 
   --ease: cubic-bezier(0.23, 1, 0.32, 1);
@@ -302,9 +294,33 @@ a { color: inherit; text-decoration: none; }
   font-family: var(--font-display);
   font-size: clamp(38px, 4.6vw, 60px);
   line-height: 1.05;
-  letter-spacing: 0.5px;
+  letter-spacing: var(--display-tracking);
+  word-spacing: var(--display-word-spacing);
   color: var(--black);
   margin: 0 0 18px;
+}
+/* Logo à la place du mot RAWLAND dans le titre. Le mot reste dans le
+   HTML (masqué) pour Google et les lecteurs d'écran. nowrap : le point
+   final ne part jamais seul à la ligne. */
+.hero-logo { white-space: nowrap; }
+.hero-logo svg {
+  display: inline-block;
+  height: 1.1em;
+  width: auto;
+  aspect-ratio: 741.01 / 215.72;
+  vertical-align: -0.2em;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 .hero-desc {
   font-size: 16px;
@@ -463,7 +479,8 @@ a { color: inherit; text-decoration: none; }
   font-family: var(--font-display);
   font-size: clamp(40px, 6vw, 72px);
   margin: 0 0 12px;
-  letter-spacing: 1px;
+  letter-spacing: var(--display-tracking);
+  word-spacing: var(--display-word-spacing);
 }
 
 .section-sub {
@@ -526,7 +543,8 @@ a { color: inherit; text-decoration: none; }
 .project-card .card-title {
   font-family: var(--font-display);
   font-size: 20px;
-  letter-spacing: 0.5px;
+  letter-spacing: var(--display-tracking);
+  word-spacing: var(--display-word-spacing);
   color: var(--white);
 }
 .project-card .card-client {
@@ -801,17 +819,6 @@ a { color: inherit; text-decoration: none; }
   height: 44px;
   object-fit: contain;
 }
-/* monogramme pour RAWLAND (pas de fichier logo) */
-.exp-list .exp-logo--mono {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--black);
-  color: var(--white);
-  font-family: var(--font-display);
-  font-size: 22px;
-  border-radius: 8px;
-}
 .exp-list li p {
   grid-column: 2 / -1;
   margin: 4px 0 0;
@@ -848,13 +855,10 @@ a { color: inherit; text-decoration: none; }
   border-bottom: 1px solid rgba(255,255,255,0.12);
   padding-bottom: 14px;
 }
-/* Manrope et non la typo des titres : Round 8, très condensée et
-   italique, devient illisible à cette taille. */
 .contact-label {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 1px;
   color: rgba(255,255,255,0.5);
   min-width: 110px;
 }
@@ -923,7 +927,8 @@ a { color: inherit; text-decoration: none; }
   font-family: var(--font-display);
   font-weight: 400;
   font-size: 20px;
-  letter-spacing: 0.5px;
+  letter-spacing: var(--display-tracking);
+  word-spacing: var(--display-word-spacing);
   margin: 0 0 12px;
 }
 .legal-block p {
@@ -1029,6 +1034,8 @@ a { color: inherit; text-decoration: none; }
 }
 .modal-topbar h3 {
   font-family: var(--font-display);
+  letter-spacing: var(--display-tracking);
+  word-spacing: var(--display-word-spacing);
   font-size: clamp(22px, 3vw, 30px);
   margin: 0;
   line-height: 1.15;
@@ -1325,7 +1332,8 @@ a { color: inherit; text-decoration: none; }
   font-family: var(--font-display);
   font-size: clamp(24px, 2.4vw, 34px);
   line-height: 1.05;
-  letter-spacing: 1px;
+  letter-spacing: var(--display-tracking);
+  word-spacing: var(--display-word-spacing);
   text-transform: uppercase;
 }
 .logo-band-title::after {
@@ -1549,9 +1557,9 @@ a.review-author:hover { text-decoration: underline; }
     font-family: var(--font-display);
     font-size: 30px;
     font-weight: 400;
-    letter-spacing: 0.5px;
+    letter-spacing: var(--display-tracking);
+    word-spacing: var(--display-word-spacing);
     opacity: 1;
-    transform: skewX(11deg); /* Round 8 redressée (voir .upright) */
   }
   /* Header opaque tant que le menu est ouvert (même au-dessus du hero,
      où il est normalement transparent). */
@@ -1621,7 +1629,7 @@ a.review-author:hover { text-decoration: underline; }
 
 .cursor-ring span {
   opacity: 0;
-  transform: scale(0.6) skewX(11deg); /* skewX : Round 8 redressée */
+  transform: scale(0.6);
   font-family: var(--font-display);
   font-size: 11px;
   letter-spacing: 0.5px;
@@ -1645,7 +1653,7 @@ a.review-author:hover { text-decoration: underline; }
 }
 .cursor-ring.is-view span {
   opacity: 1;
-  transform: scale(1) skewX(11deg);
+  transform: scale(1);
 }
 
 .cursor-ring.is-active {
