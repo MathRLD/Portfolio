@@ -805,7 +805,14 @@
   // loading="lazy" : dans les galeries des popups, seules les images proches
   // de la zone visible sont téléchargées, pas toute la galerie d'un coup.
   function imgTag(src, alt) {
-    return `<img src="${src}" alt="${alt || ""}" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('img-missing')">`;
+    return `<img src="${src}" alt="${(alt || "").replace(/"/g, "&quot;")}" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('img-missing')">`;
+  }
+
+  // Images de galerie : { src, alt } dans projects-data.js. Un simple
+  // chemin reste accepté, avec le titre du projet comme alt par défaut.
+  function galleryImages(project) {
+    const list = project.images && project.images.length ? project.images : [project.cover];
+    return list.map((img) => (typeof img === "string" ? { src: img, alt: project.title } : img));
   }
 
   function renderVideoContent(project) {
@@ -848,8 +855,7 @@
 
     const gallery = document.createElement("div");
     gallery.className = "modal-masonry";
-    const images = project.images && project.images.length ? project.images : [project.cover];
-    gallery.innerHTML = images.map((src) => imgTag(src, project.title)).join("");
+    gallery.innerHTML = galleryImages(project).map((img) => imgTag(img.src, img.alt)).join("");
     wrapper.appendChild(gallery);
 
     return wrapper;
@@ -857,13 +863,13 @@
 
   function renderGraphismeContent(project) {
     const wrapper = document.createDocumentFragment();
-    const images = project.images && project.images.length ? project.images : [project.cover];
+    const images = galleryImages(project);
 
     const intro = document.createElement("div");
     intro.className = "modal-graphisme-intro";
 
     const introImg = document.createElement("div");
-    introImg.innerHTML = imgTag(images[0], project.title);
+    introImg.innerHTML = imgTag(images[0].src, images[0].alt);
 
     const introText = document.createElement("div");
     introText.className = "modal-graphisme-text";
@@ -871,10 +877,14 @@
     desc.textContent = project.description || "";
     introText.appendChild(desc);
 
-    const context = document.createElement("span");
-    context.className = "modal-context";
-    context.textContent = project.client ? project.client : "Projet personnel";
-    introText.appendChild(context);
+    // le cadre (client, perso, étudiant) est porté par le premier tag ;
+    // le nom du client s'affiche en plus quand il y en a un
+    if (project.client) {
+      const context = document.createElement("span");
+      context.className = "modal-context";
+      context.textContent = project.client;
+      introText.appendChild(context);
+    }
 
     if (project.tags && project.tags.length) {
       const tagList = document.createElement("ul");
@@ -890,7 +900,7 @@
     if (images.length > 1) {
       const rest = document.createElement("div");
       rest.className = "modal-graphisme-gallery";
-      rest.innerHTML = images.slice(1).map((src) => imgTag(src, project.title)).join("");
+      rest.innerHTML = images.slice(1).map((img) => imgTag(img.src, img.alt)).join("");
       wrapper.appendChild(rest);
     }
     return wrapper;
