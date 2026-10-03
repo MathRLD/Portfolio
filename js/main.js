@@ -1079,8 +1079,9 @@
   /* ---------------------------------------------------
      8. CURSEUR PERSONNALISÉ
      Un point (position exacte) + un anneau qui suit avec un
-     léger retard élastique, et se transforme en pastille
-     "Voir" au survol des vignettes/cartes de projet.
+     léger retard élastique. Sur tout ce qui est cliquable,
+     l'anneau grandit (plus encore sur les vignettes/cartes de
+     projet) et le point devient l'étoile du logo.
      N'active jamais sur écran tactile (pointer: coarse) ni en
      mode mouvement réduit.
      --------------------------------------------------- */
@@ -1089,14 +1090,15 @@
     cursorDot.className = "cursor-dot";
     const cursorRing = document.createElement("div");
     cursorRing.className = "cursor-ring";
-    const cursorLabel = document.createElement("span");
-    cursorRing.appendChild(cursorLabel);
-    document.body.appendChild(cursorDot);
-    document.body.appendChild(cursorRing);
+    const cursorStar = document.createElement("div");
+    cursorStar.className = "cursor-star";
+    const cursorParts = [cursorDot, cursorRing, cursorStar];
+    document.body.append(...cursorParts);
     document.body.classList.add("has-custom-cursor");
 
     const VIEW_TARGETS = ".project-card:not(.is-empty), .hero-orbit-item:not(.is-placeholder)";
     const HOVER_TARGETS = "a, button";
+    const SOLID_TARGETS = ".btn-cta, .btn-toggle";
 
     let mouseX = window.innerWidth / 2;
     let mouseY = window.innerHeight / 2;
@@ -1107,24 +1109,29 @@
       mouseX = e.clientX;
       mouseY = e.clientY;
       cursorDot.style.transform = `translate(${mouseX}px, ${mouseY}px)`;
+      cursorStar.style.transform = cursorDot.style.transform;
 
       const viewEl = e.target.closest(VIEW_TARGETS);
       const linkEl = !viewEl && e.target.closest(HOVER_TARGETS);
       cursorRing.classList.toggle("is-view", !!viewEl);
       cursorRing.classList.toggle("is-hover", !!linkEl);
-      cursorLabel.textContent = viewEl ? "Voir" : "";
+      cursorDot.classList.toggle("is-hover", !!(viewEl || linkEl));
+      cursorStar.classList.toggle("is-hover", !!(viewEl || linkEl));
+
+      // photos et boutons rouges : blanc pur plutôt que couleurs inversées
+      const solid = !!(viewEl || e.target.closest(SOLID_TARGETS));
+      cursorRing.classList.toggle("is-solid", solid);
+      cursorStar.classList.toggle("is-solid", solid);
     }
     window.addEventListener("mousemove", onMouseMove);
 
     document.addEventListener("mousedown", () => cursorRing.classList.add("is-active"));
     document.addEventListener("mouseup", () => cursorRing.classList.remove("is-active"));
     document.addEventListener("mouseleave", () => {
-      cursorDot.classList.add("is-hidden");
-      cursorRing.classList.add("is-hidden");
+      cursorParts.forEach((el) => el.classList.add("is-hidden"));
     });
     document.addEventListener("mouseenter", () => {
-      cursorDot.classList.remove("is-hidden");
-      cursorRing.classList.remove("is-hidden");
+      cursorParts.forEach((el) => el.classList.remove("is-hidden"));
     });
 
     // L'anneau suit le point avec un léger retard (lerp), le point lui

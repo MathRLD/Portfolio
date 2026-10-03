@@ -40,6 +40,11 @@
 
   --accent: #a8322d;
   --accent-glow: rgba(168, 50, 45, 0.35);
+
+  /* étoile du logo (assets/Logo/étoile.svg), utilisée en masque CSS :
+     sa couleur se règle avec background-color */
+  --star-red: #960823;
+  --star: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 219.43 219.43'%3E%3Cpolygon points='140.57 131.04 129.73 219.43 88.38 140.57 0 129.73 78.86 88.38 89.69 0 131.04 78.86 219.43 89.69 140.57 131.04'/%3E%3C/svg%3E");
 }
 
 * { box-sizing: border-box; }
@@ -777,6 +782,9 @@ a { color: inherit; text-decoration: none; }
 }
 
 .btn-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   margin-top: 12px;
   padding: 12px 24px;
   border-radius: 0;
@@ -1362,6 +1370,7 @@ a { color: inherit; text-decoration: none; }
 /* chaque logo occupe un emplacement de même largeur : espacement régulier
    quel que soit le format (écusson étroit ou logo très large) */
 .logo-list li {
+  position: relative;
   flex: 0 0 auto;
   width: 280px;
   display: flex;
@@ -1448,6 +1457,119 @@ a.review-author:hover { text-decoration: underline; }
 
 @media (prefers-reduced-motion: reduce) {
   .logo-track { animation: none; }
+}
+
+/* =====================================================
+   ÉTOILES : touches discrètes reprises du logo
+   ===================================================== */
+.section-title::after,
+.btn-cta::before,
+.btn-toggle::before,
+.logo-list li::after,
+.section--star::before {
+  -webkit-mask: var(--star) center / contain no-repeat;
+  mask: var(--star) center / contain no-repeat;
+  background-color: var(--star-red);
+}
+
+/* petite étoile en exposant après le point des titres */
+.section-title::after {
+  content: "";
+  display: inline-block;
+  width: 0.24em;
+  height: 0.24em;
+  margin-left: 0.05em;
+  vertical-align: 0.5em;
+  transition: transform 0.9s var(--ease) 0.3s;
+}
+/* elle éclot quand le titre apparaît au scroll */
+.reveal:not(.is-visible) .section-title::after,
+.section-title.reveal:not(.is-visible)::after {
+  transform: scale(0) rotate(-120deg);
+}
+
+/* boutons : l'étoile tourne et passe en blanc au survol */
+.btn-cta::before,
+.btn-toggle::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 11px;
+  height: 11px;
+  transition: transform 0.6s var(--ease), background-color 0.3s var(--ease);
+}
+.btn-toggle[aria-expanded="true"]::before { transform: rotate(90deg); }
+.btn-cta:hover::before,
+.btn-toggle:hover::before {
+  background-color: var(--white);
+  transform: rotate(180deg);
+}
+
+/* bandeau logos : une étoile entre chaque logo */
+.logo-list li::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  transform: translate(50%, -50%);
+}
+
+/* grande étoile en filigrane, qui tourne très lentement */
+.section--star {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.section--star::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  right: 0;
+  width: clamp(320px, 40vw, 600px);
+  aspect-ratio: 1;
+  translate: 40% -50%;
+  opacity: 0.055;
+  pointer-events: none;
+  animation: star-spin 140s linear infinite;
+}
+.section--dark.section--star::before { opacity: 0.13; }
+/* une position par section, en alternant les côtés au fil du scroll ;
+   par défaut (Contact) : à droite, centrée verticalement */
+#videos.section--star::before {
+  top: 0;
+  translate: 35% -35%;
+  animation-direction: reverse;
+}
+#photos.section--star::before {
+  top: 0;
+  right: auto;
+  left: 0;
+  translate: -38% -28%;
+}
+#graphisme.section--star::before {
+  top: auto;
+  bottom: 0;
+  translate: 40% 40%;
+  animation-direction: reverse;
+}
+#apropos.section--star::before {
+  top: auto;
+  right: auto;
+  bottom: 0;
+  left: 0;
+  translate: -45% 35%;
+}
+@keyframes star-spin {
+  to { rotate: 360deg; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .section--star::before { animation: none; }
+  .section-title::after,
+  .reveal:not(.is-visible) .section-title::after,
+  .section-title.reveal:not(.is-visible)::after { transition: none; transform: none; }
 }
 
 /* =====================================================
@@ -1584,6 +1706,8 @@ a.review-author:hover { text-decoration: underline; }
    Point + anneau qui suit avec un léger retard élastique.
    mix-blend-mode: difference - reste blanc sur fond sombre,
    noir sur fond clair, sans avoir à traquer la section active.
+   Sur un élément cliquable, l'anneau grandit et le point laisse
+   place à l'étoile du logo, qui tourne doucement.
    Activé en JS uniquement sur pointeur fin (souris), jamais
    au toucher : voir main.js, section 8.
    ===================================================== */
@@ -1594,7 +1718,8 @@ a.review-author:hover { text-decoration: underline; }
 }
 
 .cursor-dot,
-.cursor-ring {
+.cursor-ring,
+.cursor-star {
   position: fixed;
   top: 0;
   left: 0;
@@ -1610,7 +1735,11 @@ a.review-author:hover { text-decoration: underline; }
   margin: -3px 0 0 -3px;
   border-radius: 50%;
   background: var(--white);
-  transition: opacity 0.2s var(--ease);
+  transition: opacity 0.2s var(--ease), scale 0.3s var(--ease);
+}
+.cursor-dot.is-hover {
+  opacity: 0;
+  scale: 0;
 }
 
 .cursor-ring {
@@ -1619,41 +1748,21 @@ a.review-author:hover { text-decoration: underline; }
   margin: -20px 0 0 -20px;
   border-radius: 50%;
   border: 1px solid var(--white);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: width 0.3s var(--ease), height 0.3s var(--ease),
-    margin 0.3s var(--ease), background 0.3s var(--ease),
-    border-color 0.3s var(--ease), opacity 0.2s var(--ease);
+  transition: width 0.4s var(--ease), height 0.4s var(--ease),
+    margin 0.4s var(--ease), opacity 0.2s var(--ease);
 }
 
-.cursor-ring span {
-  opacity: 0;
-  transform: scale(0.6);
-  font-family: var(--font-display);
-  font-size: 11px;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  color: var(--black);
-  transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
-}
-
+/* liens et boutons */
 .cursor-ring.is-hover {
-  width: 56px;
-  height: 56px;
-  margin: -28px 0 0 -28px;
+  width: 64px;
+  height: 64px;
+  margin: -32px 0 0 -32px;
 }
-
+/* vignettes et cartes de projet : cible plus grande, cercle plus grand */
 .cursor-ring.is-view {
-  width: 84px;
-  height: 84px;
-  margin: -42px 0 0 -42px;
-  background: var(--white);
-  border-color: transparent;
-}
-.cursor-ring.is-view span {
-  opacity: 1;
-  transform: scale(1);
+  width: 88px;
+  height: 88px;
+  margin: -44px 0 0 -44px;
 }
 
 .cursor-ring.is-active {
@@ -1662,8 +1771,45 @@ a.review-author:hover { text-decoration: underline; }
   margin: -17px 0 0 -17px;
 }
 
+/* étoile du logo à la place du point : blanche + difference comme le
+   point, donc noire sur fond clair et blanche sur fond sombre. Le JS
+   déplace l'élément (transform), l'apparition joue sur scale/opacity
+   et la rotation continue sur rotate. */
+.cursor-star {
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+}
+.cursor-star::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  -webkit-mask: var(--star) center / contain no-repeat;
+  mask: var(--star) center / contain no-repeat;
+  background-color: var(--white);
+  opacity: 0;
+  scale: 0;
+  transition: opacity 0.25s var(--ease), scale 0.45s var(--ease);
+  animation: star-spin 3.5s linear infinite;
+}
+.cursor-star.is-hover::before {
+  opacity: 1;
+  scale: 1;
+}
+.cursor-ring.is-active ~ .cursor-star::before { scale: 0.7; }
+
+/* sur les photos et les boutons rouges, difference donnerait des
+   couleurs inversées : on repasse en blanc pur, avec une ombre légère
+   pour rester lisible sur les zones claires des photos */
+.cursor-ring.is-solid,
+.cursor-star.is-solid {
+  mix-blend-mode: normal;
+  filter: drop-shadow(0 0 2px rgba(0,0,0,0.35));
+}
+
 .cursor-dot.is-hidden,
-.cursor-ring.is-hidden {
+.cursor-ring.is-hidden,
+.cursor-star.is-hidden {
   opacity: 0;
 }
 
@@ -1674,7 +1820,8 @@ a.review-author:hover { text-decoration: underline; }
     cursor: auto;
   }
   .cursor-dot,
-  .cursor-ring {
+  .cursor-ring,
+  .cursor-star {
     display: none;
   }
 }
