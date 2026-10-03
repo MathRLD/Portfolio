@@ -315,6 +315,8 @@ a { color: inherit; text-decoration: none; }
   aspect-ratio: 436.33 / 124.08;
   vertical-align: -0.2em;
 }
+/* le point descend d'autant que le logo : son bas s'aligne sur celui de RAWLAND */
+.hero-logo-dot { vertical-align: -0.2em; }
 
 .visually-hidden {
   position: absolute;
