@@ -107,6 +107,7 @@
   const heroStage = document.querySelector(".hero-stage");
   const heroPortrait = document.getElementById("hero-portrait");
   const orbitContainer = document.getElementById("hero-orbit");
+  const heroContent = document.querySelector(".hero-content");
 
   // Position (en pixels, dans la photo à sa résolution native 1920x1080) du
   // personnage dans fond_hero_section.jpg, mesurée par corrélation d'image
@@ -261,7 +262,15 @@
       const isStacked = window.innerWidth <= 880;
       // En mobile, l'anneau doit tenir dans la largeur de la photo : on
       // retire la demi-largeur d'une vignette (agrandie à l'avant) de chaque côté.
-      const maxRx = isStacked ? heroVisual.clientWidth / 2 - 52 : 300;
+      let maxRx = isStacked ? heroVisual.clientWidth / 2 - 52 : 300;
+      // En desktop, le bord droit de l'anneau (centre + 0.7 rx, voir le
+      // décalage plus bas, + une demi-vignette et un peu d'air) reste à
+      // gauche de la colonne de texte : les vignettes ne passent jamais
+      // sous le titre. Plancher à 160 pour garder un vrai anneau.
+      if (!isStacked && heroContent) {
+        const room = heroContent.getBoundingClientRect().left - (rect.left + rect.width / 2) - 54 - 20;
+        maxRx = Math.max(160, Math.min(maxRx, room / 0.7));
+      }
       const rx = Math.min(rect.width * 0.44, maxRx);
       const ry = rx * 0.34;
       // Anneau décalé vers la gauche par rapport au centre du portrait,
