@@ -102,6 +102,13 @@
      - une vignette passe alternativement devant/derrière le
        portrait selon sa position sur l'ellipse (profondeur simulée)
      --------------------------------------------------- */
+  // Cadrage des miniatures (champ thumbPosition, réglé avec _outils/) :
+  // appliqué en object-position sur les cartes, et sur les vignettes de
+  // l'anneau qui n'ont pas leur propre image (heroThumb, déjà recadrée).
+  function thumbStyle(project) {
+    return project.thumbPosition ? ` style="object-position: ${project.thumbPosition}"` : "";
+  }
+
   const heroVisual = document.getElementById("hero-visual");
   const heroBgPhoto = document.getElementById("hero-bg-photo");
   const heroStage = document.querySelector(".hero-stage");
@@ -218,21 +225,21 @@
     return picked;
   }
 
-  const ORBIT_COUNT = 8;
-  // Projets à toujours faire apparaître dans l'anneau autour du portrait,
-  // et projets à ne jamais y faire apparaître (aucun pour l'instant).
-  const ORBIT_PINNED_IDS = ["sncf-valeurs-eigs", "redstar-eag", "bobital-2026", "jeune-lion-release-party"];
+  // Projets de l'anneau : la liste heroOrbit de projects-data.js, dans
+  // l'ordre. Si elle est vide, l'anneau se complète tout seul (8 projets).
+  const ORBIT_IDS = typeof heroOrbit !== "undefined" ? heroOrbit : [];
+  const ORBIT_COUNT = ORBIT_IDS.length || 8;
   const ORBIT_EXCLUDED_IDS = [];
   const orbitProjects = new Map(); // élément -> projet associé (pour l'ouverture de la modale)
   const orbitDeform = new Map(); // élément -> légère déformation figée (rotation)
   const orbitItems = orbitContainer
-    ? gatherOrbitProjects(ORBIT_COUNT, ORBIT_PINNED_IDS, ORBIT_EXCLUDED_IDS).map((project) => {
+    ? gatherOrbitProjects(ORBIT_COUNT, ORBIT_IDS, ORBIT_EXCLUDED_IDS).map((project) => {
         const el = document.createElement(project ? "button" : "div");
         el.className = "hero-orbit-item" + (project ? "" : " is-placeholder");
         if (project) {
           el.type = "button";
           el.setAttribute("aria-label", project.title);
-          el.innerHTML = `<img src="${project.thumb || project.cover}" alt="" decoding="async" onload="this.classList.add('is-loaded')" onerror="this.parentElement.classList.add('img-missing')">`;
+          el.innerHTML = `<img src="${project.heroThumb || project.thumb || project.cover}" alt=""${project.heroThumb ? "" : thumbStyle(project)} decoding="async" onload="this.classList.add('is-loaded')" onerror="this.parentElement.classList.add('img-missing')">`;
           orbitProjects.set(el, project);
           // Fallback pour le mode "mouvement réduit" (pas de drag, donc pas de
           // capture de pointeur) : le click natif suffit dans ce cas.
@@ -406,7 +413,7 @@
     // data-src et non src : l'image n'est réellement chargée qu'à l'approche
     // du carrousel (voir setupInfiniteSlider), pour laisser la priorité au hero.
     card.innerHTML = `
-      <img data-src="${project.thumb || project.cover}" alt="${project.title}" decoding="async" onload="this.classList.add('is-loaded')" onerror="this.parentElement.classList.add('img-missing')">
+      <img data-src="${project.thumb || project.cover}" alt="${project.title}"${thumbStyle(project)} decoding="async" onload="this.classList.add('is-loaded')" onerror="this.parentElement.classList.add('img-missing')">
       <div class="card-overlay">
         <span class="card-title">${project.title}</span>
         ${project.client ? `<span class="card-client">${project.client}</span>` : ""}

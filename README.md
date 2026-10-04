@@ -49,6 +49,32 @@ pour garder la mise en page complète (comme sur ta maquette de référence).
 > au reste du site, puisque tout le contenu passe déjà par une seule source
 > de données.
 
+## Choisir les miniatures et l'anneau du hero
+
+Double-clic sur `_outils/Choisir les miniatures.bat` : une page s'ouvre dans
+le navigateur (http://localhost:4321).
+
+**Onglets Photos, Vidéos, Graphisme** : clique sur un projet à gauche.
+
+- *Miniature de la carte* : choisis une image du projet, ou **Importer** une
+  image de ton ordinateur (ou glisse-la directement dans l'aperçu). Fais
+  glisser l'image dans l'aperçu pour la cadrer.
+- *Vignette de l'anneau du hero* : coche si le projet doit apparaître dans
+  l'anneau. « Comme la miniature » reprend la carte ; « Vignette dédiée »
+  permet une autre image, recadrée en 3:4 avec un zoom.
+- **Enregistrer** : l'outil convertit les images en WebP au bon format
+  (carte : 1000px de large dans `assets/images/thumbs/` ; anneau : 480x640
+  dans `assets/images/thumbs/hero/`) et met à jour `js/projects-data.js`
+  et `index.html` tout seul.
+
+**Onglet Anneau du hero** : les projets de l'anneau, dans l'ordre. Flèches
+pour changer l'ordre, × pour retirer, « + Ajouter » pour en mettre d'autres.
+
+Ferme la fenêtre noire pour arrêter l'outil (et relance-la si l'outil a été
+mis à jour), puis commit et push comme d'habitude. Il faut Node.js installé
+sur la machine. Le dossier `_outils` commence par « _ » : GitHub Pages ne
+le publie pas.
+
 ## Mettre le projet sur GitHub
 
 Tu as déjà créé le dépôt sur GitHub. Depuis le dossier du projet, dans le

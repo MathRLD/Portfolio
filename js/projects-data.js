@@ -18,6 +18,12 @@
                    carrousels et l'anneau du hero (optionnel :
                    si absent, cover est utilisée à la place).
                    WebP ~1000px de large, dans assets/images/thumbs/
+   - thumbPosition : cadrage de la miniature dans les cartes et l'anneau
+                   du hero, en object-position ("50% 30%"). Optionnel :
+                   centré si absent.
+   - heroThumb   : vignette dédiée à l'anneau du hero, déjà recadrée en
+                   3:4 (480x640, dans assets/images/thumbs/hero/). Optionnel :
+                   sinon l'anneau reprend thumb et son cadrage.
    - tags        : liste de mots-clés affichés dans la popup
 
    Champ spécifique aux vidéos :
@@ -36,6 +42,10 @@
 
    Pour les projets graphisme, le premier tag indique le cadre :
    "Projet client", "Projet personnel" ou "Projet étudiant".
+
+   Pour changer les miniatures, les vignettes de l'anneau ou les projets
+   de l'anneau sans toucher à ce fichier : double-clic sur
+   _outils/"Choisir les miniatures.bat".
    ===================================================== */
 
 const projectsData = {
@@ -48,7 +58,9 @@ const projectsData = {
       client: "Film court sur une journée de Bundesliga",
       description: "Vidéo du match de Bundesliga entre le FC St. Pauli et le 1. FC Köln (17.04.2026), sur le terrain et dans les tribunes.",
       cover: "assets/images/videos/stpauli-cover.jpg",
-      thumb: "assets/images/thumbs/stpauli-koln-2026-video.webp",
+      thumb: "assets/images/thumbs/stpauli-koln-2026-video.webp?v=20261004021242",
+      thumbPosition: "45% 50%",
+      heroThumb: "assets/images/thumbs/hero/stpauli-koln-2026-video.webp?v=20261004023711",
       tags: ["Sport", "Football", "Bundesliga", "Montage"],
       media: { type: "youtube", src: "WOpr0kPQ1hg" }
     },
@@ -58,7 +70,9 @@ const projectsData = {
       client: "SNCF Intercités",
       description: "Film institutionnel pour SNCF Intercités sur les valeurs de l'EIGS, tourné avec les équipes à bord et en gare.",
       cover: "assets/images/videos/valeurs-eigs-cover.jpg",
-      thumb: "assets/images/thumbs/sncf-valeurs-eigs.webp",
+      thumb: "assets/images/thumbs/sncf-valeurs-eigs.webp?v=20261004021235",
+      thumbPosition: "18% 50%",
+      heroThumb: "assets/images/thumbs/hero/sncf-valeurs-eigs.webp?v=20261004023737",
       tags: ["Réalisation", "Montage", "Institutionnel", "SNCF"],
       media: { type: "youtube", src: "pB53WOa4bag" }
     },
@@ -68,7 +82,8 @@ const projectsData = {
       client: "Projet client · Tennis de table",
       description: "Court-métrage pour le club de Neuilly-sur-Marne Tennis de Table, filmé au plus près des joueurs pendant les matchs.",
       cover: "assets/images/videos/nsmtt-cover.jpg",
-      thumb: "assets/images/thumbs/nsmtt-short-film.webp",
+      thumb: "assets/images/thumbs/nsmtt-short-film.webp?v=20261004021232",
+      thumbPosition: "9% 50%",
       tags: ["Court-métrage", "Sport", "Réalisation"],
       media: { type: "youtube", src: "fbg9Hu20Xts" }
     },
@@ -78,7 +93,8 @@ const projectsData = {
       client: "SNCF Intercités",
       description: "Court-métrage pour SNCF Intercités. On suit des voyageurs qui attendent leur train, et les rencontres qu'ils font en gare et sur le quai.",
       cover: "assets/images/videos/viviane-cover.jpg",
-      thumb: "assets/images/thumbs/viviane-short-film.webp",
+      thumb: "assets/images/thumbs/viviane-short-film.webp?v=20261004021228",
+      thumbPosition: "100% 50%",
       tags: ["Court-métrage", "Réalisation", "SNCF"],
       media: { type: "youtube", src: "470WgFqnpT4" }
     },
@@ -103,7 +119,9 @@ const projectsData = {
       client: "Bundesliga",
       description: "Reportage photo du match de Bundesliga entre le FC St. Pauli et le 1. FC Köln (17.04.2026), sur le terrain et dans les tribunes.",
       cover: "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-53.jpg",
-      thumb: "assets/images/thumbs/stpauli-koln-2026.webp",
+      thumb: "assets/images/thumbs/stpauli-koln-2026.webp?v=20261004020913",
+      thumbPosition: "58% 50%",
+      heroThumb: "assets/images/thumbs/hero/stpauli-koln-2026.webp?v=20261004023821",
       tags: ["Sport", "Football", "Bundesliga", "Reportage"],
       images: [
         { src: "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-53.jpg", alt: "Duel au milieu de terrain entre un joueur du FC St. Pauli et trois joueurs du 1. FC Köln, devant une tribune pleine" },
@@ -130,8 +148,9 @@ const projectsData = {
       title: "SNCF Intercités - Shooting lifestyle",
       client: "SNCF Intercités",
       description: "Shooting lifestyle à bord d'un train Intercités, en lumière naturelle, pour montrer le voyage côté passagers.",
-      cover: "assets/images/photos/Shootingsncf1/web/Shooting photo TDN.jpg",
-      thumb: "assets/images/thumbs/sncf-intercites-lifestyle.webp",
+      cover: "assets/images/photos/Shootingsncf1/web/Shooting photo TDN-3.jpg",
+      thumb: "assets/images/thumbs/sncf-intercites-lifestyle.webp?v=20261004020934",
+      thumbPosition: "100% 50%",
       tags: ["Lifestyle", "Institutionnel", "SNCF"],
       images: [
         { src: "assets/images/photos/Shootingsncf1/web/Shooting photo TDN.jpg", alt: "Voyageuse regardant par la fenêtre d'un compartiment Intercités, en lumière naturelle" },
@@ -149,8 +168,9 @@ const projectsData = {
       title: "SNCF Intercités - Gares & trains de nuit",
       client: "SNCF Intercités",
       description: "Reportage de nuit en gare et à bord des trains Intercités. Les lumières des quais et les rames en mouvement.",
-      cover: "assets/images/photos/Shootingsncf2/web/Photos_Shooting_05_05-35.jpg",
-      thumb: "assets/images/thumbs/sncf-intercites-gare.webp",
+      cover: "assets/images/photos/Shootingsncf2/web/Photos_Shooting_05_05-34.jpg",
+      thumb: "assets/images/thumbs/sncf-intercites-gare.webp?v=20261004020944",
+      thumbPosition: "72% 50%",
       tags: ["Reportage", "Institutionnel", "SNCF"],
       images: [
         { src: "assets/images/photos/Shootingsncf2/web/Photos_Shooting_05_05-35.jpg", alt: "Locomotive Intercités entrant en gare de nuit, phares allumés, le long des quais éclairés" },
@@ -167,8 +187,9 @@ const projectsData = {
       title: "Bobital 2026",
       client: "",
       description: "Reportage photo au festival Bobital L'Armor à Sons, édition 2026. Les concerts, le public, et une belle lumière en fin de journée.",
-      cover: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026.jpg",
-      thumb: "assets/images/thumbs/bobital-2026.webp",
+      cover: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-5.jpg",
+      thumb: "assets/images/thumbs/bobital-2026.webp?v=20261004021011",
+      thumbPosition: "50% 100%",
       tags: ["Événementiel", "Concert", "Reportage"],
       images: [
         { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026.jpg", alt: "Silhouette d'un rappeur sur scène en contre-jour, au coucher du soleil" },
@@ -192,8 +213,8 @@ const projectsData = {
       title: "Jeune Lion - Release Party",
       client: "",
       description: "Photos de la release party de Jeune Lion, le 12 février 2026.",
-      cover: "assets/images/photos/jeunelion/web/Releaseparty_Jeune-Lion_12_02_26_@Rawland-17.jpg",
-      thumb: "assets/images/thumbs/jeune-lion-release-party.webp",
+      cover: "assets/images/photos/jeunelion/web/Releaseparty_Jeune-Lion_12_02_26_@Rawland-5.jpg",
+      thumb: "assets/images/thumbs/jeune-lion-release-party.webp?v=20261004021037",
       tags: ["Événementiel", "Musique", "Reportage"],
       images: [
         { src: "assets/images/photos/jeunelion/web/Releaseparty_Jeune-Lion_12_02_26_@Rawland-17.jpg", alt: "Pendentif tête de lion doré sur un t-shirt blanc, en gros plan" },
@@ -219,8 +240,8 @@ const projectsData = {
       title: "Red Star FC - EA Guingamp",
       client: "Ligue 2",
       description: "Reportage photo du match de Ligue 2 entre le Red Star FC et l'En Avant Guingamp (24.04), jusqu'à la fête en fin de match.",
-      cover: "assets/images/photos/redstareag/web/RedStarFC_EAG_@Rawland_24_04-99.jpg",
-      thumb: "assets/images/thumbs/redstar-eag.webp",
+      cover: "assets/images/photos/redstareag/web/RedStar_EAG_@Rawland_24_04-14.jpg",
+      thumb: "assets/images/thumbs/redstar-eag.webp?v=20261004021050",
       tags: ["Sport", "Football", "Ligue 2", "Reportage"],
       images: [
         { src: "assets/images/photos/redstareag/web/RedStarFC_EAG_@Rawland_24_04-99.jpg", alt: "Joueurs du Red Star FC qui fêtent la fin du match face au public, poings levés" },
@@ -251,8 +272,9 @@ const projectsData = {
       title: "Red Star FC - Grenoble Foot 38",
       client: "Ligue 2",
       description: "Reportage photo du match entre le Red Star FC et Grenoble Foot 38. Un but, des fumigènes et des tribunes bien chaudes.",
-      cover: "assets/images/photos/redstargrenoble/web/RED_STAR__GRENOBLE_BUT-3.jpg",
-      thumb: "assets/images/thumbs/redstar-grenoble.webp",
+      cover: "assets/images/photos/redstargrenoble/web/RED_STAR__GRENOBLE_fumee-5.jpg",
+      thumb: "assets/images/thumbs/redstar-grenoble.webp?v=20261004021123",
+      thumbPosition: "50% 100%",
       tags: ["Sport", "Football", "Ligue 2", "Reportage"],
       images: [
         { src: "assets/images/photos/redstargrenoble/web/RED_STAR__GRENOBLE_BUT-3.jpg", alt: "Joueurs du Red Star en maillot blanc qui se félicitent sur la pelouse du Stade des Alpes" },
@@ -277,8 +299,9 @@ const projectsData = {
       title: "Red Star FC - Stade Lavallois",
       client: "Ligue 2",
       description: "Reportage photo du match entre le Red Star FC et le Stade Lavallois, sur le terrain et côté supporters.",
-      cover: "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand46.jpg",
-      thumb: "assets/images/thumbs/redstar-laval.webp",
+      cover: "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand13.jpg",
+      thumb: "assets/images/thumbs/redstar-laval.webp?v=20261004021200",
+      thumbPosition: "16% 50%",
       tags: ["Sport", "Football", "Ligue 2", "Reportage"],
       images: [
         { src: "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand46.jpg", alt: "Joueur du Red Star floqué Durand 7 qui applaudit les supporters en tribune" },
@@ -320,8 +343,9 @@ const projectsData = {
       title: "LinkyJob - Identité visuelle",
       client: "",
       description: "Projet étudiant de fin de M2 : l'identité visuelle de LinkyJob, une startup qui met en relation des étudiants étrangers et des particuliers pour des missions. J'ai créé le logo, la charte graphique et ses déclinaisons, jusqu'aux goodies.",
-      cover: "assets/images/graphisme/LinkyJob/Minimal Perspective Logo Mockup.jpg",
-      thumb: "assets/images/thumbs/linkyjob-goodies.webp",
+      cover: "assets/images/graphisme/LinkyJob/Free_Tote_Bag_Mockup_on_the_Floor.jpg",
+      thumb: "assets/images/thumbs/linkyjob-goodies.webp?v=20261004021216",
+      thumbPosition: "50% 76%",
       tags: ["Projet étudiant", "Identité visuelle", "Logo", "Charte graphique"],
       images: [
         { src: "assets/images/graphisme/LinkyJob/Mockup.jpg", alt: "Logo LinkyJob brodé sur une veste matelassée noire" },
@@ -392,3 +416,17 @@ const projectsData = {
     // objet "photos" ou "videos" ci-dessus (mêmes champs communs + `images`).
   ]
 };
+
+/* ----------------- ANNEAU DU HERO ----------------- */
+// Projets affichés dans l'anneau autour du portrait, dans l'ordre (ids).
+// Vide : l'anneau se remplit tout seul avec 8 projets.
+const heroOrbit = [
+  "stpauli-koln-2026-video",
+  "jeune-lion-release-party",
+  "bobital-2026",
+  "france-euro-affiches",
+  "redstar-eag",
+  "sncf-valeurs-eigs",
+  "stpauli-koln-2026",
+  "sncf-intercites-lifestyle"
+];

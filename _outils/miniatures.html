@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Miniatures | RAWLAND</title>
+<!-- Page de l'outil local (_outils/miniatures.js) : ne fonctionne que
+     lancée par ce serveur, qui lit et enregistre les fichiers du site. -->
+<style>
+  @font-face {
+    font-family: "Clash Display";
+    src: url("/assets/webfonts/ClashDisplay-Bold.woff2") format("woff2");
+    font-weight: 100 900;
+  }
+  :root {
+    --bg: #111111;
+    --panel: #1a1a1a;
+    --line: #2c2c2c;
+    --text: #f4f4f2;
+    --muted: #8a8a86;
+    --accent: #a8322d;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  button, input { font: inherit; color: inherit; }
+
+  /* ---------- en-tête ---------- */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    padding: 14px 24px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+  }
+  h1 {
+    margin: 0;
+    font-family: "Clash Display", sans-serif;
+    font-size: 22px;
+    letter-spacing: -0.02em;
+  }
+  .tabs { display: flex; gap: 4px; }
+  .tabs button {
+    padding: 6px 14px;
+    border: 1px solid var(--line);
+    background: none;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 12px;
+  }
+  .tabs button.is-active { background: var(--text); color: var(--bg); border-color: var(--text); }
+  header a { margin-left: auto; color: var(--muted); font-size: 13px; }
+  header a:hover { color: var(--text); }
+
+  /* ---------- mise en page ---------- */
+  main {
+    display: grid;
+    grid-template-columns: 290px 1fr;
+    min-height: calc(100vh - 61px);
+  }
+  main.is-wide { grid-template-columns: 1fr; }
+  main.is-wide #list { display: none; }
+  #list { border-right: 1px solid var(--line); }
+  .item {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    width: 100%;
+    padding: 10px 16px;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    background: none;
+    text-align: left;
+    cursor: pointer;
+  }
+  .item:hover { background: #161616; }
+  .item.is-active { background: var(--panel); }
+  .item img { flex: 0 0 auto; width: 52px; height: 52px; object-fit: cover; }
+  .item small { display: block; color: var(--muted); font-size: 12px; }
+  .badge {
+    display: inline-block;
+    margin-top: 2px;
+    padding: 0 6px;
+    border: 1px solid var(--muted);
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  #editor { padding: 24px 32px 120px; }
+  #editor h2 {
+    margin: 0 0 6px;
+    font-family: "Clash Display", sans-serif;
+    font-size: 30px;
+    letter-spacing: -0.02em;
+  }
+  .hint { margin: 0; color: var(--muted); }
+  .block {
+    margin-top: 28px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
+  }
+  /* carte et vignette de l'anneau côte à côte quand la place le permet */
+  .blocks {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
+    column-gap: 48px;
+    align-items: start;
+  }
+  h3 {
+    margin: 0 0 14px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .row { display: flex; gap: 28px; align-items: flex-start; flex-wrap: wrap; }
+  .side { display: flex; flex-direction: column; gap: 14px; max-width: 300px; }
+  .side .hint { font-size: 13px; }
+
+  /* ---------- aperçus (glisser pour cadrer) ---------- */
+  .frame {
+    position: relative;
+    overflow: hidden;
+    background: #000;
+    cursor: grab;
+    touch-action: none;
+  }
+  .frame.is-static { cursor: default; }
+  .frame.is-dragging { cursor: grabbing; }
+  .frame.is-drop { outline: 2px dashed var(--text); outline-offset: 4px; }
+  .frame img {
+    position: absolute;
+    max-width: none;
+    pointer-events: none;
+    user-select: none;
+  }
+  .frame--card { width: min(420px, 100%); aspect-ratio: 16 / 10; }
+  .frame--card.is-square { width: min(300px, 100%); aspect-ratio: 1; }
+  .frame--orbit { width: 180px; aspect-ratio: 3 / 4; border-radius: 16px; }
+  .frame--orbit.is-off { opacity: 0.45; }
+
+  .btn {
+    padding: 9px 18px;
+    border: 1.5px solid var(--text);
+    background: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .btn.primary { background: var(--text); color: var(--bg); }
+  .btn.primary:not(:disabled):hover { background: var(--accent); border-color: var(--accent); color: var(--text); }
+  .btn:disabled { opacity: 0.35; cursor: default; }
+  .btn.small { padding: 5px 12px; font-size: 12px; align-self: flex-start; }
+
+  .seg { display: inline-flex; border: 1px solid var(--line); }
+  .seg button { padding: 7px 14px; border: 0; background: none; cursor: pointer; font-size: 13px; }
+  .seg button.is-active { background: var(--text); color: var(--bg); }
+
+  label.check { display: inline-flex; gap: 8px; align-items: center; cursor: pointer; }
+  .zoom { display: flex; gap: 10px; align-items: center; font-size: 13px; color: var(--muted); }
+  .zoom input { width: 180px; accent-color: var(--text); }
+
+  /* ---------- choix d'image ---------- */
+  .choices {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+    gap: 8px;
+    max-width: 1000px;
+    margin-top: 18px;
+  }
+  .choices button {
+    position: relative;
+    padding: 0;
+    border: 0;
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    background: #000;
+    aspect-ratio: 1;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .choices button:hover { outline-color: var(--muted); }
+  .choices button.is-selected { outline-color: var(--text); }
+  .choices img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .choices .tag {
+    position: absolute;
+    left: 4px;
+    bottom: 4px;
+    padding: 1px 6px;
+    background: rgba(0,0,0,0.75);
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .choices .import {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    background: var(--panel);
+    border: 1px dashed var(--muted);
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .choices .import span { font-size: 26px; line-height: 1; }
+
+  /* ---------- barre d'enregistrement ---------- */
+  .savebar {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 290px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 14px 32px;
+    background: rgba(17,17,17,0.94);
+    border-top: 1px solid var(--line);
+  }
+  main.is-wide .savebar { left: 0; }
+  #status { color: var(--muted); font-size: 13px; }
+  #status.is-ok { color: #7ccf8f; }
+  #status.is-error { color: #ff7a6e; }
+
+  /* ---------- onglet anneau ---------- */
+  .ring {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 14px;
+    max-width: 1200px;
+  }
+  .ring figure { margin: 0; }
+  .ring .thumb { position: relative; aspect-ratio: 3 / 4; border-radius: 14px; overflow: hidden; background: #000; }
+  .ring .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .ring .num {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    min-width: 22px;
+    padding: 1px 6px;
+    background: var(--text);
+    color: var(--bg);
+    font-size: 12px;
+    font-weight: 700;
+    text-align: center;
+  }
+  .ring figcaption { margin-top: 6px; font-size: 12px; line-height: 1.35; }
+  .ring .tools { display: flex; gap: 4px; margin-top: 6px; }
+  .ring .tools button {
+    flex: 1;
+    padding: 3px 0;
+    border: 1px solid var(--line);
+    background: none;
+    cursor: pointer;
+  }
+  .ring .tools button:hover:not(:disabled) { border-color: var(--text); }
+  .ring .tools button:disabled { opacity: 0.3; cursor: default; }
+  .ring--add .thumb { opacity: 0.6; }
+  .ring--add figure:hover .thumb { opacity: 1; }
+  .empty { color: var(--muted); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Miniatures.</h1>
+  <nav class="tabs" id="tabs">
+    <button type="button" data-tab="photos">Photos</button>
+    <button type="button" data-tab="videos">Vidéos</button>
+    <button type="button" data-tab="graphisme">Graphisme</button>
+    <button type="button" data-tab="orbit">Anneau du hero</button>
+  </nav>
+  <a href="/index.html" target="_blank">Voir le site ↗</a>
+</header>
+
+<main id="main">
+  <aside id="list"></aside>
+  <section id="editor"></section>
+  <div class="savebar">
+    <button type="button" class="btn primary" id="save">Enregistrer</button>
+    <button type="button" class="btn" id="reset">Annuler</button>
+    <span id="status"></span>
+  </div>
+</main>
+
+<input type="file" id="file" accept="image/jpeg,image/png,image/webp,image/avif" hidden>
+
+<script>
+  const CATEGORIES = ["videos", "photos", "graphisme"];
+  const CATEGORY_LABEL = { photos: "photos", videos: "vidéos", graphisme: "graphisme" };
+  const HERO_SIZE = { w: 480, h: 640 };   // vignette de l'anneau (3:4)
+  const CARD_MAX_W = 1000;                 // miniature de carte (image entière)
+
+  let data = null;         // { projects, heroOrbit }
+  let tab = "photos";
+  let project = null;      // projet affiché
+  let draft = null;        // état en cours d'édition
+  let saved = null;        // état tel qu'enregistré
+  let orbitDraft = null;   // ids de l'anneau (onglet anneau)
+  let uploadTarget = null; // "card" | "hero" : destination de l'import en cours
+  let uploads = { card: null, hero: null }; // dernière image importée par zone
+
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const mainEl = $("#main");
+  const listEl = $("#list");
+  const editorEl = $("#editor");
+  const saveBtn = $("#save");
+  const resetBtn = $("#reset");
+  const fileInput = $("#file");
+
+  const url = (src) => (/^(blob:|data:)/.test(src) ? src : "/" + encodeURI(src));
+  const clamp = (v) => Math.min(100, Math.max(0, v));
+  const pos = (s) => `${Math.round(s.x)}% ${Math.round(s.y)}%`;
+  const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+
+  function allProjects() {
+    return CATEGORIES.flatMap((c) => data.projects[c].map((p) => ({ ...p, category: c })));
+  }
+  function byId(id) {
+    return allProjects().find((p) => p.id === id);
+  }
+  function galleryOf(p) {
+    const list = p.images && p.images.length ? p.images : [p.cover];
+    const srcs = list.map((img) => (typeof img === "string" ? img : img.src));
+    if (p.cover && !srcs.includes(p.cover)) srcs.unshift(p.cover);
+    return srcs;
+  }
+  // Image + cadrage affichés dans l'anneau pour un projet (sur le site).
+  function orbitImage(p) {
+    return p.heroThumb
+      ? { src: p.heroThumb, position: "50% 50%" }
+      : { src: p.thumb || p.cover, position: p.thumbPosition || "50% 50%" };
+  }
+
+  /* =========================================================
+     Chargement et navigation
+     ========================================================= */
+  async function loadData(keepId) {
+    data = await (await fetch("/api/data", { cache: "no-store" })).json();
+    showTab(tab, keepId);
+  }
+
+  function heroChanged() {
+    return draft.hero.mode !== saved.hero.mode || (draft.hero.mode === "custom" && !same(draft.hero, saved.hero));
+  }
+
+  function isDirty() {
+    if (tab === "orbit") return orbitDraft && !same(orbitDraft, data.heroOrbit);
+    return Boolean(draft && saved) && (!same(draft.card, saved.card) || heroChanged() || draft.inOrbit !== saved.inOrbit);
+  }
+
+  function confirmLeave() {
+    return !isDirty() || confirm("Les changements ne sont pas enregistrés. Continuer quand même ?");
+  }
+
+  function showTab(next, keepId) {
+    tab = next;
+    document.querySelectorAll("#tabs button").forEach((b) => b.classList.toggle("is-active", b.dataset.tab === tab));
+    mainEl.classList.toggle("is-wide", tab === "orbit");
+    if (tab === "orbit") {
+      orbitDraft = [...data.heroOrbit];
+      renderOrbitTab();
+    } else {
+      renderList();
+      const list = data.projects[tab];
+      select(list.find((p) => p.id === keepId) || list[0]);
+    }
+  }
+
+  document.querySelectorAll("#tabs button").forEach((b) => {
+    b.addEventListener("click", () => {
+      if (b.dataset.tab !== tab && confirmLeave()) showTab(b.dataset.tab);
+    });
+  });
+
+  function renderList() {
+    listEl.innerHTML = "";
+    data.projects[tab].forEach((p) => {
+      const item = document.createElement("button");
+      item.type = "button";
+      item.className = "item";
+      item.dataset.id = p.id;
+      const inRing = data.heroOrbit.includes(p.id);
+      item.innerHTML = `<img src="${url(p.thumb || p.cover)}" alt="" style="object-position:${p.thumbPosition || "50% 50%"}">
+        <span>${p.title}${p.client ? `<small>${p.client}</small>` : ""}${inRing ? `<span class="badge">Anneau</span>` : ""}</span>`;
+      item.addEventListener("click", () => {
+        if (p.id !== project?.id && confirmLeave()) select(p);
+      });
+      listEl.appendChild(item);
+    });
+  }
+
+  /* =========================================================
+     Onglets photos / vidéos / graphisme : un projet
+     ========================================================= */
+  function initialState(p) {
+    const [x, y] = (p.thumbPosition || "50% 50%").split(" ").map(parseFloat);
+    return {
+      card: { kind: "current", src: p.thumb || p.cover, x, y },
+      hero: p.heroThumb
+        ? { mode: "custom", kind: "current", src: p.heroThumb, x: 50, y: 50, zoom: 1 }
+        : { mode: "same", kind: "card", src: p.thumb || p.cover, x, y, zoom: 1 },
+      inOrbit: data.heroOrbit.includes(p.id),
+    };
+  }
+
+  function select(p) {
+    project = { ...p, category: tab };
+    uploads = { card: null, hero: null };
+    saved = initialState(project);
+    draft = structuredClone(saved);
+    listEl.querySelectorAll(".item").forEach((el) => el.classList.toggle("is-active", el.dataset.id === p.id));
+    renderProject();
+  }
+
+  function renderProject() {
+    const square = tab === "photos";
+    editorEl.innerHTML = `
+      <h2>${project.title}</h2>
+      <p class="hint">Fais glisser une image dans un aperçu pour la cadrer. Tu peux aussi y déposer une image depuis ton ordinateur.</p>
+
+      <div class="blocks">
+      <section class="block">
+        <h3>Miniature de la carte</h3>
+        <div class="row">
+          <div class="frame frame--card${square ? " is-square" : ""}" data-target="card"><img alt=""></div>
+          <div class="side">
+            <p class="hint">Carte du carrousel ${CATEGORY_LABEL[tab]}. L'image reste entière, le site applique le cadrage.</p>
+            <button type="button" class="btn small" data-center="card">Recentrer</button>
+          </div>
+        </div>
+        <div class="choices" data-choices="card"></div>
+      </section>
+
+      <section class="block">
+        <h3>Vignette de l'anneau du hero</h3>
+        <label class="check"><input type="checkbox" id="in-orbit"> Ce projet apparaît dans l'anneau</label>
+        <div class="row" style="margin-top:16px">
+          <div class="frame frame--orbit" data-target="hero"><img alt=""></div>
+          <div class="side">
+            <div class="seg" id="hero-mode">
+              <button type="button" data-mode="same">Comme la miniature</button>
+              <button type="button" data-mode="custom">Vignette dédiée</button>
+            </div>
+            <p class="hint" id="hero-hint"></p>
+            <div class="zoom" id="hero-zoom">Zoom <input type="range" min="1" max="3" step="0.01"></div>
+            <button type="button" class="btn small" data-center="hero">Recentrer</button>
+          </div>
+        </div>
+        <div class="choices" data-choices="hero"></div>
+      </section>
+      </div>
+    `;
+
+    editorEl.querySelectorAll(".frame").forEach(enableFrame);
+    editorEl.querySelectorAll("[data-center]").forEach((b) => {
+      b.addEventListener("click", () => {
+        const s = draft[b.dataset.center];
+        s.x = 50; s.y = 50;
+        if ("zoom" in s) s.zoom = 1;
+        update();
+      });
+    });
+    $("#in-orbit").addEventListener("change", (e) => { draft.inOrbit = e.target.checked; update(); });
+    editorEl.querySelectorAll("#hero-mode button").forEach((b) => {
+      b.addEventListener("click", () => {
+        if (draft.hero.mode === b.dataset.mode) return;
+        draft.hero = b.dataset.mode === "same"
+          ? { mode: "same", kind: "card", src: draft.card.src, x: 50, y: 50, zoom: 1 }
+          : saved.hero.mode === "custom"
+            ? structuredClone(saved.hero)
+            : { mode: "custom", kind: "card", src: draft.card.src, x: draft.card.x, y: draft.card.y, zoom: 1 };
+        renderChoices();
+        update();
+      });
+    });
+    $("#hero-zoom input").addEventListener("input", (e) => { draft.hero.zoom = parseFloat(e.target.value); update(); });
+
+    renderChoices();
+    update();
+  }
+
+  // Tuiles de choix d'image (galerie du projet + import).
+  function renderChoices() {
+    const tiles = {
+      card: [
+        { kind: "current", src: project.thumb || project.cover, tag: "Actuelle" },
+        ...galleryOf(project).map((src) => ({ kind: "gallery", src })),
+      ],
+      hero: [
+        ...(project.heroThumb ? [{ kind: "current", src: project.heroThumb, tag: "Actuelle" }] : []),
+        { kind: "card", src: null, tag: "Miniature" },
+        ...galleryOf(project).map((src) => ({ kind: "gallery", src })),
+      ],
+    };
+    ["card", "hero"].forEach((target) => {
+      const box = editorEl.querySelector(`[data-choices="${target}"]`);
+      box.innerHTML = "";
+      box.hidden = target === "hero" && draft.hero.mode === "same";
+      tiles[target].forEach((t) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.dataset.kind = t.kind;
+        if (t.src) b.dataset.src = t.src;
+        const shown = t.kind === "card" ? draft.card.src : t.src;
+        b.innerHTML = `<img src="${url(shown)}" alt="" loading="lazy">${t.tag ? `<span class="tag">${t.tag}</span>` : ""}`;
+        b.addEventListener("click", () => {
+          const s = draft[target];
+          s.kind = t.kind;
+          s.src = t.kind === "card" ? draft.card.src : t.src;
+          s.x = 50; s.y = 50;
+          if (target === "hero") s.zoom = 1;
+          update();
+        });
+        box.appendChild(b);
+      });
+      // dernière image importée, puis bouton d'import
+      if (uploads[target]) {
+        const up = document.createElement("button");
+        up.type = "button";
+        up.dataset.kind = "upload";
+        up.innerHTML = `<img src="${uploads[target]}" alt=""><span class="tag">Importée</span>`;
+        up.addEventListener("click", () => {
+          Object.assign(draft[target], { kind: "upload", src: uploads[target], x: 50, y: 50 }, target === "hero" ? { zoom: 1 } : {});
+          update();
+        });
+        box.appendChild(up);
+      }
+      const imp = document.createElement("button");
+      imp.type = "button";
+      imp.className = "import";
+      imp.innerHTML = `<span>+</span>Importer`;
+      imp.addEventListener("click", () => { uploadTarget = target; fileInput.value = ""; fileInput.click(); });
+      box.appendChild(imp);
+    });
+  }
+
+  fileInput.addEventListener("change", () => {
+    if (fileInput.files[0]) useUpload(uploadTarget, fileInput.files[0]);
+  });
+
+  function useUpload(target, file) {
+    if (!file || !file.type.startsWith("image/")) return setStatus("Ce fichier n'est pas une image.", "error");
+    const s = draft[target];
+    if (target === "hero" && s.mode === "same") draft.hero = { mode: "custom", kind: "upload", src: "", x: 50, y: 50, zoom: 1 };
+    const t = draft[target];
+    t.kind = "upload";
+    t.src = uploads[target] = URL.createObjectURL(file);
+    t.x = 50; t.y = 50;
+    if (target === "hero") t.zoom = 1;
+    renderChoices();
+    update();
+  }
+
+  // Met à jour les aperçus, les sélections et la barre d'enregistrement.
+  function update() {
+    if (tab === "orbit") return updateSavebar();
+    // la vignette "comme la miniature" suit la carte en direct
+    if (draft.hero.mode === "same") Object.assign(draft.hero, { src: draft.card.src, x: draft.card.x, y: draft.card.y, zoom: 1 });
+    else if (draft.hero.kind === "card") draft.hero.src = draft.card.src;
+
+    ["card", "hero"].forEach((target) => {
+      const frame = editorEl.querySelector(`.frame[data-target="${target}"]`);
+      const img = frame.querySelector("img");
+      const s = draft[target];
+      if (img.dataset.src !== s.src) {
+        img.dataset.src = s.src;
+        img.onload = () => layout(frame);
+        img.src = url(s.src);
+      }
+      layout(frame);
+      editorEl.querySelectorAll(`[data-choices="${target}"] button`).forEach((b) => {
+        const selected = b.dataset.kind === s.kind && (s.kind !== "gallery" || b.dataset.src === s.src);
+        b.classList.toggle("is-selected", selected);
+      });
+    });
+
+    const custom = draft.hero.mode === "custom";
+    const heroFrame = editorEl.querySelector('.frame[data-target="hero"]');
+    heroFrame.classList.toggle("is-static", !custom);
+    heroFrame.classList.toggle("is-off", !draft.inOrbit);
+    editorEl.querySelectorAll("#hero-mode button").forEach((b) => b.classList.toggle("is-active", b.dataset.mode === draft.hero.mode));
+    $("#hero-zoom").hidden = !custom;
+    $("#hero-zoom input").value = draft.hero.zoom;
+    editorEl.querySelector('[data-center="hero"]').hidden = !custom;
+    editorEl.querySelector('[data-choices="hero"]').hidden = !custom;
+    $("#hero-hint").textContent = custom
+      ? "Image recadrée en 3:4 pour l'anneau, indépendante de la carte. Glisse pour cadrer, zoome si besoin."
+      : "L'anneau reprend la miniature de la carte et son cadrage.";
+    $("#in-orbit").checked = draft.inOrbit;
+    updateSavebar();
+  }
+
+  // Place l'image dans un cadre comme object-fit: cover + object-position,
+  // avec un zoom en plus pour la vignette dédiée.
+  function geometry(frame, img, s) {
+    const fw = frame.clientWidth;
+    const fh = frame.clientHeight;
+    const scale = Math.max(fw / img.naturalWidth, fh / img.naturalHeight) * (s.zoom || 1);
+    const w = img.naturalWidth * scale;
+    const h = img.naturalHeight * scale;
+    return { w, h, ox: w - fw, oy: h - fh };
+  }
+  function layout(frame) {
+    const img = frame.querySelector("img");
+    if (!img.naturalWidth) return;
+    const s = draft[frame.dataset.target];
+    const g = geometry(frame, img, s);
+    Object.assign(img.style, {
+      width: `${g.w}px`,
+      height: `${g.h}px`,
+      left: `${-g.ox * s.x / 100}px`,
+      top: `${-g.oy * s.y / 100}px`,
+    });
+  }
+
+  // Glisser pour cadrer + déposer un fichier image dans l'aperçu.
+  function enableFrame(frame) {
+    const target = frame.dataset.target;
+    let last = null;
+    frame.addEventListener("pointerdown", (e) => {
+      if (target === "hero" && draft.hero.mode === "same") return;
+      last = { x: e.clientX, y: e.clientY };
+      frame.setPointerCapture(e.pointerId);
+      frame.classList.add("is-dragging");
+    });
+    frame.addEventListener("pointermove", (e) => {
+      if (!last) return;
+      const img = frame.querySelector("img");
+      if (!img.naturalWidth) return;
+      const s = draft[target];
+      const g = geometry(frame, img, s);
+      if (g.ox > 0.5) s.x = clamp(s.x - ((e.clientX - last.x) / g.ox) * 100);
+      if (g.oy > 0.5) s.y = clamp(s.y - ((e.clientY - last.y) / g.oy) * 100);
+      last = { x: e.clientX, y: e.clientY };
+      update();
+    });
+    const stop = () => { last = null; frame.classList.remove("is-dragging"); };
+    frame.addEventListener("pointerup", stop);
+    frame.addEventListener("pointercancel", stop);
+
+    frame.addEventListener("dragover", (e) => { e.preventDefault(); frame.classList.add("is-drop"); });
+    frame.addEventListener("dragleave", () => frame.classList.remove("is-drop"));
+    frame.addEventListener("drop", (e) => {
+      e.preventDefault();
+      frame.classList.remove("is-drop");
+      useUpload(target, e.dataTransfer.files[0]);
+    });
+  }
+
+  /* ---------- rendu des images (WebP, dans le navigateur) ---------- */
+  function loadImage(src) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error("Image illisible : " + src));
+      img.src = url(src);
+    });
+  }
+  function toWebp(canvas) {
+    const data = canvas.toDataURL("image/webp", 0.85);
+    if (!data.startsWith("data:image/webp")) throw new Error("Ce navigateur ne sait pas créer de WebP : utilise Chrome ou Edge.");
+    return data;
+  }
+  // Miniature de carte : image entière, 1000px de large max.
+  async function renderCard(src) {
+    const img = await loadImage(src);
+    const w = Math.min(CARD_MAX_W, img.naturalWidth);
+    const h = Math.round((img.naturalHeight * w) / img.naturalWidth);
+    const canvas = Object.assign(document.createElement("canvas"), { width: w, height: h });
+    const ctx = canvas.getContext("2d");
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(img, 0, 0, w, h);
+    return toWebp(canvas);
+  }
+  // Vignette de l'anneau : recadrée en 3:4 comme dans l'aperçu.
+  async function renderHero(s) {
+    const img = await loadImage(s.src);
+    const { w: W, h: H } = HERO_SIZE;
+    const scale = Math.max(W / img.naturalWidth, H / img.naturalHeight) * s.zoom;
+    const w = img.naturalWidth * scale;
+    const h = img.naturalHeight * scale;
+    const canvas = Object.assign(document.createElement("canvas"), { width: W, height: H });
+    const ctx = canvas.getContext("2d");
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(img, -(w - W) * s.x / 100, -(h - H) * s.y / 100, w, h);
+    return toWebp(canvas);
+  }
+
+  async function saveProject() {
+    const body = { id: project.id };
+    if (!same(draft.card, saved.card)) {
+      const c = draft.card;
+      body.card = { kind: c.kind, position: pos(c) };
+      if (c.kind === "gallery") body.card.src = c.src;
+      if (c.kind !== "current") body.card.image = await renderCard(c.src);
+    }
+    if (heroChanged()) {
+      body.hero = draft.hero.mode === "same"
+        ? { mode: "same" }
+        : { mode: "custom", image: await renderHero(draft.hero) };
+    }
+    if (draft.inOrbit !== saved.inOrbit) body.inOrbit = draft.inOrbit;
+    await post("/api/project", body);
+  }
+
+  /* =========================================================
+     Onglet anneau du hero
+     ========================================================= */
+  function renderOrbitTab() {
+    const inRing = orbitDraft.map(byId).filter(Boolean);
+    const others = CATEGORIES.map((c) => ({
+      c,
+      list: data.projects[c].filter((p) => !orbitDraft.includes(p.id)),
+    }));
+    const tile = (p, i) => {
+      const o = orbitImage(p);
+      return `<figure data-id="${p.id}">
+        <div class="thumb"><img src="${url(o.src)}" alt="" style="object-position:${o.position}">${i !== undefined ? `<span class="num">${i + 1}</span>` : ""}</div>
+        <figcaption>${p.title}</figcaption>
+        <div class="tools">${i !== undefined
+          ? `<button type="button" data-act="left" title="Avancer" ${i === 0 ? "disabled" : ""}>←</button>
+             <button type="button" data-act="right" title="Reculer" ${i === inRing.length - 1 ? "disabled" : ""}>→</button>
+             <button type="button" data-act="remove" title="Retirer de l'anneau">×</button>`
+          : `<button type="button" data-act="add">+ Ajouter</button>`}</div>
+      </figure>`;
+    };
+    editorEl.innerHTML = `
+      <h2>Anneau du hero</h2>
+      <p class="hint">Les projets qui tournent autour de ton portrait, dans cet ordre. Conseillé : entre 6 et 10.
+        Pour changer la vignette d'un projet, ouvre-le dans son onglet.</p>
+      <section class="block">
+        <h3>Dans l'anneau (${inRing.length})</h3>
+        ${inRing.length ? `<div class="ring">${inRing.map(tile).join("")}</div>` : `<p class="empty">Aucun projet : l'anneau se remplira tout seul avec 8 projets.</p>`}
+      </section>
+      ${others.filter((o) => o.list.length).map((o) => `
+        <section class="block">
+          <h3>Ajouter : ${CATEGORY_LABEL[o.c]}</h3>
+          <div class="ring ring--add">${o.list.map((p) => tile(p)).join("")}</div>
+        </section>`).join("")}
+    `;
+    editorEl.querySelectorAll("[data-act]").forEach((b) => {
+      b.addEventListener("click", () => {
+        const id = b.closest("figure").dataset.id;
+        const i = orbitDraft.indexOf(id);
+        const act = b.dataset.act;
+        if (act === "add") orbitDraft.push(id);
+        if (act === "remove") orbitDraft.splice(i, 1);
+        if (act === "left") [orbitDraft[i - 1], orbitDraft[i]] = [orbitDraft[i], orbitDraft[i - 1]];
+        if (act === "right") [orbitDraft[i + 1], orbitDraft[i]] = [orbitDraft[i], orbitDraft[i + 1]];
+        renderOrbitTab();
+      });
+    });
+    updateSavebar();
+  }
+
+  /* =========================================================
+     Enregistrement
+     ========================================================= */
+  function updateSavebar() {
+    const dirty = isDirty();
+    saveBtn.disabled = !dirty;
+    resetBtn.disabled = !dirty;
+    let warn = "";
+    if (tab === "orbit" && dirty && orbitDraft.length && (orbitDraft.length < 4 || orbitDraft.length > 12)) {
+      warn = ` (${orbitDraft.length} projets : l'anneau rend mieux entre 6 et 10)`;
+    }
+    setStatus(dirty ? "Modifications non enregistrées" + warn : "");
+  }
+
+  function setStatus(text, kind) {
+    const el = $("#status");
+    el.textContent = text;
+    el.className = kind ? `is-${kind}` : "";
+  }
+
+  async function post(path, body) {
+    const res = await fetch(path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const result = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(result.error || "Erreur à l'enregistrement");
+  }
+
+  saveBtn.addEventListener("click", async () => {
+    saveBtn.disabled = true;
+    setStatus("Enregistrement…");
+    try {
+      if (tab === "orbit") await post("/api/orbit", { ids: orbitDraft });
+      else await saveProject();
+      await loadData(project?.id);
+      setStatus("Enregistré ✓", "ok");
+    } catch (err) {
+      setStatus(err.message, "error");
+      saveBtn.disabled = false;
+    }
+  });
+
+  resetBtn.addEventListener("click", () => {
+    if (tab === "orbit") {
+      orbitDraft = [...data.heroOrbit];
+      renderOrbitTab();
+    } else {
+      draft = structuredClone(saved);
+      renderChoices();
+      update();
+    }
+  });
+
+  window.addEventListener("beforeunload", (e) => {
+    if (isDirty()) e.preventDefault();
+  });
+
+  loadData();
+</script>
+</body>
+</html>
