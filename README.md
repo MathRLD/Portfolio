@@ -49,9 +49,9 @@ pour garder la mise en page complète (comme sur ta maquette de référence).
 > au reste du site, puisque tout le contenu passe déjà par une seule source
 > de données.
 
-## Choisir les miniatures et l'anneau du hero
+## Gérer les projets (miniatures, ordre, anneau, publication)
 
-Double-clic sur `_outils/Choisir les miniatures.bat` : une page s'ouvre dans
+Double-clic sur `_outils/Gérer les projets.bat` : une page s'ouvre dans
 le navigateur (http://localhost:4321).
 
 **Onglets Photos, Vidéos, Graphisme** : clique sur un projet à gauche.
@@ -67,13 +67,24 @@ le navigateur (http://localhost:4321).
   dans `assets/images/thumbs/hero/`) et met à jour `js/projects-data.js`
   et `index.html` tout seul.
 
+**Onglet Ordre des carrousels** : les projets de chaque carrousel, de gauche
+à droite. Fais glisser une carte sur une autre (ou utilise les flèches), puis
+**Enregistrer** : l'ordre des projets dans `js/projects-data.js` est mis à
+jour. En vidéos et graphisme, la carte n°2 est la grande carte mise en avant.
+
 **Onglet Anneau du hero** : les projets de l'anneau, dans l'ordre. Flèches
 pour changer l'ordre, × pour retirer, « + Ajouter » pour en mettre d'autres.
 
+**Bouton Publier** (en haut à droite, avec le nombre de fichiers modifiés) :
+affiche la liste des fichiers changés, puis fait l'équivalent de
+`git add -A`, `git commit` et `git push` avec le message saisi. Tous les
+changements du dossier partent, y compris ceux faits hors de l'outil :
+vérifie la liste avant de cliquer. Le site en ligne se met à jour une ou
+deux minutes après.
+
 Ferme la fenêtre noire pour arrêter l'outil (et relance-la si l'outil a été
-mis à jour), puis commit et push comme d'habitude. Il faut Node.js installé
-sur la machine. Le dossier `_outils` commence par « _ » : GitHub Pages ne
-le publie pas.
+mis à jour). Il faut Node.js installé sur la machine. Le dossier `_outils`
+commence par « _ » : GitHub Pages ne le publie pas.
 
 ## Mettre le projet sur GitHub
 

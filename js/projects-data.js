@@ -43,15 +43,27 @@
    Pour les projets graphisme, le premier tag indique le cadre :
    "Projet client", "Projet personnel" ou "Projet étudiant".
 
-   Pour changer les miniatures, les vignettes de l'anneau ou les projets
-   de l'anneau sans toucher à ce fichier : double-clic sur
-   _outils/"Choisir les miniatures.bat".
+   Pour changer les miniatures, l'ordre des carrousels, les vignettes ou
+   les projets de l'anneau sans toucher à ce fichier : double-clic sur
+   _outils/"Gérer les projets.bat".
    ===================================================== */
 
 const projectsData = {
 
   /* ----------------- VIDÉOS ----------------- */
   videos: [
+    {
+      id: "sncf-valeurs-eigs",
+      title: "SNCF Intercités - Valeurs EIGS",
+      client: "SNCF Intercités",
+      description: "Film institutionnel pour SNCF Intercités sur les valeurs de l'EIGS, tourné avec les équipes à bord et en gare.",
+      cover: "assets/images/videos/valeurs-eigs-cover.jpg",
+      thumb: "assets/images/thumbs/sncf-valeurs-eigs.webp?v=20261004021235",
+      thumbPosition: "18% 50%",
+      heroThumb: "assets/images/thumbs/hero/sncf-valeurs-eigs.webp?v=20261004023737",
+      tags: ["Réalisation", "Montage", "Institutionnel", "SNCF"],
+      media: { type: "youtube", src: "pB53WOa4bag" }
+    },
     {
       id: "stpauli-koln-2026-video",
       title: "FC St. Pauli - 1. FC Köln",
@@ -65,16 +77,14 @@ const projectsData = {
       media: { type: "youtube", src: "WOpr0kPQ1hg" }
     },
     {
-      id: "sncf-valeurs-eigs",
-      title: "SNCF Intercités - Valeurs EIGS",
-      client: "SNCF Intercités",
-      description: "Film institutionnel pour SNCF Intercités sur les valeurs de l'EIGS, tourné avec les équipes à bord et en gare.",
-      cover: "assets/images/videos/valeurs-eigs-cover.jpg",
-      thumb: "assets/images/thumbs/sncf-valeurs-eigs.webp?v=20261004021235",
-      thumbPosition: "18% 50%",
-      heroThumb: "assets/images/thumbs/hero/sncf-valeurs-eigs.webp?v=20261004023737",
-      tags: ["Réalisation", "Montage", "Institutionnel", "SNCF"],
-      media: { type: "youtube", src: "pB53WOa4bag" }
+      id: "further-joe-juice-vlog",
+      title: "Vlog Shooting",
+      client: "Further Athletics x Joe & The Juice",
+      description: "Vlog vertical tourné caméra à l'épaule pendant un shooting Further Athletics x Joe & The Juice à Paris. Les coulisses de la journée.",
+      cover: "assets/images/videos/further-joe-juice-cover.jpg",
+      thumb: "assets/images/thumbs/further-joe-juice-vlog.webp",
+      tags: ["Vlog", "Short", "Coulisses", "Montage"],
+      media: { type: "youtube", src: "_vUNS86Ek4M", vertical: true }
     },
     {
       id: "nsmtt-short-film",
@@ -97,22 +107,38 @@ const projectsData = {
       thumbPosition: "100% 50%",
       tags: ["Court-métrage", "Réalisation", "SNCF"],
       media: { type: "youtube", src: "470WgFqnpT4" }
-    },
-    {
-      id: "further-joe-juice-vlog",
-      title: "Vlog Shooting",
-      client: "Further Athletics x Joe & The Juice",
-      description: "Vlog vertical tourné caméra à l'épaule pendant un shooting Further Athletics x Joe & The Juice à Paris. Les coulisses de la journée.",
-      cover: "assets/images/videos/further-joe-juice-cover.jpg",
-      thumb: "assets/images/thumbs/further-joe-juice-vlog.webp",
-      tags: ["Vlog", "Short", "Coulisses", "Montage"],
-      media: { type: "youtube", src: "_vUNS86Ek4M", vertical: true }
     }
     // Ajoute d'autres vidéos ici en copiant le bloc ci-dessus.
   ],
 
   /* ----------------- PHOTOS ----------------- */
   photos: [
+    {
+      id: "bobital-2026",
+      title: "Bobital 2026",
+      client: "",
+      description: "Reportage photo au festival Bobital L'Armor à Sons, édition 2026. Les concerts, le public, et une belle lumière en fin de journée.",
+      cover: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-5.jpg",
+      thumb: "assets/images/thumbs/bobital-2026.webp?v=20261004021011",
+      thumbPosition: "50% 100%",
+      tags: ["Événementiel", "Concert", "Reportage"],
+      images: [
+        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026.jpg", alt: "Silhouette d'un rappeur sur scène en contre-jour, au coucher du soleil" },
+        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-3.jpg", alt: "Rappeur en casquette rouge au micro sur la scène du festival" },
+        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-5.jpg", alt: "Rappeur en casquette rouge chantant tête levée, arbres en arrière-plan" },
+        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-6.jpg", alt: "Deux rappeurs au bord de la scène face au public, en contre-plongée" },
+        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-8.jpg", alt: "Deux artistes sur scène devant la foule du festival, en plein jour" },
+        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-9.jpg", alt: "Structure d'éclairage de la scène en contre-jour" },
+        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-12.jpg", alt: "Rappeur aux lunettes vertes, doigt levé, micro en main" },
+        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-13.jpg", alt: "Rappeur aux lunettes vertes en mouvement sur scène, dans la lumière des projecteurs" },
+        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-14.jpg", alt: "Rappeur aux lunettes vertes au micro, projecteur en arrière-plan" },
+        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-18.jpg", alt: "Chanteuse au micro en gros plan, devant la structure de la scène" },
+        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-19.jpg", alt: "Chanteuse en mouvement sur scène, ciel nuageux en arrière-plan" },
+        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-25.jpg", alt: "Rappeur sur scène dans une lumière orange et la fumée" },
+        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-26.jpg", alt: "Artiste bras levé dans une lumière bleue, bouteille d'eau à la main" },
+        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-28.jpg", alt: "Rappeur au micro en contre-plongée, dans des faisceaux bleus et jaunes" }
+      ]
+    },
     {
       id: "stpauli-koln-2026",
       title: "FC St. Pauli - 1. FC Köln",
@@ -161,51 +187,6 @@ const projectsData = {
         { src: "assets/images/photos/Shootingsncf1/web/Shooting photo TDN-18.jpg", alt: "Deux amies sous la couette d'une couchette, regardant un téléphone" },
         { src: "assets/images/photos/Shootingsncf1/web/Shooting photo TDN-26.jpg", alt: "Voyageuse blottie contre un oreiller, regardant par la fenêtre du train" },
         { src: "assets/images/photos/Shootingsncf1/web/Shooting photo TDN-34.jpg", alt: "Deux amies en bataille d'oreillers dans un compartiment couchettes" }
-      ]
-    },
-    {
-      id: "sncf-intercites-gare",
-      title: "SNCF Intercités - Gares & trains de nuit",
-      client: "SNCF Intercités",
-      description: "Reportage de nuit en gare et à bord des trains Intercités. Les lumières des quais et les rames en mouvement.",
-      cover: "assets/images/photos/Shootingsncf2/web/Photos_Shooting_05_05-34.jpg",
-      thumb: "assets/images/thumbs/sncf-intercites-gare.webp?v=20261004020944",
-      thumbPosition: "72% 50%",
-      tags: ["Reportage", "Institutionnel", "SNCF"],
-      images: [
-        { src: "assets/images/photos/Shootingsncf2/web/Photos_Shooting_05_05-35.jpg", alt: "Locomotive Intercités entrant en gare de nuit, phares allumés, le long des quais éclairés" },
-        { src: "assets/images/photos/Shootingsncf2/web/Photos_Shooting_05_05-21.jpg", alt: "Couloir vide d'une voiture Intercités, en perspective" },
-        { src: "assets/images/photos/Shootingsncf2/web/Photos_Shooting_05_05-32.jpg", alt: "Voiture Intercités à quai, porte ouverte, sous la verrière de la gare" },
-        { src: "assets/images/photos/Shootingsncf2/web/Photos_Shooting_05_05-34.jpg", alt: "Locomotive en gare de nuit, avec une traînée lumineuse rouge en pose longue" },
-        { src: "assets/images/photos/Shootingsncf2/web/Photos_Shooting_05_05-37.jpg", alt: "Rame Intercités éclairée à quai, verrière de la gare en arrière-plan" },
-        { src: "assets/images/photos/Shootingsncf2/web/Photos_Shooting_05_05-40.jpg", alt: "Train filé le long du quai en pose longue" },
-        { src: "assets/images/photos/Shootingsncf2/web/Photos_Shooting_05_05-41.jpg", alt: "Rame qui défile en pose longue sur un quai désert" }
-      ]
-    },
-    {
-      id: "bobital-2026",
-      title: "Bobital 2026",
-      client: "",
-      description: "Reportage photo au festival Bobital L'Armor à Sons, édition 2026. Les concerts, le public, et une belle lumière en fin de journée.",
-      cover: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-5.jpg",
-      thumb: "assets/images/thumbs/bobital-2026.webp?v=20261004021011",
-      thumbPosition: "50% 100%",
-      tags: ["Événementiel", "Concert", "Reportage"],
-      images: [
-        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026.jpg", alt: "Silhouette d'un rappeur sur scène en contre-jour, au coucher du soleil" },
-        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-3.jpg", alt: "Rappeur en casquette rouge au micro sur la scène du festival" },
-        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-5.jpg", alt: "Rappeur en casquette rouge chantant tête levée, arbres en arrière-plan" },
-        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-6.jpg", alt: "Deux rappeurs au bord de la scène face au public, en contre-plongée" },
-        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-8.jpg", alt: "Deux artistes sur scène devant la foule du festival, en plein jour" },
-        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-9.jpg", alt: "Structure d'éclairage de la scène en contre-jour" },
-        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-12.jpg", alt: "Rappeur aux lunettes vertes, doigt levé, micro en main" },
-        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-13.jpg", alt: "Rappeur aux lunettes vertes en mouvement sur scène, dans la lumière des projecteurs" },
-        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-14.jpg", alt: "Rappeur aux lunettes vertes au micro, projecteur en arrière-plan" },
-        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-18.jpg", alt: "Chanteuse au micro en gros plan, devant la structure de la scène" },
-        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-19.jpg", alt: "Chanteuse en mouvement sur scène, ciel nuageux en arrière-plan" },
-        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-25.jpg", alt: "Rappeur sur scène dans une lumière orange et la fumée" },
-        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-26.jpg", alt: "Artiste bras levé dans une lumière bleue, bouteille d'eau à la main" },
-        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-28.jpg", alt: "Rappeur au micro en contre-plongée, dans des faisceaux bleus et jaunes" }
       ]
     },
     {
@@ -268,6 +249,47 @@ const projectsData = {
       ]
     },
     {
+      id: "sncf-intercites-gare",
+      title: "SNCF Intercités - Gares & trains de nuit",
+      client: "SNCF Intercités",
+      description: "Reportage de nuit en gare et à bord des trains Intercités. Les lumières des quais et les rames en mouvement.",
+      cover: "assets/images/photos/Shootingsncf2/web/Photos_Shooting_05_05-34.jpg",
+      thumb: "assets/images/thumbs/sncf-intercites-gare.webp?v=20261004020944",
+      thumbPosition: "72% 50%",
+      tags: ["Reportage", "Institutionnel", "SNCF"],
+      images: [
+        { src: "assets/images/photos/Shootingsncf2/web/Photos_Shooting_05_05-35.jpg", alt: "Locomotive Intercités entrant en gare de nuit, phares allumés, le long des quais éclairés" },
+        { src: "assets/images/photos/Shootingsncf2/web/Photos_Shooting_05_05-21.jpg", alt: "Couloir vide d'une voiture Intercités, en perspective" },
+        { src: "assets/images/photos/Shootingsncf2/web/Photos_Shooting_05_05-32.jpg", alt: "Voiture Intercités à quai, porte ouverte, sous la verrière de la gare" },
+        { src: "assets/images/photos/Shootingsncf2/web/Photos_Shooting_05_05-34.jpg", alt: "Locomotive en gare de nuit, avec une traînée lumineuse rouge en pose longue" },
+        { src: "assets/images/photos/Shootingsncf2/web/Photos_Shooting_05_05-37.jpg", alt: "Rame Intercités éclairée à quai, verrière de la gare en arrière-plan" },
+        { src: "assets/images/photos/Shootingsncf2/web/Photos_Shooting_05_05-40.jpg", alt: "Train filé le long du quai en pose longue" },
+        { src: "assets/images/photos/Shootingsncf2/web/Photos_Shooting_05_05-41.jpg", alt: "Rame qui défile en pose longue sur un quai désert" }
+      ]
+    },
+    {
+      id: "redstar-laval",
+      title: "Red Star FC - Stade Lavallois",
+      client: "Ligue 2",
+      description: "Reportage photo du match entre le Red Star FC et le Stade Lavallois, sur le terrain et côté supporters.",
+      cover: "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand13.jpg",
+      thumb: "assets/images/thumbs/redstar-laval.webp?v=20261004021200",
+      thumbPosition: "16% 50%",
+      tags: ["Sport", "Football", "Ligue 2", "Reportage"],
+      images: [
+        { src: "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand46.jpg", alt: "Joueur du Red Star floqué Durand 7 qui applaudit les supporters en tribune" },
+        { src: "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand11.jpg", alt: "Joueur du Red Star qui passe devant le parcage des supporters, drapeaux levés" },
+        { src: "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand13.jpg", alt: "Portrait d'un joueur du Red Star sur fond de ciel clair" },
+        { src: "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand32.jpg", alt: "Joueur du Red Star en chasuble jaune à l'échauffement" },
+        { src: "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand35.jpg", alt: "Joueur du Red Star souriant, qui fête avec les supporters devant la tribune" },
+        { src: "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand48.jpg", alt: "Joueurs du Red Star de dos, face à la tribune visiteurs" },
+        { src: "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand55.jpg", alt: "Joueurs du Red Star qui dansent bras levés devant leurs supporters" },
+        { src: "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand64.jpg", alt: "Joueur du Red Star qui prend un selfie devant les supporters" },
+        { src: "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand91.jpg", alt: "Joueur du Red Star à la sortie du tunnel" },
+        { src: "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand96.jpg", alt: "Joueur du Red Star floqué K. Cabral 91, de dos" }
+      ]
+    },
+    {
       id: "redstar-grenoble",
       title: "Red Star FC - Grenoble Foot 38",
       client: "Ligue 2",
@@ -293,28 +315,6 @@ const projectsData = {
         { src: "assets/images/photos/redstargrenoble/web/RED_STAR__GRENOBLE_fumee-5.jpg", alt: "Joueur du Red Star numéro 25 qui s'apprête à tirer un corner" },
         { src: "assets/images/photos/redstargrenoble/web/RED_STAR__GRENOBLE_fumee-7.jpg", alt: "Remplaçant du Red Star numéro 93, de dos, qui regarde le match" }
       ]
-    },
-    {
-      id: "redstar-laval",
-      title: "Red Star FC - Stade Lavallois",
-      client: "Ligue 2",
-      description: "Reportage photo du match entre le Red Star FC et le Stade Lavallois, sur le terrain et côté supporters.",
-      cover: "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand13.jpg",
-      thumb: "assets/images/thumbs/redstar-laval.webp?v=20261004021200",
-      thumbPosition: "16% 50%",
-      tags: ["Sport", "Football", "Ligue 2", "Reportage"],
-      images: [
-        { src: "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand46.jpg", alt: "Joueur du Red Star floqué Durand 7 qui applaudit les supporters en tribune" },
-        { src: "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand11.jpg", alt: "Joueur du Red Star qui passe devant le parcage des supporters, drapeaux levés" },
-        { src: "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand13.jpg", alt: "Portrait d'un joueur du Red Star sur fond de ciel clair" },
-        { src: "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand32.jpg", alt: "Joueur du Red Star en chasuble jaune à l'échauffement" },
-        { src: "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand35.jpg", alt: "Joueur du Red Star souriant, qui fête avec les supporters devant la tribune" },
-        { src: "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand48.jpg", alt: "Joueurs du Red Star de dos, face à la tribune visiteurs" },
-        { src: "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand55.jpg", alt: "Joueurs du Red Star qui dansent bras levés devant leurs supporters" },
-        { src: "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand64.jpg", alt: "Joueur du Red Star qui prend un selfie devant les supporters" },
-        { src: "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand91.jpg", alt: "Joueur du Red Star à la sortie du tunnel" },
-        { src: "assets/images/photos/redstarlaval/web/Laval-RedStar_RawLand96.jpg", alt: "Joueur du Red Star floqué K. Cabral 91, de dos" }
-      ]
     }
     // Ajoute d'autres photos ici. 10 emplacements sont prévus
     // dans la grille par défaut ; les cases vides afficheront
@@ -339,20 +339,17 @@ const projectsData = {
       ]
     },
     {
-      id: "linkyjob-goodies",
-      title: "LinkyJob - Identité visuelle",
+      id: "workshop-ping-affiches",
+      title: "Workshop Ping - Affiches",
       client: "",
-      description: "Projet étudiant de fin de M2 : l'identité visuelle de LinkyJob, une startup qui met en relation des étudiants étrangers et des particuliers pour des missions. J'ai créé le logo, la charte graphique et ses déclinaisons, jusqu'aux goodies.",
-      cover: "assets/images/graphisme/LinkyJob/Free_Tote_Bag_Mockup_on_the_Floor.jpg",
-      thumb: "assets/images/thumbs/linkyjob-goodies.webp?v=20261004021216",
-      thumbPosition: "50% 76%",
-      tags: ["Projet étudiant", "Identité visuelle", "Logo", "Charte graphique"],
+      description: "Projet étudiant de M2, en collaboration avec le Neuilly-sur-Marne Tennis de Table. J'ai créé des affiches pour aider le club à mieux communiquer : annonce de match, journée portes ouvertes et déclinaisons pour Instagram.",
+      cover: "assets/images/graphisme/Workshop_Ping/mockupping.jpg",
+      thumb: "assets/images/thumbs/workshop-ping-affiches.webp",
+      tags: ["Projet étudiant", "Affiche", "Tennis de table"],
       images: [
-        { src: "assets/images/graphisme/LinkyJob/Mockup.jpg", alt: "Logo LinkyJob brodé sur une veste matelassée noire" },
-        { src: "assets/images/graphisme/LinkyJob/Free_Pen_Mockup_5.jpg", alt: "Quatre stylos aux couleurs de LinkyJob" },
-        { src: "assets/images/graphisme/LinkyJob/Free_Tote_Bag_Mockup_on_the_Floor.jpg", alt: "Tote bag blanc avec le logo LinkyJob" },
-        { src: "assets/images/graphisme/LinkyJob/Lanyard Mockup.jpg", alt: "Badge intervenant LinkyJob porté autour du cou" },
-        { src: "assets/images/graphisme/LinkyJob/Minimal Perspective Logo Mockup.jpg", alt: "Logo LinkyJob orange et turquoise sur fond gris clair" }
+        { src: "assets/images/graphisme/Workshop_Ping/MatchRégional3_V1.jpg", alt: "Affiche du dernier match de la saison en Régionale 3 du Neuilly-sur-Marne Tennis de Table, samedi 6 juin 2026" },
+        { src: "assets/images/graphisme/Workshop_Ping/Portes_Ouvertes_30_05.jpg", alt: "Affiche des portes ouvertes du Neuilly-sur-Marne Tennis de Table, samedi 30 mai 2026" },
+        { src: "assets/images/graphisme/Workshop_Ping/mockupping.jpg", alt: "Les deux affiches déclinées en publications Instagram" }
       ]
     },
     {
@@ -382,6 +379,23 @@ const projectsData = {
       ]
     },
     {
+      id: "linkyjob-goodies",
+      title: "LinkyJob - Identité visuelle",
+      client: "",
+      description: "Projet étudiant de fin de M2 : l'identité visuelle de LinkyJob, une startup qui met en relation des étudiants étrangers et des particuliers pour des missions. J'ai créé le logo, la charte graphique et ses déclinaisons, jusqu'aux goodies.",
+      cover: "assets/images/graphisme/LinkyJob/Free_Tote_Bag_Mockup_on_the_Floor.jpg",
+      thumb: "assets/images/thumbs/linkyjob-goodies.webp?v=20261004021216",
+      thumbPosition: "50% 76%",
+      tags: ["Projet étudiant", "Identité visuelle", "Logo", "Charte graphique"],
+      images: [
+        { src: "assets/images/graphisme/LinkyJob/Mockup.jpg", alt: "Logo LinkyJob brodé sur une veste matelassée noire" },
+        { src: "assets/images/graphisme/LinkyJob/Free_Pen_Mockup_5.jpg", alt: "Quatre stylos aux couleurs de LinkyJob" },
+        { src: "assets/images/graphisme/LinkyJob/Free_Tote_Bag_Mockup_on_the_Floor.jpg", alt: "Tote bag blanc avec le logo LinkyJob" },
+        { src: "assets/images/graphisme/LinkyJob/Lanyard Mockup.jpg", alt: "Badge intervenant LinkyJob porté autour du cou" },
+        { src: "assets/images/graphisme/LinkyJob/Minimal Perspective Logo Mockup.jpg", alt: "Logo LinkyJob orange et turquoise sur fond gris clair" }
+      ]
+    },
+    {
       id: "te-ora-naho",
       title: "Te Ora Naho - Identité visuelle",
       client: "",
@@ -396,20 +410,6 @@ const projectsData = {
         { src: "assets/images/graphisme/TeOraNaho/3.jpg", alt: "T-shirt bleu canard avec le logo Te Ora Naho en blanc" },
         { src: "assets/images/graphisme/TeOraNaho/5.jpg", alt: "Page d'accueil du site Te Ora Naho sur un écran : « Préservons ensemble la biodiversité polynésienne »" },
         { src: "assets/images/graphisme/TeOraNaho/6.jpg", alt: "Logo Te Ora Naho embossé sur papier turquoise" }
-      ]
-    },
-    {
-      id: "workshop-ping-affiches",
-      title: "Workshop Ping - Affiches",
-      client: "",
-      description: "Projet étudiant de M2, en collaboration avec le Neuilly-sur-Marne Tennis de Table. J'ai créé des affiches pour aider le club à mieux communiquer : annonce de match, journée portes ouvertes et déclinaisons pour Instagram.",
-      cover: "assets/images/graphisme/Workshop_Ping/mockupping.jpg",
-      thumb: "assets/images/thumbs/workshop-ping-affiches.webp",
-      tags: ["Projet étudiant", "Affiche", "Tennis de table"],
-      images: [
-        { src: "assets/images/graphisme/Workshop_Ping/MatchRégional3_V1.jpg", alt: "Affiche du dernier match de la saison en Régionale 3 du Neuilly-sur-Marne Tennis de Table, samedi 6 juin 2026" },
-        { src: "assets/images/graphisme/Workshop_Ping/Portes_Ouvertes_30_05.jpg", alt: "Affiche des portes ouvertes du Neuilly-sur-Marne Tennis de Table, samedi 30 mai 2026" },
-        { src: "assets/images/graphisme/Workshop_Ping/mockupping.jpg", alt: "Les deux affiches déclinées en publications Instagram" }
       ]
     }
     // Ajoute d'autres projets graphiques ici en copiant le gabarit d'un

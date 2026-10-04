@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Miniatures | RAWLAND</title>
-<!-- Page de l'outil local (_outils/miniatures.js) : ne fonctionne que
+<title>Projets | RAWLAND</title>
+<!-- Page de l'outil local (_outils/projets.js) : ne fonctionne que
      lancée par ce serveur, qui lit et enregistre les fichiers du site. -->
 <style>
   @font-face {
@@ -58,8 +58,20 @@
     font-size: 12px;
   }
   .tabs button.is-active { background: var(--text); color: var(--bg); border-color: var(--text); }
-  header a { margin-left: auto; color: var(--muted); font-size: 13px; }
+  header a { color: var(--muted); font-size: 13px; }
   header a:hover { color: var(--text); }
+  #publish-open { margin-left: auto; }
+  #publish-open .count {
+    display: inline-block;
+    min-width: 18px;
+    margin-left: 6px;
+    padding: 0 5px;
+    background: var(--accent);
+    color: var(--text);
+    font-size: 11px;
+    text-align: center;
+  }
+  #publish-open .count:empty { display: none; }
 
   /* ---------- mise en page ---------- */
   main {
@@ -271,18 +283,94 @@
   .ring--add .thumb { opacity: 0.6; }
   .ring--add figure:hover .thumb { opacity: 1; }
   .empty { color: var(--muted); }
+
+  /* ---------- onglet ordre des carrousels ---------- */
+  .block .hint + .ring { margin-top: 14px; }
+  .ring.order { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+  .ring.order.is-square { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  .ring.order .thumb { aspect-ratio: 16 / 10; border-radius: 4px; }
+  .ring.order.is-square .thumb { aspect-ratio: 1; }
+  .ring.order figure { cursor: grab; }
+  .ring.order figure.is-dragging { opacity: 0.35; }
+  .ring.order figure.is-over .thumb { outline: 2px solid var(--text); outline-offset: 3px; }
+  .ring .featured {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    padding: 1px 6px;
+    background: var(--accent);
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  /* ---------- fenêtre de publication ---------- */
+  dialog {
+    width: min(620px, calc(100vw - 32px));
+    padding: 24px 28px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--text);
+  }
+  dialog::backdrop { background: rgba(0,0,0,0.6); }
+  dialog h2 {
+    margin: 0 0 6px;
+    font-family: "Clash Display", sans-serif;
+    font-size: 26px;
+    letter-spacing: -0.02em;
+  }
+  .changes {
+    max-height: 240px;
+    margin: 16px 0;
+    padding: 8px 0;
+    overflow-y: auto;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    list-style: none;
+    font-size: 13px;
+  }
+  .changes:empty { display: none; }
+  .changes li { display: flex; gap: 10px; padding: 2px 0; }
+  .changes .what { flex: 0 0 70px; color: var(--muted); }
+  .changes .file { overflow-wrap: anywhere; }
+  .field { display: flex; flex-direction: column; gap: 6px; color: var(--muted); font-size: 13px; }
+  .field input {
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    font-size: 14px;
+  }
+  .field[hidden] { display: none; }
+  .warn { margin: 14px 0 0; color: #f0b35e; font-size: 13px; }
+  .warn:empty { display: none; }
+  #publish-status { min-height: 1.5em; margin: 14px 0 0; color: var(--muted); font-size: 13px; }
+  #publish-status.is-ok { color: #7ccf8f; }
+  #publish-status.is-error { color: #ff7a6e; }
+  #publish-log {
+    max-height: 160px;
+    margin: 10px 0 0;
+    padding: 10px;
+    overflow: auto;
+    background: var(--bg);
+    color: var(--muted);
+    font-size: 12px;
+    white-space: pre-wrap;
+  }
+  dialog .actions { display: flex; gap: 12px; margin-top: 18px; }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>Miniatures.</h1>
+  <h1>Projets.</h1>
   <nav class="tabs" id="tabs">
     <button type="button" data-tab="photos">Photos</button>
     <button type="button" data-tab="videos">Vidéos</button>
     <button type="button" data-tab="graphisme">Graphisme</button>
+    <button type="button" data-tab="order">Ordre des carrousels</button>
     <button type="button" data-tab="orbit">Anneau du hero</button>
   </nav>
+  <button type="button" class="btn small" id="publish-open" title="Envoyer les changements sur GitHub">Publier<span class="count"></span></button>
   <a href="/index.html" target="_blank">Voir le site ↗</a>
 </header>
 
@@ -298,9 +386,26 @@
 
 <input type="file" id="file" accept="image/jpeg,image/png,image/webp,image/avif" hidden>
 
+<dialog id="publish">
+  <h2>Publier le site</h2>
+  <p class="hint" id="publish-intro"></p>
+  <p class="warn" id="publish-warn"></p>
+  <ul class="changes" id="publish-changes"></ul>
+  <label class="field" id="publish-field">Description des changements
+    <input type="text" id="publish-message" maxlength="200" value="Mise à jour des projets">
+  </label>
+  <p id="publish-status"></p>
+  <pre id="publish-log" hidden></pre>
+  <div class="actions">
+    <button type="button" class="btn primary" id="publish-go">Publier</button>
+    <button type="button" class="btn" id="publish-close">Fermer</button>
+  </div>
+</dialog>
+
 <script>
   const CATEGORIES = ["videos", "photos", "graphisme"];
   const CATEGORY_LABEL = { photos: "photos", videos: "vidéos", graphisme: "graphisme" };
+  const CATEGORY_TITLE = { photos: "Photos", videos: "Vidéos", graphisme: "Graphisme" };
   const HERO_SIZE = { w: 480, h: 640 };   // vignette de l'anneau (3:4)
   const CARD_MAX_W = 1000;                 // miniature de carte (image entière)
 
@@ -310,6 +415,7 @@
   let draft = null;        // état en cours d'édition
   let saved = null;        // état tel qu'enregistré
   let orbitDraft = null;   // ids de l'anneau (onglet anneau)
+  let orderDraft = null;   // { videos: [ids], ... } (onglet ordre)
   let uploadTarget = null; // "card" | "hero" : destination de l'import en cours
   let uploads = { card: null, hero: null }; // dernière image importée par zone
 
@@ -359,6 +465,7 @@
 
   function isDirty() {
     if (tab === "orbit") return orbitDraft && !same(orbitDraft, data.heroOrbit);
+    if (tab === "order") return orderDraft && !same(orderDraft, currentOrder());
     return Boolean(draft && saved) && (!same(draft.card, saved.card) || heroChanged() || draft.inOrbit !== saved.inOrbit);
   }
 
@@ -369,10 +476,13 @@
   function showTab(next, keepId) {
     tab = next;
     document.querySelectorAll("#tabs button").forEach((b) => b.classList.toggle("is-active", b.dataset.tab === tab));
-    mainEl.classList.toggle("is-wide", tab === "orbit");
+    mainEl.classList.toggle("is-wide", tab === "orbit" || tab === "order");
     if (tab === "orbit") {
       orbitDraft = [...data.heroOrbit];
       renderOrbitTab();
+    } else if (tab === "order") {
+      orderDraft = currentOrder();
+      renderOrderTab();
     } else {
       renderList();
       const list = data.projects[tab];
@@ -768,6 +878,89 @@
   }
 
   /* =========================================================
+     Onglet ordre des carrousels
+     ========================================================= */
+  function currentOrder() {
+    return Object.fromEntries(CATEGORIES.map((c) => [c, data.projects[c].map((p) => p.id)]));
+  }
+
+  // Carrousels vidéos et graphisme : au chargement, la 2e carte est la
+  // grande carte mise en avant (la 1re sur mobile).
+  const HAS_FEATURED = { videos: true, photos: false, graphisme: true };
+
+  function renderOrderTab() {
+    const tile = (c, id, i, list) => {
+      const p = byId(id);
+      return `<figure data-id="${id}" draggable="true">
+        <div class="thumb"><img src="${url(p.thumb || p.cover)}" alt="" draggable="false" style="object-position:${p.thumbPosition || "50% 50%"}">
+          <span class="num">${i + 1}</span>${HAS_FEATURED[c] && i === 1 ? `<span class="featured">En avant</span>` : ""}</div>
+        <figcaption>${p.title}</figcaption>
+        <div class="tools">
+          <button type="button" data-act="left" title="Avancer" ${i === 0 ? "disabled" : ""}>←</button>
+          <button type="button" data-act="right" title="Reculer" ${i === list.length - 1 ? "disabled" : ""}>→</button>
+        </div>
+      </figure>`;
+    };
+    editorEl.innerHTML = `
+      <h2>Ordre des carrousels</h2>
+      <p class="hint">L'ordre des projets dans chaque carrousel du site, de gauche à droite.
+        Fais glisser une carte sur une autre pour la déplacer, ou utilise les flèches.</p>
+      ${CATEGORIES.map((c) => `
+        <section class="block">
+          <h3>${CATEGORY_TITLE[c]} (${orderDraft[c].length})</h3>
+          <p class="hint">${HAS_FEATURED[c]
+            ? "Au chargement, la carte n°2 est la grande carte mise en avant (sur mobile, c'est la n°1)."
+            : "Au chargement, la photo n°1 est la première à gauche."}</p>
+          <div class="ring order${c === "photos" ? " is-square" : ""}" data-category="${c}">
+            ${orderDraft[c].map((id, i, list) => tile(c, id, i, list)).join("")}
+          </div>
+        </section>`).join("")}
+    `;
+
+    const move = (c, from, to) => {
+      const list = orderDraft[c];
+      list.splice(to, 0, ...list.splice(from, 1));
+      renderOrderTab();
+    };
+    let dragged = null; // { c, id }
+    editorEl.querySelectorAll(".order figure").forEach((fig) => {
+      const c = fig.parentElement.dataset.category;
+      const id = fig.dataset.id;
+      fig.querySelectorAll("[data-act]").forEach((b) => {
+        b.addEventListener("click", () => {
+          const i = orderDraft[c].indexOf(id);
+          move(c, i, b.dataset.act === "left" ? i - 1 : i + 1);
+        });
+      });
+      fig.addEventListener("dragstart", (e) => {
+        dragged = { c, id };
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", id);
+        fig.classList.add("is-dragging");
+      });
+      fig.addEventListener("dragend", () => {
+        dragged = null;
+        editorEl.querySelectorAll(".order figure").forEach((f) => f.classList.remove("is-dragging", "is-over"));
+      });
+      fig.addEventListener("dragover", (e) => {
+        if (!dragged || dragged.c !== c || dragged.id === id) return;
+        e.preventDefault();
+        fig.classList.add("is-over");
+      });
+      fig.addEventListener("dragleave", (e) => {
+        if (!fig.contains(e.relatedTarget)) fig.classList.remove("is-over");
+      });
+      fig.addEventListener("drop", (e) => {
+        e.preventDefault();
+        if (!dragged || dragged.c !== c) return;
+        // la carte déplacée prend la place de celle sur laquelle on la lâche
+        move(c, orderDraft[c].indexOf(dragged.id), orderDraft[c].indexOf(id));
+      });
+    });
+    updateSavebar();
+  }
+
+  /* =========================================================
      Enregistrement
      ========================================================= */
   function updateSavebar() {
@@ -794,7 +987,8 @@
       body: JSON.stringify(body),
     });
     const result = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(result.error || "Erreur à l'enregistrement");
+    if (!res.ok) throw Object.assign(new Error(result.error || "Erreur à l'enregistrement"), { detail: result.detail });
+    return result;
   }
 
   saveBtn.addEventListener("click", async () => {
@@ -802,6 +996,7 @@
     setStatus("Enregistrement…");
     try {
       if (tab === "orbit") await post("/api/orbit", { ids: orbitDraft });
+      else if (tab === "order") await post("/api/order", { order: orderDraft });
       else await saveProject();
       await loadData(project?.id);
       setStatus("Enregistré ✓", "ok");
@@ -809,12 +1004,16 @@
       setStatus(err.message, "error");
       saveBtn.disabled = false;
     }
+    refreshGit();
   });
 
   resetBtn.addEventListener("click", () => {
     if (tab === "orbit") {
       orbitDraft = [...data.heroOrbit];
       renderOrbitTab();
+    } else if (tab === "order") {
+      orderDraft = currentOrder();
+      renderOrderTab();
     } else {
       draft = structuredClone(saved);
       renderChoices();
@@ -826,7 +1025,101 @@
     if (isDirty()) e.preventDefault();
   });
 
+  /* =========================================================
+     Publication sur GitHub (commit + push de tous les changements)
+     ========================================================= */
+  const publishDialog = $("#publish");
+  const publishGo = $("#publish-go");
+  const publishMessage = $("#publish-message");
+  let gitState = null; // { branch, upstream, ahead, changes: [{ code, path }] } ou { error }
+
+  async function refreshGit() {
+    try {
+      const res = await fetch("/api/git", { cache: "no-store" });
+      gitState = await res.json();
+      if (!res.ok) throw new Error(gitState.detail || gitState.error);
+    } catch (err) {
+      gitState = { error: err.message };
+    }
+    const count = $("#publish-open .count");
+    count.textContent = gitState.error ? "" : gitState.changes.length || (gitState.ahead ? "↑" : "");
+  }
+
+  function changeLabel(code) {
+    if (code === "??" || code.includes("A")) return "nouveau";
+    if (code.includes("D")) return "supprimé";
+    if (code.includes("R")) return "renommé";
+    return "modifié";
+  }
+
+  function setPublishStatus(text, kind, detail) {
+    const el = $("#publish-status");
+    el.textContent = text;
+    el.className = kind ? `is-${kind}` : "";
+    $("#publish-log").hidden = !detail;
+    $("#publish-log").textContent = detail || "";
+  }
+
+  // Remplit la fenêtre à partir de gitState.
+  function renderPublish() {
+    const g = gitState;
+    const list = $("#publish-changes");
+    list.innerHTML = "";
+    $("#publish-warn").textContent = isDirty()
+      ? "Des modifications ne sont pas enregistrées dans l'onglet ouvert : elles ne seront pas publiées."
+      : "";
+    if (g.error) {
+      $("#publish-intro").textContent = "Impossible de lire l'état de git.";
+      $("#publish-field").hidden = true;
+      publishGo.disabled = true;
+      return setPublishStatus("", "", g.error);
+    }
+    const files = g.changes.length;
+    $("#publish-intro").textContent = files
+      ? `${files} fichier${files > 1 ? "s" : ""} à envoyer sur GitHub (branche ${g.branch}). Le site en ligne sera à jour une ou deux minutes après.`
+      : g.ahead
+        ? `Aucun nouveau changement, mais ${g.ahead} commit${g.ahead > 1 ? "s" : ""} pas encore envoyé${g.ahead > 1 ? "s" : ""} sur GitHub.`
+        : "Rien à publier : GitHub est à jour.";
+    g.changes.forEach((c) => {
+      const li = document.createElement("li");
+      li.innerHTML = `<span class="what">${changeLabel(c.code)}</span><span class="file"></span>`;
+      li.querySelector(".file").textContent = c.path;
+      list.appendChild(li);
+    });
+    $("#publish-field").hidden = !files;
+    publishGo.textContent = files ? "Publier" : "Envoyer";
+    publishGo.disabled = !files && !g.ahead && Boolean(g.upstream);
+  }
+
+  $("#publish-open").addEventListener("click", async () => {
+    setPublishStatus("");
+    await refreshGit();
+    renderPublish();
+    publishDialog.showModal();
+    if (!publishGo.disabled) (gitState.changes.length ? publishMessage : publishGo).focus();
+  });
+  $("#publish-close").addEventListener("click", () => publishDialog.close());
+
+  publishGo.addEventListener("click", async () => {
+    publishGo.disabled = true;
+    setPublishStatus("Envoi en cours…");
+    try {
+      await post("/api/publish", {
+        message: publishMessage.value,
+        paths: gitState.changes.map((c) => c.path),
+      });
+      await refreshGit();
+      renderPublish();
+      setPublishStatus("Publié ✓ Le site en ligne sera à jour d'ici une ou deux minutes.", "ok");
+    } catch (err) {
+      await refreshGit();
+      renderPublish();
+      setPublishStatus(err.message, "error", err.detail);
+    }
+  });
+
   loadData();
+  refreshGit();
 </script>
 </body>
 </html>

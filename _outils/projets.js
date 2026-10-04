@@ -1,8 +1,8 @@
 /* =====================================================
-   Outil local : miniatures et anneau du hero
+   Outil local de gestion des projets
    ---------------------------------------------------
-   Lancement : double-clic sur "Choisir les miniatures.bat"
-   (ou `node _outils/miniatures.js` depuis la racine du site).
+   Lancement : double-clic sur "Gérer les projets.bat"
+   (ou `node _outils/projets.js` depuis la racine du site).
    Une page s'ouvre dans le navigateur sur http://localhost:4321.
 
    Ce que fait l'outil (les images sont converties en WebP par le
@@ -12,9 +12,12 @@
      galerie), thumb (avec ?v=) et thumbPosition (cadrage) ;
    - vignette de l'anneau : assets/images/thumbs/hero/<id>.webp, déjà
      recadrée en 3:4 (480x640) ; champ heroThumb ;
+   - ordre des carrousels : ordre des projets dans les tableaux videos,
+     photos et graphisme de projects-data.js ;
    - projets de l'anneau : liste heroOrbit à la fin de projects-data.js ;
    - à chaque enregistrement, le ?v= de projects-data.js dans index.html
-     change, pour que les navigateurs rechargent les données.
+     change, pour que les navigateurs rechargent les données ;
+   - publication : git add -A, commit et push, depuis le bouton Publier.
 
    Aucune dépendance : uniquement Node. Le dossier commence par "_",
    GitHub Pages ne le publie donc pas.
@@ -23,7 +26,7 @@ const http = require("http");
 const fs = require("fs");
 const path = require("path");
 const vm = require("vm");
-const { exec } = require("child_process");
+const { exec, execFile } = require("child_process");
 
 const ROOT = path.resolve(__dirname, "..");
 const DATA_FILE = path.join(ROOT, "js", "projects-data.js");
@@ -207,6 +210,137 @@ function saveOrbit(body) {
   console.log(`✓ Anneau du hero : ${ids.length} projets`);
 }
 
+/* ---------- ordre des carrousels ----------
+   corps : { order: { videos: [ids], photos: [ids], graphisme: [ids] } }
+   Les blocs des projets sont permutés dans leur tableau ; ce qui les
+   sépare (virgules, commentaires) reste en place. */
+const PROJECT_BLOCK = /^    \{[\s\S]*?^    \}/gm;
+
+function reorderCategory(text, category, ids) {
+  const start = text.indexOf(`\n  ${category}: [`);
+  const end = text.indexOf("\n  ]", start);
+  if (start < 0 || end < 0) throw new Error(`tableau ${category} introuvable dans projects-data.js`);
+  const body = text.slice(start, end);
+  const blocks = new Map();
+  for (const [block] of body.matchAll(PROJECT_BLOCK)) {
+    const id = /^      id: ("[^"\n]*"),/m.exec(block);
+    if (!id) throw new Error(`projet sans id dans ${category}`);
+    blocks.set(JSON.parse(id[1]), block);
+  }
+  if (blocks.size !== ids.length || ids.some((id) => !blocks.has(id))) {
+    throw new Error(`Liste de projets ${category} incomplète : recharge la page.`);
+  }
+  let i = 0;
+  return text.slice(0, start) + body.replace(PROJECT_BLOCK, () => blocks.get(ids[i++])) + text.slice(end);
+}
+
+function saveOrder(body) {
+  const { projects } = readData();
+  let text = fs.readFileSync(DATA_FILE, "utf8");
+  const done = [];
+  for (const category of CATEGORIES) {
+    const ids = body.order && body.order[category];
+    if (!Array.isArray(ids)) throw new Error("Ordre invalide.");
+    const current = (projects[category] || []).map((p) => p.id);
+    if (ids.join() === current.join()) continue;
+    text = reorderCategory(text, category, ids);
+    done.push(category);
+  }
+  if (!done.length) return;
+  writeData(text);
+  const check = readData().projects;
+  if (CATEGORIES.some((c) => check[c].map((p) => p.id).join() !== body.order[c].join())) {
+    throw new Error("L'ordre enregistré ne correspond pas : vérifie projects-data.js.");
+  }
+  bumpDataVersion(timestamp());
+  console.log(`✓ Ordre des carrousels : ${done.join(", ")}`);
+}
+
+/* ---------- publication (git) ---------- */
+function git(args) {
+  return new Promise((resolve, reject) => {
+    execFile(
+      "git",
+      ["-c", "core.quotepath=false", ...args],
+      { cwd: ROOT, env: { ...process.env, GIT_TERMINAL_PROMPT: "0" }, maxBuffer: 20 * 1024 * 1024 },
+      (err, stdout, stderr) => {
+        if (!err) return resolve(stdout);
+        const failure = new Error(`git ${args[0]} a échoué`);
+        failure.detail = (stderr || stdout || err.message).trim();
+        reject(failure);
+      }
+    );
+  });
+}
+
+// Fichiers modifiés (porcelain, -z : noms avec espaces ou accents intacts)
+// et commits pas encore envoyés.
+async function gitStatus() {
+  const entries = (await git(["status", "--porcelain=v1", "-b", "-z", "--untracked-files=all"])).split("\0");
+  const head = /^## (.+?)(?:\.\.\.(\S+))?(?: \[(.*)\])?$/.exec(entries.shift()) || [];
+  const changes = [];
+  for (let i = 0; i < entries.length; i++) {
+    if (!entries[i]) continue;
+    const code = entries[i].slice(0, 2);
+    changes.push({ code, path: entries[i].slice(3) });
+    if (/[RC]/.test(code)) i++; // l'ancien nom suit, on le saute
+  }
+  return {
+    branch: head[1] || "?",
+    upstream: head[2] || null,
+    ahead: Number(/ahead (\d+)/.exec(head[3] || "")?.[1] || 0),
+    changes,
+  };
+}
+
+function pushError(err) {
+  const detail = err.detail || "";
+  let message = "L'envoi sur GitHub a échoué.";
+  if (/rejected|fetch first|non-fast-forward/i.test(detail)) {
+    message = "GitHub a des changements que ton ordinateur n'a pas : récupère-les d'abord (git pull dans VS Code), puis republie.";
+  } else if (/Authentication failed|could not read Username|403|denied/i.test(detail)) {
+    message = "GitHub refuse la connexion : fais un push une fois depuis VS Code pour te reconnecter, puis republie.";
+  } else if (/Could not resolve host|unable to access/i.test(detail)) {
+    message = "Impossible de joindre GitHub : vérifie ta connexion internet.";
+  }
+  const failure = new Error(message);
+  failure.detail = detail;
+  return failure;
+}
+
+// corps : { message, paths } ; paths = fichiers affichés dans l'outil, pour
+// ne rien publier d'autre que ce qui a été montré.
+let publishing = false;
+async function publish(body) {
+  if (publishing) throw new Error("Publication déjà en cours.");
+  publishing = true;
+  try {
+    const status = await gitStatus();
+    if (status.branch === "HEAD (no branch)") throw new Error("Aucune branche active : publie depuis VS Code.");
+    const shown = [...(body.paths || [])].sort().join("\n");
+    if (shown !== status.changes.map((c) => c.path).sort().join("\n")) {
+      throw new Error("Les fichiers ont changé entre-temps : rouvre la fenêtre Publier pour vérifier.");
+    }
+    if (status.changes.length) {
+      const message = String(body.message || "").trim();
+      if (!message) throw new Error("Écris un message pour décrire les changements.");
+      await git(["add", "-A"]);
+      await git(["commit", "-m", message]);
+      console.log(`✓ Commit : ${message}`);
+    } else if (!status.ahead && status.upstream) {
+      throw new Error("Rien à publier.");
+    }
+    try {
+      await git(status.upstream ? ["push"] : ["push", "-u", "origin", status.branch]);
+    } catch (err) {
+      throw pushError(err);
+    }
+    console.log("✓ Envoyé sur GitHub");
+  } finally {
+    publishing = false;
+  }
+}
+
 /* ---------- serveur ---------- */
 function send(res, status, body, type = "application/json; charset=utf-8") {
   res.writeHead(status, { "Content-Type": type, "Cache-Control": "no-store" });
@@ -229,7 +363,7 @@ function readBody(req) {
 
 function serveStatic(req, res) {
   let urlPath = decodeURIComponent(new URL(req.url, "http://localhost").pathname);
-  if (urlPath === "/") urlPath = "/_outils/miniatures.html";
+  if (urlPath === "/") urlPath = "/_outils/projets.html";
   const file = path.resolve(ROOT, "." + urlPath);
   if (!file.startsWith(ROOT + path.sep)) return send(res, 403, "Interdit", "text/plain");
   fs.readFile(file, (err, buf) => {
@@ -238,17 +372,31 @@ function serveStatic(req, res) {
   });
 }
 
+// L'outil écrit des fichiers et publie sur GitHub : seule sa propre page
+// (http://localhost:PORT) peut l'appeler, pas un autre site ouvert dans le
+// navigateur.
+const LOCAL_HOSTS = [`localhost:${PORT}`, `127.0.0.1:${PORT}`];
+function isLocal(req) {
+  if (!LOCAL_HOSTS.includes(req.headers.host)) return false;
+  const origin = req.headers.origin;
+  return req.method === "GET" || !origin || LOCAL_HOSTS.some((h) => origin === `http://${h}`);
+}
+
 const server = http.createServer(async (req, res) => {
   try {
+    if (!isLocal(req)) return send(res, 403, "Interdit", "text/plain; charset=utf-8");
     const route = `${req.method} ${req.url}`;
     if (route === "GET /api/data") return send(res, 200, readData());
+    if (route === "GET /api/git") return send(res, 200, await gitStatus());
     if (route === "POST /api/project") { saveProject(await readBody(req)); return send(res, 200, { ok: true }); }
     if (route === "POST /api/orbit") { saveOrbit(await readBody(req)); return send(res, 200, { ok: true }); }
+    if (route === "POST /api/order") { saveOrder(await readBody(req)); return send(res, 200, { ok: true }); }
+    if (route === "POST /api/publish") { await publish(await readBody(req)); return send(res, 200, { ok: true }); }
     if (req.method === "GET") return serveStatic(req, res);
     send(res, 405, "Méthode non gérée", "text/plain; charset=utf-8");
   } catch (err) {
-    console.error("✗", err.message);
-    send(res, 400, { error: err.message });
+    console.error("✗", err.message + (err.detail ? `\n${err.detail}` : ""));
+    send(res, 400, { error: err.message, detail: err.detail });
   }
 });
 
@@ -260,7 +408,7 @@ server.on("error", (err) => {
 
 server.listen(PORT, "127.0.0.1", () => {
   const url = `http://localhost:${PORT}`;
-  console.log(`Outil des miniatures : ${url}`);
+  console.log(`Gestion des projets : ${url}`);
   console.log("Laisse cette fenêtre ouverte pendant que tu l'utilises, ferme-la pour l'arrêter.");
   if (!process.env.NO_OPEN) {
     const opener = process.platform === "win32" ? `start "" "${url}"` : process.platform === "darwin" ? `open "${url}"` : `xdg-open "${url}"`;
