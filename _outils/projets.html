@@ -27,7 +27,7 @@
     color: var(--text);
     font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
   }
-  button, input { font: inherit; color: inherit; }
+  button, input, textarea, select { font: inherit; color: inherit; }
 
   /* ---------- en-tête ---------- */
   header {
@@ -290,10 +290,10 @@
   .ring.order.is-square { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
   .ring.order .thumb { aspect-ratio: 16 / 10; border-radius: 4px; }
   .ring.order.is-square .thumb { aspect-ratio: 1; }
-  .ring.order figure { cursor: grab; }
+  .ring .thumb[draggable="true"] { cursor: grab; }
   .ring.order figure.is-dragging { opacity: 0.35; }
   .ring.order figure.is-over .thumb { outline: 2px solid var(--text); outline-offset: 3px; }
-  .ring .featured {
+  .ring .flag {
     position: absolute;
     top: 6px;
     right: 6px;
@@ -334,13 +334,84 @@
   .changes .what { flex: 0 0 70px; color: var(--muted); }
   .changes .file { overflow-wrap: anywhere; }
   .field { display: flex; flex-direction: column; gap: 6px; color: var(--muted); font-size: 13px; }
-  .field input {
+  .field small { margin-left: 6px; font-size: 12px; opacity: 0.75; }
+  .field input, .field textarea, .field select {
     padding: 8px 10px;
     border: 1px solid var(--line);
     background: var(--bg);
+    color: var(--text);
     font-size: 14px;
   }
+  .field textarea { resize: vertical; line-height: 1.5; }
+  .field input:focus, .field textarea:focus, .field select:focus { outline: none; border-color: var(--muted); }
   .field[hidden] { display: none; }
+
+  /* ---------- textes, vidéo et galerie d'un projet ---------- */
+  .form { display: grid; gap: 14px; max-width: 860px; }
+  .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+  .form .hint { margin-top: -6px; font-size: 13px; }
+  .hint.is-error { color: #ff7a6e; }
+  .hint a { color: var(--text); }
+  .cover-preview {
+    position: relative;
+    width: min(420px, 100%);
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: #000;
+  }
+  .cover-preview img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .cover-preview.is-drop, #gallery-block.is-drop { outline: 2px dashed var(--text); outline-offset: 6px; }
+  .cover-preview.is-empty img, .frame.is-empty img { display: none; }
+  .cover-preview.is-empty::after, .frame.is-empty::after {
+    content: "Aucune image";
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  #editor, .gallery figure { min-width: 0; } /* les champs ne doivent pas élargir la page */
+  .gallery textarea {
+    width: 100%;
+    margin-top: 6px;
+    padding: 5px 7px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 12px;
+    line-height: 1.35;
+    resize: vertical;
+  }
+  .gallery textarea:focus { outline: none; border-color: var(--muted); }
+  .add-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    aspect-ratio: 1;
+    border: 1px dashed var(--muted);
+    background: var(--panel);
+    color: var(--muted);
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .add-tile span { font-size: 28px; line-height: 1; }
+  .add-tile:hover { border-color: var(--text); color: var(--text); }
+  .item--new { color: var(--muted); }
+  .item--new .plus {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border: 1px dashed var(--muted);
+    font-size: 24px;
+  }
+  .item--new:hover, .item--new.is-active { color: var(--text); }
   .warn { margin: 14px 0 0; color: #f0b35e; font-size: 13px; }
   .warn:empty { display: none; }
   #publish-status { min-height: 1.5em; margin: 14px 0 0; color: var(--muted); font-size: 13px; }
@@ -432,17 +503,14 @@
   const pos = (s) => `${Math.round(s.x)}% ${Math.round(s.y)}%`;
   const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
+  const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const move = (list, from, to) => list.splice(to, 0, ...list.splice(from, 1));
+
   function allProjects() {
     return CATEGORIES.flatMap((c) => data.projects[c].map((p) => ({ ...p, category: c })));
   }
   function byId(id) {
     return allProjects().find((p) => p.id === id);
-  }
-  function galleryOf(p) {
-    const list = p.images && p.images.length ? p.images : [p.cover];
-    const srcs = list.map((img) => (typeof img === "string" ? img : img.src));
-    if (p.cover && !srcs.includes(p.cover)) srcs.unshift(p.cover);
-    return srcs;
   }
   // Image + cadrage affichés dans l'anneau pour un projet (sur le site).
   function orbitImage(p) {
@@ -466,7 +534,9 @@
   function isDirty() {
     if (tab === "orbit") return orbitDraft && !same(orbitDraft, data.heroOrbit);
     if (tab === "order") return orderDraft && !same(orderDraft, currentOrder());
-    return Boolean(draft && saved) && (!same(draft.card, saved.card) || heroChanged() || draft.inOrbit !== saved.inOrbit);
+    if (!draft || !saved) return false;
+    return ["info", "video", "cover", "gallery", "card"].some((k) => !same(draft[k], saved[k]))
+      || heroChanged() || draft.inOrbit !== saved.inOrbit;
   }
 
   function confirmLeave() {
@@ -486,7 +556,9 @@
     } else {
       renderList();
       const list = data.projects[tab];
-      select(list.find((p) => p.id === keepId) || list[0]);
+      const p = list.find((x) => x.id === keepId) || list[0];
+      if (p) select(p);
+      else selectNew();
     }
   }
 
@@ -498,6 +570,14 @@
 
   function renderList() {
     listEl.innerHTML = "";
+    const add = document.createElement("button");
+    add.type = "button";
+    add.className = "item item--new";
+    add.innerHTML = `<span class="plus">+</span><span>Nouveau projet<small>${CATEGORY_TITLE[tab]}</small></span>`;
+    add.addEventListener("click", () => {
+      if (!project?.isNew && confirmLeave()) selectNew();
+    });
+    listEl.appendChild(add);
     data.projects[tab].forEach((p) => {
       const item = document.createElement("button");
       item.type = "button";
@@ -505,7 +585,7 @@
       item.dataset.id = p.id;
       const inRing = data.heroOrbit.includes(p.id);
       item.innerHTML = `<img src="${url(p.thumb || p.cover)}" alt="" style="object-position:${p.thumbPosition || "50% 50%"}">
-        <span>${p.title}${p.client ? `<small>${p.client}</small>` : ""}${inRing ? `<span class="badge">Anneau</span>` : ""}</span>`;
+        <span>${esc(p.title)}${p.client ? `<small>${esc(p.client)}</small>` : ""}${inRing ? `<span class="badge">Anneau</span>` : ""}</span>`;
       item.addEventListener("click", () => {
         if (p.id !== project?.id && confirmLeave()) select(p);
       });
@@ -516,31 +596,149 @@
   /* =========================================================
      Onglets photos / vidéos / graphisme : un projet
      ========================================================= */
+  const FRAMES = ["Projet client", "Projet personnel", "Projet étudiant"]; // 1er tag des projets graphisme
+  const WEB_MAX = 2000; // grand côté des images de galerie et des couvertures
+  let pending = new Map(); // URL blob: -> { blob, name } : images préparées, pas encore enregistrées
+
+  function videoLink(media) {
+    if (!media || !media.src) return "";
+    if (media.type === "youtube") return `https://www.youtube.com/watch?v=${media.src}`;
+    if (media.type === "vimeo") return `https://vimeo.com/${media.src}`;
+    return media.src;
+  }
+
+  // Lien YouTube (watch, youtu.be, Shorts, embed), Vimeo, ou identifiant
+  // YouTube seul -> { type, src, shorts? } ; null si non reconnu.
+  function parseVideoLink(text) {
+    const s = String(text || "").trim();
+    if (/^[\w-]{11}$/.test(s)) return { type: "youtube", src: s };
+    let u;
+    try { u = new URL(/^https?:\/\//i.test(s) ? s : "https://" + s); } catch { return null; }
+    const host = u.hostname.replace(/^(www|m|music)\./, "");
+    let id = null;
+    if (host === "youtu.be") id = u.pathname.split("/")[1];
+    if (host === "youtube.com" || host === "youtube-nocookie.com") {
+      id = u.searchParams.get("v") || (/^\/(?:shorts|embed|live|v)\/([\w-]{11})/.exec(u.pathname) || [])[1];
+    }
+    if (id && /^[\w-]{11}$/.test(id)) return { type: "youtube", src: id, shorts: u.pathname.startsWith("/shorts/") };
+    if (host === "vimeo.com" || host === "player.vimeo.com") {
+      const m = /\/(\d{5,})(?:\/|$)/.exec(u.pathname);
+      if (m) return { type: "vimeo", src: m[1] };
+    }
+    return null;
+  }
+
   function initialState(p) {
     const [x, y] = (p.thumbPosition || "50% 50%").split(" ").map(parseFloat);
+    const thumb = p.thumb || p.cover || null;
+    const tags = p.tags || [];
+    const framed = tab === "graphisme" && FRAMES.includes(tags[0]);
     return {
-      card: { kind: "current", src: p.thumb || p.cover, x, y },
+      info: {
+        title: p.title || "",
+        client: p.client || "",
+        description: p.description || "",
+        frame: tab !== "graphisme" ? null : framed ? tags[0] : p.isNew ? FRAMES[1] : "",
+        tags: (framed ? tags.slice(1) : tags).join(", "),
+      },
+      video: tab === "videos" ? { link: videoLink(p.media), vertical: Boolean(p.media && p.media.vertical) } : null,
+      cover: tab === "videos" ? p.cover || null : null,
+      gallery: tab === "videos"
+        ? null
+        : (p.images || []).map((img) => (typeof img === "string" ? { src: img, alt: p.title } : { src: img.src, alt: img.alt || "" })),
+      card: p.isNew ? { kind: "gallery", src: null, x: 50, y: 50 } : { kind: "current", src: thumb, x, y },
       hero: p.heroThumb
         ? { mode: "custom", kind: "current", src: p.heroThumb, x: 50, y: 50, zoom: 1 }
-        : { mode: "same", kind: "card", src: p.thumb || p.cover, x, y, zoom: 1 },
+        : { mode: "same", kind: "card", src: thumb, x, y, zoom: 1 },
       inOrbit: data.heroOrbit.includes(p.id),
     };
   }
 
   function select(p) {
     project = { ...p, category: tab };
+    pending.forEach((_, src) => URL.revokeObjectURL(src));
+    pending = new Map();
     uploads = { card: null, hero: null };
     saved = initialState(project);
     draft = structuredClone(saved);
-    listEl.querySelectorAll(".item").forEach((el) => el.classList.toggle("is-active", el.dataset.id === p.id));
+    listEl.querySelectorAll(".item").forEach((el) => {
+      el.classList.toggle("is-active", project.isNew ? el.classList.contains("item--new") : el.dataset.id === project.id);
+    });
     renderProject();
+  }
+
+  function selectNew() {
+    select({ isNew: true, id: null, title: "", client: "", description: "", cover: "", tags: [], images: [] });
+  }
+
+  // Images proposées pour la miniature : la galerie (ou la couverture d'une vidéo).
+  function cardSources() {
+    if (tab === "videos") return draft.cover ? [draft.cover] : [];
+    const srcs = draft.gallery.map((g) => g.src);
+    if (!project.isNew && project.cover && !srcs.includes(project.cover)) srcs.unshift(project.cover);
+    return srcs;
+  }
+
+  // Après un changement de galerie ou de couverture, la miniature et la
+  // vignette ne doivent pas rester sur une image retirée.
+  function syncImageRefs() {
+    const srcs = cardSources();
+    if (draft.card.kind === "gallery" && !srcs.includes(draft.card.src)) {
+      draft.card = project.isNew ? { kind: "gallery", src: srcs[0] || null, x: 50, y: 50 } : structuredClone(saved.card);
+    }
+    const h = draft.hero;
+    if (h.mode === "custom" && h.kind === "gallery" && !srcs.includes(h.src)) draft.hero = structuredClone(saved.hero);
   }
 
   function renderProject() {
     const square = tab === "photos";
+    const isVideo = tab === "videos";
     editorEl.innerHTML = `
-      <h2>${project.title}</h2>
-      <p class="hint">Fais glisser une image dans un aperçu pour la cadrer. Tu peux aussi y déposer une image depuis ton ordinateur.</p>
+      <h2 id="project-title"></h2>
+      <p class="hint">${project.isNew
+        ? `Nouveau projet ${CATEGORY_LABEL[tab]} : il sera ajouté à la fin du carrousel.`
+        : `Identifiant : ${esc(project.id)}`}</p>
+
+      <section class="block">
+        <h3>Textes</h3>
+        <div class="form">
+          <div class="form-row">
+            <label class="field"><span>Titre</span><input type="text" data-info="title" maxlength="200"></label>
+            <label class="field"><span>Sous-titre <small>client ou contexte, affiché sous le titre</small></span><input type="text" data-info="client" maxlength="200"></label>
+          </div>
+          ${tab === "graphisme" ? `
+          <label class="field"><span>Cadre <small>premier mot-clé de la popup</small></span>
+            <select data-info="frame"><option value="">Aucun</option>${FRAMES.map((f) => `<option>${f}</option>`).join("")}</select></label>` : ""}
+          <label class="field"><span>Description</span><textarea data-info="description" rows="4" maxlength="3000"></textarea></label>
+          <label class="field"><span>Mots-clés <small>séparés par des virgules</small></span><input type="text" data-info="tags" placeholder="Sport, Reportage"></label>
+        </div>
+      </section>
+
+      ${isVideo ? `
+      <section class="block">
+        <h3>Vidéo</h3>
+        <div class="form">
+          <label class="field"><span>Lien YouTube ou Vimeo</span><input type="text" id="video-link" placeholder="https://www.youtube.com/watch?v=…"></label>
+          <p class="hint" id="video-status"></p>
+          <label class="check"><input type="checkbox" id="video-vertical"> Vidéo verticale (Shorts, Reels) : la popup s'affiche en portrait</label>
+        </div>
+        <div class="row" style="margin-top:20px">
+          <div class="cover-preview" id="cover-preview"><img alt=""></div>
+          <div class="side">
+            <p class="hint">Image de couverture, affichée dans la popup avant la lecture. Redimensionnée et compressée automatiquement.</p>
+            <button type="button" class="btn small" id="cover-upload">Importer une image</button>
+            <button type="button" class="btn small" id="cover-youtube">Prendre l'image YouTube</button>
+          </div>
+        </div>
+      </section>` : `
+      <section class="block" id="gallery-block">
+        <h3>Galerie <span id="gallery-count"></span></h3>
+        <p class="hint">Les images de la popup, dans l'ordre. Glisse tes fichiers ici ou clique sur « Ajouter » :
+          ils sont redimensionnés (${WEB_MAX} px max) et compressés automatiquement.
+          ${tab === "graphisme" ? "La 1re image est la grande image en haut de la popup. " : ""}Le texte sous chaque image la décrit
+          (lecteurs d'écran, Google).</p>
+        <div class="ring order is-square gallery" id="gallery"></div>
+      </section>`}
 
       <div class="blocks">
       <section class="block">
@@ -548,7 +746,7 @@
         <div class="row">
           <div class="frame frame--card${square ? " is-square" : ""}" data-target="card"><img alt=""></div>
           <div class="side">
-            <p class="hint">Carte du carrousel ${CATEGORY_LABEL[tab]}. L'image reste entière, le site applique le cadrage.</p>
+            <p class="hint">Carte du carrousel ${CATEGORY_LABEL[tab]}. Fais glisser l'image pour la cadrer ; l'image reste entière, le site applique le cadrage.</p>
             <button type="button" class="btn small" data-center="card">Recentrer</button>
           </div>
         </div>
@@ -574,6 +772,35 @@
       </section>
       </div>
     `;
+
+    editorEl.querySelectorAll("[data-info]").forEach((el) => {
+      el.value = draft.info[el.dataset.info] ?? "";
+      el.addEventListener("input", () => {
+        draft.info[el.dataset.info] = el.value;
+        updateTitle();
+        updateSavebar();
+      });
+    });
+    updateTitle();
+
+    if (isVideo) {
+      const link = $("#video-link");
+      link.value = draft.video.link;
+      link.addEventListener("input", () => {
+        draft.video.link = link.value;
+        if (parseVideoLink(link.value)?.shorts) draft.video.vertical = true;
+        updateVideo();
+        updateSavebar();
+      });
+      $("#video-vertical").addEventListener("change", (e) => { draft.video.vertical = e.target.checked; updateSavebar(); });
+      $("#cover-upload").addEventListener("click", () => openFiles("cover"));
+      $("#cover-youtube").addEventListener("click", useYoutubeCover);
+      enableFileDrop($("#cover-preview"), (files) => setCoverFile(files[0]));
+      updateVideo();
+    } else {
+      enableFileDrop($("#gallery-block"), addGalleryFiles);
+      renderGallery();
+    }
 
     editorEl.querySelectorAll(".frame").forEach(enableFrame);
     editorEl.querySelectorAll("[data-center]").forEach((b) => {
@@ -603,17 +830,208 @@
     update();
   }
 
+  function updateTitle() {
+    $("#project-title").textContent = draft.info.title.trim() || (project.isNew ? "Nouveau projet" : "Sans titre");
+  }
+
+  /* ---------- vidéo : lien et couverture ---------- */
+  function updateVideo() {
+    const media = parseVideoLink(draft.video.link);
+    const keptFile = draft.video.link === saved.video.link && project.media?.type === "file";
+    const status = $("#video-status");
+    status.className = "hint";
+    if (keptFile) {
+      status.textContent = "Fichier vidéo hébergé sur le site.";
+    } else if (!draft.video.link.trim()) {
+      status.textContent = "Colle le lien de la vidéo (page YouTube, youtu.be, Shorts ou Vimeo).";
+    } else if (!media) {
+      status.textContent = "Lien non reconnu : colle un lien YouTube ou Vimeo.";
+      status.className = "hint is-error";
+    } else {
+      status.innerHTML = `${media.type === "youtube" ? "YouTube" : "Vimeo"} · ${esc(media.src)} · <a href="${esc(videoLink(media))}" target="_blank">voir la vidéo ↗</a>`;
+    }
+    $("#video-vertical").checked = draft.video.vertical;
+    $("#cover-youtube").disabled = media?.type !== "youtube";
+    const preview = $("#cover-preview");
+    const img = preview.querySelector("img");
+    preview.classList.toggle("is-empty", !draft.cover);
+    if (draft.cover && img.dataset.src !== draft.cover) {
+      img.dataset.src = draft.cover;
+      img.src = url(draft.cover);
+    }
+  }
+
+  async function setCoverFile(file) {
+    const d = draft;
+    try {
+      setStatus("Préparation de l'image…");
+      const src = await prepareImage(file);
+      if (draft !== d) return;
+      draft.cover = src;
+      syncImageRefs();
+      updateVideo();
+      renderChoices();
+      update();
+    } catch (err) {
+      setStatus(err.message, "error");
+    }
+  }
+
+  async function useYoutubeCover() {
+    const media = parseVideoLink(draft.video.link);
+    if (media?.type !== "youtube") return;
+    setStatus("Récupération de l'image YouTube…");
+    try {
+      const res = await fetch(`/api/youtube-cover?id=${encodeURIComponent(media.src)}`);
+      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || "Image YouTube introuvable.");
+      await setCoverFile(new File([await res.blob()], `youtube-${media.src}.jpg`, { type: "image/jpeg" }));
+    } catch (err) {
+      setStatus(err.message, "error");
+    }
+  }
+
+  /* ---------- galerie (photos, graphisme) ---------- */
+  function renderGallery() {
+    const box = $("#gallery");
+    $("#gallery-count").textContent = `(${draft.gallery.length})`;
+    box.innerHTML = draft.gallery.map((g, i) => `
+      <figure data-index="${i}">
+        <div class="thumb"><img src="${url(g.src)}" alt="" draggable="false"><span class="num">${i + 1}</span>${pending.has(g.src) ? `<span class="flag">Nouvelle</span>` : ""}</div>
+        <textarea rows="2" maxlength="300" placeholder="Ce que montre l'image"></textarea>
+        <div class="tools">
+          <button type="button" data-act="left" title="Avancer" ${i === 0 ? "disabled" : ""}>←</button>
+          <button type="button" data-act="right" title="Reculer" ${i === draft.gallery.length - 1 ? "disabled" : ""}>→</button>
+          <button type="button" data-act="remove" title="Retirer de la galerie">×</button>
+        </div>
+      </figure>`).join("") + `
+      <button type="button" class="add-tile" id="gallery-add"><span>+</span>Ajouter des images</button>`;
+    box.querySelectorAll("figure").forEach((fig) => {
+      const i = Number(fig.dataset.index);
+      const alt = fig.querySelector("textarea");
+      alt.value = draft.gallery[i].alt;
+      alt.addEventListener("input", () => { draft.gallery[i].alt = alt.value; updateSavebar(); });
+      fig.querySelectorAll("[data-act]").forEach((b) => {
+        b.addEventListener("click", () => {
+          if (b.dataset.act === "remove") draft.gallery.splice(i, 1);
+          else move(draft.gallery, i, b.dataset.act === "left" ? i - 1 : i + 1);
+          galleryChanged();
+        });
+      });
+    });
+    sortable(box, draft.gallery, galleryChanged);
+    $("#gallery-add").addEventListener("click", () => openFiles("gallery"));
+  }
+
+  function galleryChanged() {
+    syncImageRefs();
+    renderGallery();
+    renderChoices();
+    update();
+  }
+
+  async function addGalleryFiles(files) {
+    const d = draft;
+    const errors = [];
+    for (const [n, file] of files.entries()) {
+      setStatus(`Préparation des images ${n + 1}/${files.length}…`);
+      try {
+        const src = await prepareImage(file);
+        if (draft !== d) return;
+        draft.gallery.push({ src, alt: "" });
+        galleryChanged();
+      } catch (err) {
+        errors.push(err.message);
+      }
+    }
+    if (errors.length) setStatus(errors.join(" · "), "error");
+  }
+
+  /* ---------- fichiers ---------- */
+  function openFiles(target) {
+    uploadTarget = target;
+    fileInput.multiple = target === "gallery";
+    fileInput.value = "";
+    fileInput.click();
+  }
+
+  fileInput.addEventListener("change", () => {
+    const files = [...fileInput.files];
+    if (!files.length) return;
+    if (uploadTarget === "gallery") addGalleryFiles(files);
+    else if (uploadTarget === "cover") setCoverFile(files[0]);
+    else useUpload(uploadTarget, files[0]);
+  });
+
+  // Dépôt de fichiers depuis l'ordinateur sur une zone.
+  function enableFileDrop(el, onFiles) {
+    const hasFiles = (e) => [...(e.dataTransfer?.types || [])].includes("Files");
+    el.addEventListener("dragover", (e) => {
+      if (!hasFiles(e)) return;
+      e.preventDefault();
+      el.classList.add("is-drop");
+    });
+    el.addEventListener("dragleave", (e) => {
+      if (!el.contains(e.relatedTarget)) el.classList.remove("is-drop");
+    });
+    el.addEventListener("drop", (e) => {
+      if (!hasFiles(e)) return;
+      e.preventDefault();
+      el.classList.remove("is-drop");
+      onFiles([...e.dataTransfer.files]);
+    });
+  }
+  // Un fichier lâché à côté d'une zone ne doit pas remplacer la page.
+  window.addEventListener("dragover", (e) => e.preventDefault());
+  window.addEventListener("drop", (e) => e.preventDefault());
+
+  // Glisser-déposer pour réordonner les <figure data-index> d'un conteneur,
+  // en attrapant la carte par son image.
+  function sortable(container, list, after) {
+    let from = null;
+    container.querySelectorAll("figure[data-index]").forEach((fig) => {
+      const i = Number(fig.dataset.index);
+      fig.querySelector(".thumb").draggable = true;
+      fig.addEventListener("dragstart", (e) => {
+        from = i;
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", String(i));
+        fig.classList.add("is-dragging");
+      });
+      fig.addEventListener("dragend", () => {
+        from = null;
+        container.querySelectorAll("figure").forEach((f) => f.classList.remove("is-dragging", "is-over"));
+      });
+      fig.addEventListener("dragover", (e) => {
+        if (from === null || from === i) return;
+        e.preventDefault();
+        fig.classList.add("is-over");
+      });
+      fig.addEventListener("dragleave", (e) => {
+        if (!fig.contains(e.relatedTarget)) fig.classList.remove("is-over");
+      });
+      fig.addEventListener("drop", (e) => {
+        if (from === null) return;
+        e.preventDefault();
+        // la carte déplacée prend la place de celle sur laquelle on la lâche
+        move(list, from, i);
+        from = null;
+        after();
+      });
+    });
+  }
+
   // Tuiles de choix d'image (galerie du projet + import).
   function renderChoices() {
+    const sources = cardSources().map((src) => ({ kind: "gallery", src, tag: pending.has(src) ? "Nouvelle" : "" }));
     const tiles = {
       card: [
-        { kind: "current", src: project.thumb || project.cover, tag: "Actuelle" },
-        ...galleryOf(project).map((src) => ({ kind: "gallery", src })),
+        ...(project.isNew ? [] : [{ kind: "current", src: project.thumb || project.cover, tag: "Actuelle" }]),
+        ...sources,
       ],
       hero: [
         ...(project.heroThumb ? [{ kind: "current", src: project.heroThumb, tag: "Actuelle" }] : []),
         { kind: "card", src: null, tag: "Miniature" },
-        ...galleryOf(project).map((src) => ({ kind: "gallery", src })),
+        ...sources,
       ],
     };
     ["card", "hero"].forEach((target) => {
@@ -626,7 +1044,7 @@
         b.dataset.kind = t.kind;
         if (t.src) b.dataset.src = t.src;
         const shown = t.kind === "card" ? draft.card.src : t.src;
-        b.innerHTML = `<img src="${url(shown)}" alt="" loading="lazy">${t.tag ? `<span class="tag">${t.tag}</span>` : ""}`;
+        b.innerHTML = `${shown ? `<img src="${url(shown)}" alt="" loading="lazy">` : ""}${t.tag ? `<span class="tag">${t.tag}</span>` : ""}`;
         b.addEventListener("click", () => {
           const s = draft[target];
           s.kind = t.kind;
@@ -653,14 +1071,10 @@
       imp.type = "button";
       imp.className = "import";
       imp.innerHTML = `<span>+</span>Importer`;
-      imp.addEventListener("click", () => { uploadTarget = target; fileInput.value = ""; fileInput.click(); });
+      imp.addEventListener("click", () => openFiles(target));
       box.appendChild(imp);
     });
   }
-
-  fileInput.addEventListener("change", () => {
-    if (fileInput.files[0]) useUpload(uploadTarget, fileInput.files[0]);
-  });
 
   function useUpload(target, file) {
     if (!file || !file.type.startsWith("image/")) return setStatus("Ce fichier n'est pas une image.", "error");
@@ -677,7 +1091,7 @@
 
   // Met à jour les aperçus, les sélections et la barre d'enregistrement.
   function update() {
-    if (tab === "orbit") return updateSavebar();
+    if (tab === "orbit" || tab === "order") return updateSavebar();
     // la vignette "comme la miniature" suit la carte en direct
     if (draft.hero.mode === "same") Object.assign(draft.hero, { src: draft.card.src, x: draft.card.x, y: draft.card.y, zoom: 1 });
     else if (draft.hero.kind === "card") draft.hero.src = draft.card.src;
@@ -686,10 +1100,12 @@
       const frame = editorEl.querySelector(`.frame[data-target="${target}"]`);
       const img = frame.querySelector("img");
       const s = draft[target];
-      if (img.dataset.src !== s.src) {
-        img.dataset.src = s.src;
+      frame.classList.toggle("is-empty", !s.src);
+      if (img.dataset.src !== (s.src || "")) {
+        img.dataset.src = s.src || "";
         img.onload = () => layout(frame);
-        img.src = url(s.src);
+        if (s.src) img.src = url(s.src);
+        else img.removeAttribute("src");
       }
       layout(frame);
       editorEl.querySelectorAll(`[data-choices="${target}"] button`).forEach((b) => {
@@ -761,17 +1177,10 @@
     const stop = () => { last = null; frame.classList.remove("is-dragging"); };
     frame.addEventListener("pointerup", stop);
     frame.addEventListener("pointercancel", stop);
-
-    frame.addEventListener("dragover", (e) => { e.preventDefault(); frame.classList.add("is-drop"); });
-    frame.addEventListener("dragleave", () => frame.classList.remove("is-drop"));
-    frame.addEventListener("drop", (e) => {
-      e.preventDefault();
-      frame.classList.remove("is-drop");
-      useUpload(target, e.dataTransfer.files[0]);
-    });
+    enableFileDrop(frame, (files) => useUpload(target, files[0]));
   }
 
-  /* ---------- rendu des images (WebP, dans le navigateur) ---------- */
+  /* ---------- rendu des images (dans le navigateur) ---------- */
   function loadImage(src) {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -784,6 +1193,46 @@
     const data = canvas.toDataURL("image/webp", 0.85);
     if (!data.startsWith("data:image/webp")) throw new Error("Ce navigateur ne sait pas créer de WebP : utilise Chrome ou Edge.");
     return data;
+  }
+  function blobToDataUrl(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error("Lecture de l'image impossible."));
+      reader.readAsDataURL(blob);
+    });
+  }
+  // Photo de galerie ou couverture : ${WEB_MAX}px max sur le grand côté, en
+  // JPEG, ou en WebP si l'image a de la transparence (logo PNG…).
+  async function prepareImage(file) {
+    if (!file || !file.type.startsWith("image/")) throw new Error(`${file?.name || "Fichier"} : ce n'est pas une image.`);
+    const source = URL.createObjectURL(file);
+    try {
+      const img = await loadImage(source).catch(() => {
+        throw new Error(`${file.name} : format non pris en charge (utilise du JPEG, PNG ou WebP).`);
+      });
+      const scale = Math.min(1, WEB_MAX / Math.max(img.naturalWidth, img.naturalHeight));
+      const w = Math.round(img.naturalWidth * scale);
+      const h = Math.round(img.naturalHeight * scale);
+      const canvas = Object.assign(document.createElement("canvas"), { width: w, height: h });
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
+      ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(img, 0, 0, w, h);
+      const alpha = !/jpe?g/.test(file.type) && hasTransparency(ctx, w, h);
+      const type = alpha ? "image/webp" : "image/jpeg";
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, type, alpha ? 0.9 : 0.86));
+      if (!blob || blob.type !== type) throw new Error("Ce navigateur ne sait pas convertir les images : utilise Chrome ou Edge.");
+      const src = URL.createObjectURL(blob);
+      pending.set(src, { blob, name: file.name });
+      return src;
+    } finally {
+      URL.revokeObjectURL(source);
+    }
+  }
+  function hasTransparency(ctx, w, h) {
+    const px = ctx.getImageData(0, 0, w, h).data;
+    for (let i = 3; i < px.length; i += 4) if (px[i] < 255) return true;
+    return false;
   }
   // Miniature de carte : image entière, 1000px de large max.
   async function renderCard(src) {
@@ -810,12 +1259,53 @@
     return toWebp(canvas);
   }
 
+  async function pendingBody(src) {
+    const { blob, name } = pending.get(src);
+    return { name, image: await blobToDataUrl(blob) };
+  }
+
+  // Envoie ce qui a changé ; renvoie l'identifiant du projet.
   async function saveProject() {
-    const body = { id: project.id };
+    const isNew = project.isNew;
+    const body = isNew ? { create: { category: tab } } : { id: project.id };
+
+    if (isNew || !same(draft.info, saved.info)) {
+      if (!draft.info.title.trim()) throw new Error("Le titre est obligatoire.");
+      const tags = draft.info.tags.split(",").map((t) => t.trim()).filter(Boolean);
+      body.info = {
+        title: draft.info.title,
+        client: draft.info.client,
+        description: draft.info.description,
+        tags: draft.info.frame ? [draft.info.frame, ...tags] : tags,
+      };
+    }
+
+    if (tab === "videos") {
+      if (isNew || !same(draft.video, saved.video)) {
+        const keep = draft.video.link === saved.video.link && project.media;
+        const media = keep ? project.media : parseVideoLink(draft.video.link);
+        if (!media) throw new Error("Lien vidéo non reconnu : colle un lien YouTube ou Vimeo.");
+        body.media = { type: media.type, src: media.src, vertical: draft.video.vertical };
+      }
+      if (draft.cover !== saved.cover) body.cover = await pendingBody(draft.cover);
+      else if (isNew) throw new Error("Ajoute une image de couverture.");
+    } else if (isNew || !same(draft.gallery, saved.gallery)) {
+      if (!draft.gallery.length) throw new Error("Ajoute au moins une image à la galerie.");
+      body.gallery = [];
+      for (const g of draft.gallery) {
+        body.gallery.push(pending.has(g.src) ? { ...(await pendingBody(g.src)), alt: g.alt } : { src: g.src, alt: g.alt });
+      }
+    }
+
     if (!same(draft.card, saved.card)) {
       const c = draft.card;
+      if (!c.src) throw new Error("Ajoute une image pour la miniature.");
       body.card = { kind: c.kind, position: pos(c) };
-      if (c.kind === "gallery") body.card.src = c.src;
+      if (c.kind === "gallery") {
+        if (tab === "videos") body.card.fromCover = true;
+        else if (pending.has(c.src)) body.card.galleryIndex = draft.gallery.findIndex((g) => g.src === c.src);
+        else body.card.src = c.src;
+      }
       if (c.kind !== "current") body.card.image = await renderCard(c.src);
     }
     if (heroChanged()) {
@@ -824,7 +1314,7 @@
         : { mode: "custom", image: await renderHero(draft.hero) };
     }
     if (draft.inOrbit !== saved.inOrbit) body.inOrbit = draft.inOrbit;
-    await post("/api/project", body);
+    return (await post("/api/project", body)).id;
   }
 
   /* =========================================================
@@ -891,10 +1381,10 @@
   function renderOrderTab() {
     const tile = (c, id, i, list) => {
       const p = byId(id);
-      return `<figure data-id="${id}" draggable="true">
+      return `<figure data-index="${i}">
         <div class="thumb"><img src="${url(p.thumb || p.cover)}" alt="" draggable="false" style="object-position:${p.thumbPosition || "50% 50%"}">
-          <span class="num">${i + 1}</span>${HAS_FEATURED[c] && i === 1 ? `<span class="featured">En avant</span>` : ""}</div>
-        <figcaption>${p.title}</figcaption>
+          <span class="num">${i + 1}</span>${HAS_FEATURED[c] && i === 1 ? `<span class="flag">En avant</span>` : ""}</div>
+        <figcaption>${esc(p.title)}</figcaption>
         <div class="tools">
           <button type="button" data-act="left" title="Avancer" ${i === 0 ? "disabled" : ""}>←</button>
           <button type="button" data-act="right" title="Reculer" ${i === list.length - 1 ? "disabled" : ""}>→</button>
@@ -917,45 +1407,16 @@
         </section>`).join("")}
     `;
 
-    const move = (c, from, to) => {
-      const list = orderDraft[c];
-      list.splice(to, 0, ...list.splice(from, 1));
-      renderOrderTab();
-    };
-    let dragged = null; // { c, id }
-    editorEl.querySelectorAll(".order figure").forEach((fig) => {
-      const c = fig.parentElement.dataset.category;
-      const id = fig.dataset.id;
-      fig.querySelectorAll("[data-act]").forEach((b) => {
+    editorEl.querySelectorAll(".order[data-category]").forEach((grid) => {
+      const list = orderDraft[grid.dataset.category];
+      grid.querySelectorAll("[data-act]").forEach((b) => {
         b.addEventListener("click", () => {
-          const i = orderDraft[c].indexOf(id);
-          move(c, i, b.dataset.act === "left" ? i - 1 : i + 1);
+          const i = Number(b.closest("figure").dataset.index);
+          move(list, i, b.dataset.act === "left" ? i - 1 : i + 1);
+          renderOrderTab();
         });
       });
-      fig.addEventListener("dragstart", (e) => {
-        dragged = { c, id };
-        e.dataTransfer.effectAllowed = "move";
-        e.dataTransfer.setData("text/plain", id);
-        fig.classList.add("is-dragging");
-      });
-      fig.addEventListener("dragend", () => {
-        dragged = null;
-        editorEl.querySelectorAll(".order figure").forEach((f) => f.classList.remove("is-dragging", "is-over"));
-      });
-      fig.addEventListener("dragover", (e) => {
-        if (!dragged || dragged.c !== c || dragged.id === id) return;
-        e.preventDefault();
-        fig.classList.add("is-over");
-      });
-      fig.addEventListener("dragleave", (e) => {
-        if (!fig.contains(e.relatedTarget)) fig.classList.remove("is-over");
-      });
-      fig.addEventListener("drop", (e) => {
-        e.preventDefault();
-        if (!dragged || dragged.c !== c) return;
-        // la carte déplacée prend la place de celle sur laquelle on la lâche
-        move(c, orderDraft[c].indexOf(dragged.id), orderDraft[c].indexOf(id));
-      });
+      sortable(grid, list, renderOrderTab);
     });
     updateSavebar();
   }
@@ -965,6 +1426,7 @@
      ========================================================= */
   function updateSavebar() {
     const dirty = isDirty();
+    saveBtn.textContent = project?.isNew && CATEGORIES.includes(tab) ? "Créer le projet" : "Enregistrer";
     saveBtn.disabled = !dirty;
     resetBtn.disabled = !dirty;
     let warn = "";
@@ -995,11 +1457,13 @@
     saveBtn.disabled = true;
     setStatus("Enregistrement…");
     try {
+      const created = CATEGORIES.includes(tab) && project?.isNew;
+      let keepId = project?.id;
       if (tab === "orbit") await post("/api/orbit", { ids: orbitDraft });
       else if (tab === "order") await post("/api/order", { order: orderDraft });
-      else await saveProject();
-      await loadData(project?.id);
-      setStatus("Enregistré ✓", "ok");
+      else keepId = await saveProject();
+      await loadData(keepId);
+      setStatus(created ? "Projet créé ✓" : "Enregistré ✓", "ok");
     } catch (err) {
       setStatus(err.message, "error");
       saveBtn.disabled = false;
@@ -1016,8 +1480,7 @@
       renderOrderTab();
     } else {
       draft = structuredClone(saved);
-      renderChoices();
-      update();
+      renderProject();
     }
   });
 

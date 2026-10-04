@@ -5,8 +5,14 @@
    (ou `node _outils/projets.js` depuis la racine du site).
    Une page s'ouvre dans le navigateur sur http://localhost:4321.
 
-   Ce que fait l'outil (les images sont converties en WebP par le
-   navigateur, le serveur ne fait qu'écrire les fichiers) :
+   Ce que fait l'outil (les images sont redimensionnées et converties par
+   le navigateur, le serveur ne fait qu'écrire les fichiers) :
+   - projets : création et modification des textes, du lien vidéo, de la
+     couverture des vidéos et de la galerie des photos / graphisme ;
+     chaque projet est réécrit en entier dans projects-data.js ;
+   - images de galerie et couvertures : 2000px max sur le grand côté, en
+     JPEG (WebP si l'image a de la transparence), dans le dossier des
+     autres images du projet ou assets/images/<section>/<id>/ ;
    - miniature de carte : assets/images/thumbs/<id>.webp, image entière
      en 1000px de large max ; champs cover (si l'image vient de la
      galerie), thumb (avec ?v=) et thumbPosition (cadrage) ;
@@ -77,35 +83,57 @@ function imagesOf(project) {
   return srcs;
 }
 
-/* ---------- écriture de projects-data.js ---------- */
-function fieldRegex(field) {
-  return new RegExp(`^([ \\t]+)${field}: "[^"\\n]*",?[ \\t]*$`, "m");
-}
+/* ---------- écriture de projects-data.js ----------
+   Un projet est toujours réécrit en entier à partir de son objet, dans le
+   format du fichier : un champ par ligne, une image de galerie par ligne. */
+const FIELD_ORDER = ["id", "title", "client", "description", "cover", "thumb", "thumbPosition", "heroThumb", "tags", "media", "images"];
+const PROJECT_BLOCK = /^    \{[\s\S]*?^    \}/gm;
 
-// Remplace la valeur d'un champ texte dans le bloc d'un projet, ou
-// l'ajoute après le premier champ existant de `after`.
-function setField(block, field, value, after) {
-  const json = JSON.stringify(value);
-  if (fieldRegex(field).test(block)) {
-    return block.replace(fieldRegex(field), (m, indent) => `${indent}${field}: ${json},`);
+function inlineValue(value) {
+  if (Array.isArray(value)) return `[${value.map(inlineValue).join(", ")}]`;
+  if (value && typeof value === "object") {
+    return `{ ${Object.entries(value).map(([k, v]) => `${k}: ${inlineValue(v)}`).join(", ")} }`;
   }
-  for (const anchorField of after) {
-    const anchor = new RegExp(`^([ \\t]+)${anchorField}: [^\\n]*$`, "m");
-    if (anchor.test(block)) return block.replace(anchor, (m, indent) => `${m}\n${indent}${field}: ${json},`);
+  return JSON.stringify(value);
+}
+
+function formatProject(project) {
+  const rank = (k) => (FIELD_ORDER.includes(k) ? FIELD_ORDER.indexOf(k) : FIELD_ORDER.length);
+  const keys = Object.keys(project).filter((k) => project[k] !== undefined).sort((a, b) => rank(a) - rank(b));
+  const lines = keys.map((k) =>
+    k === "images" && project.images.length
+      ? `      images: [\n${project.images.map((img) => `        ${inlineValue(img)}`).join(",\n")}\n      ]`
+      : `      ${k}: ${inlineValue(project[k])}`
+  );
+  return `    {\n${lines.join(",\n")}\n    }`;
+}
+
+function categoryRange(text, category) {
+  const start = text.indexOf(`\n  ${category}: [`);
+  const end = text.indexOf("\n  ]", start);
+  if (start < 0 || end < 0) throw new Error(`tableau ${category} introuvable dans projects-data.js`);
+  return { start, end };
+}
+
+function blockId(block) {
+  const id = /^      id: ("[^"\n]*"),/m.exec(block);
+  return id ? JSON.parse(id[1]) : null;
+}
+
+// Remplace le bloc du projet, ou l'ajoute à la fin de sa section.
+function writeProjectBlock(text, category, project) {
+  const eol = text.includes("\r\n") ? "\r\n" : "\n";
+  const block = formatProject(project).replace(/\n/g, eol);
+  const { start, end } = categoryRange(text, category);
+  const blocks = [...text.slice(start, end).matchAll(PROJECT_BLOCK)];
+  const current = blocks.find((m) => blockId(m[0]) === project.id);
+  if (current) {
+    const at = start + current.index;
+    return text.slice(0, at) + block + text.slice(at + current[0].length);
   }
-  throw new Error(`impossible de placer le champ ${field}`);
-}
-
-function removeField(block, field) {
-  return block.replace(new RegExp(`\\n[ \\t]+${field}: "[^"\\n]*",?[ \\t]*(?=\\n)`), "");
-}
-
-function editProjectBlock(text, id, edit) {
-  const idIndex = text.indexOf(`id: ${JSON.stringify(id)},`);
-  if (idIndex < 0) throw new Error(`projet ${id} introuvable dans projects-data.js`);
-  const start = text.lastIndexOf("{", idIndex);
-  const end = text.indexOf("\n    }", idIndex);
-  return text.slice(0, start) + edit(text.slice(start, end)) + text.slice(end);
+  const last = blocks[blocks.length - 1];
+  const at = last ? start + last.index + last[0].length : text.indexOf("[", start) + 1;
+  return text.slice(0, at) + (last ? "," : "") + eol + block + text.slice(at);
 }
 
 function setHeroOrbit(text, ids) {
@@ -138,67 +166,211 @@ function webpBuffer(dataUrl) {
   return Buffer.from(match[1], "base64");
 }
 
+// Photo de galerie ou couverture, déjà redimensionnée par le navigateur :
+// JPEG, ou WebP si elle a de la transparence.
+function imageBuffer(dataUrl) {
+  const match = /^data:image\/(jpeg|webp);base64,(.+)$/.exec(dataUrl || "");
+  if (!match) throw new Error("Image manquante ou dans un format inattendu.");
+  return { buffer: Buffer.from(match[2], "base64"), ext: match[1] === "jpeg" ? ".jpg" : ".webp" };
+}
+
 function checkPosition(position) {
   if (!/^\d{1,3}(\.\d+)?% \d{1,3}(\.\d+)?%$/.test(position || "")) throw new Error("Cadrage invalide.");
 }
 
+const cleanText = (value, max) => String(value ?? "").replace(/\s+/g, " ").trim().slice(0, max);
+
+function slugify(text, fallback) {
+  const slug = String(text).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-").slice(0, 60).replace(/^-+|-+$/g, "");
+  return slug || fallback;
+}
+
+function uniqueId(projects, base) {
+  const taken = new Set(CATEGORIES.flatMap((c) => (projects[c] || []).map((p) => p.id)));
+  let id = base;
+  for (let n = 2; taken.has(id); n++) id = `${base}-${n}`;
+  return id;
+}
+
+// Chemin libre (relatif à la racine du site) : un fichier existant n'est
+// jamais écrasé, ce qui évite aussi les images périmées en cache.
+function freeFile(dir, name, ext, reserved) {
+  const base = slugify(path.parse(String(name || "")).name, "image");
+  let file = `${dir}/${base}${ext}`;
+  for (let n = 2; reserved.has(file) || fs.existsSync(path.join(ROOT, file)); n++) file = `${dir}/${base}-${n}${ext}`;
+  reserved.add(file);
+  return file;
+}
+
+// Dossier des nouvelles images : celui des images déjà dans la galerie,
+// sinon assets/images/<section>/<id>.
+function galleryDir(project, category) {
+  const first = (project.images || [])[0];
+  const dir = first && path.posix.dirname(typeof first === "string" ? first : first.src);
+  return dir && dir.startsWith("assets/images/") ? dir : `assets/images/${category}/${project.id}`;
+}
+
+function cleanMedia(media) {
+  const { type, src, vertical } = media || {};
+  const ok = (type === "youtube" && /^[\w-]{11}$/.test(src))
+    || (type === "vimeo" && /^\d+$/.test(src))
+    || (type === "file" && typeof src === "string" && src);
+  if (!ok) throw new Error("Lien vidéo invalide : colle un lien YouTube ou Vimeo.");
+  return vertical ? { type, src, vertical: true } : { type, src };
+}
+
 /* ---------- enregistrement d'un projet ----------
-   corps : { id, card?, hero?, inOrbit? }
-   card : { kind: "current" | "gallery" | "upload", src?, position, image? }
-   hero : { mode: "same" } | { mode: "custom", image } */
+   corps : { id | create: { category }, info?, media?, cover?, gallery?, card?, hero?, inOrbit? }
+   info : { title, client, description, tags: [] }
+   media (vidéos) : { type: "youtube" | "vimeo", src, vertical? }
+   cover (vidéos) : { name, image } nouvelle image de couverture de la popup
+   gallery (photos, graphisme) : la liste complète, dans l'ordre :
+     { src, alt } image déjà là | { name, image, alt } nouvelle image
+   card : { kind: "current" | "gallery" | "upload", position, image?,
+            et pour "gallery" : src | galleryIndex | fromCover }
+   hero : { mode: "same" } | { mode: "custom", image }
+   Rien n'est écrit tant que tout n'a pas été vérifié. */
 function saveProject(body) {
   const { projects, heroOrbit } = readData();
-  const project = findProject(projects, body.id);
-  if (!project) throw new Error(`Projet inconnu : ${body.id}`);
   const version = timestamp();
-  let text = fs.readFileSync(DATA_FILE, "utf8");
+  const writes = []; // [chemin relatif, contenu]
+  const reserved = new Set();
   const done = [];
+  let category, project;
 
-  if (body.card) {
-    const { kind, src, position, image } = body.card;
-    checkPosition(position);
-    if (kind === "gallery" && !imagesOf(project).includes(src)) throw new Error("Cette image n'appartient pas au projet.");
-    if (kind === "gallery" || kind === "upload") {
-      fs.mkdirSync(THUMBS_DIR, { recursive: true });
-      fs.writeFileSync(path.join(THUMBS_DIR, `${project.id}.webp`), webpBuffer(image));
-    }
-    text = editProjectBlock(text, project.id, (block) => {
-      if (kind === "gallery") block = setField(block, "cover", src, ["description"]);
-      if (kind !== "current") block = setField(block, "thumb", `assets/images/thumbs/${project.id}.webp?v=${version}`, ["cover"]);
-      block = position === "50% 50%"
-        ? removeField(block, "thumbPosition")
-        : setField(block, "thumbPosition", position, ["thumb", "cover"]);
-      return block;
-    });
-    done.push(`miniature ${kind === "upload" ? "importée" : kind === "gallery" ? path.basename(src) : "recadrée"} (${position})`);
+  if (body.create) {
+    category = body.create.category;
+    if (!CATEGORIES.includes(category)) throw new Error("Section inconnue.");
+    const id = uniqueId(projects, slugify(cleanText(body.info && body.info.title, 200), "projet"));
+    project = { id, title: "", client: "", description: "", cover: "", tags: [] };
+    if (category === "videos") project.media = { type: "youtube", src: "" };
+    else project.images = [];
+  } else {
+    category = CATEGORIES.find((c) => (projects[c] || []).some((p) => p.id === body.id));
+    if (!category) throw new Error(`Projet inconnu : ${body.id}`);
+    project = JSON.parse(JSON.stringify(findProject(projects, body.id)));
+  }
+  const id = project.id;
+
+  if (body.info) {
+    const { title, client, description, tags } = body.info;
+    project.title = cleanText(title, 200);
+    project.client = cleanText(client, 200);
+    project.description = cleanText(description, 3000);
+    project.tags = (Array.isArray(tags) ? tags : []).map((t) => cleanText(t, 60)).filter(Boolean);
+    if (!project.title) throw new Error("Le titre est obligatoire.");
+    done.push("textes");
   }
 
+  if (body.media) {
+    if (category !== "videos") throw new Error("Seuls les projets vidéo ont un lien vidéo.");
+    project.media = cleanMedia(body.media);
+    done.push("lien vidéo");
+  }
+
+  if (body.cover) {
+    const { buffer, ext } = imageBuffer(body.cover.image);
+    project.cover = freeFile("assets/images/videos", `${id}-cover`, ext, reserved);
+    writes.push([project.cover, buffer]);
+    done.push("couverture");
+  }
+
+  if (body.gallery) {
+    if (category === "videos") throw new Error("Les projets vidéo n'ont pas de galerie.");
+    const dir = galleryDir(project, category);
+    const known = new Set(imagesOf(project));
+    let added = 0;
+    project.images = body.gallery.map((item) => {
+      const alt = cleanText(item.alt, 300) || project.title;
+      if (item.image) {
+        const { buffer, ext } = imageBuffer(item.image);
+        const file = freeFile(dir, item.name, ext, reserved);
+        writes.push([file, buffer]);
+        added++;
+        return { src: file, alt };
+      }
+      if (!known.has(item.src)) throw new Error("Image de galerie inconnue : recharge la page.");
+      return { src: item.src, alt };
+    });
+    if (!project.images.length) throw new Error("La galerie doit garder au moins une image.");
+    done.push(`galerie (${project.images.length} images${added ? `, ${added} ajoutées` : ""})`);
+  }
+
+  if (body.card) {
+    const { kind, position, image } = body.card;
+    checkPosition(position);
+    if (kind === "gallery") {
+      const picked = Number.isInteger(body.card.galleryIndex) ? (project.images || [])[body.card.galleryIndex] : null;
+      const src = body.card.fromCover ? project.cover : picked ? (typeof picked === "string" ? picked : picked.src) : body.card.src;
+      if (!src || !imagesOf(project).includes(src)) throw new Error("Cette image n'appartient pas au projet.");
+      project.cover = src;
+    }
+    if (kind === "gallery" || kind === "upload") {
+      writes.push([`assets/images/thumbs/${id}.webp`, webpBuffer(image)]);
+      project.thumb = `assets/images/thumbs/${id}.webp?v=${version}`;
+    }
+    if (position === "50% 50%") delete project.thumbPosition;
+    else project.thumbPosition = position;
+    done.push(`miniature (${position})`);
+  }
+
+  let removeHero = false;
   if (body.hero) {
-    const heroFile = path.join(HERO_DIR, `${project.id}.webp`);
     if (body.hero.mode === "custom") {
-      fs.mkdirSync(HERO_DIR, { recursive: true });
-      fs.writeFileSync(heroFile, webpBuffer(body.hero.image));
-      text = editProjectBlock(text, project.id, (block) =>
-        setField(block, "heroThumb", `assets/images/thumbs/hero/${project.id}.webp?v=${version}`, ["thumbPosition", "thumb", "cover"])
-      );
+      writes.push([`assets/images/thumbs/hero/${id}.webp`, webpBuffer(body.hero.image)]);
+      project.heroThumb = `assets/images/thumbs/hero/${id}.webp?v=${version}`;
       done.push("vignette de l'anneau");
     } else {
-      text = editProjectBlock(text, project.id, (block) => removeField(block, "heroThumb"));
-      if (fs.existsSync(heroFile)) fs.unlinkSync(heroFile);
+      delete project.heroThumb;
+      removeHero = true;
       done.push("vignette de l'anneau = miniature");
     }
   }
 
-  if (typeof body.inOrbit === "boolean") {
-    const has = heroOrbit.includes(project.id);
-    if (body.inOrbit && !has) text = setHeroOrbit(text, [...heroOrbit, project.id]);
-    if (!body.inOrbit && has) text = setHeroOrbit(text, heroOrbit.filter((id) => id !== project.id));
-    if (body.inOrbit !== has) done.push(body.inOrbit ? "ajouté à l'anneau" : "retiré de l'anneau");
+  if (body.create) {
+    if (category === "videos" && !project.media.src) throw new Error("Ajoute le lien de la vidéo.");
+    if (category === "videos" && !project.cover) throw new Error("Ajoute une image de couverture.");
+    if (category !== "videos" && !project.images.length) throw new Error("Ajoute au moins une image.");
+    if (!project.cover) project.cover = project.images[0].src;
   }
 
+  let text = writeProjectBlock(fs.readFileSync(DATA_FILE, "utf8"), category, project);
+  if (typeof body.inOrbit === "boolean") {
+    const has = heroOrbit.includes(id);
+    if (body.inOrbit && !has) text = setHeroOrbit(text, [...heroOrbit, id]);
+    if (!body.inOrbit && has) text = setHeroOrbit(text, heroOrbit.filter((x) => x !== id));
+    if (body.inOrbit !== has) done.push(body.inOrbit ? "ajouté à l'anneau" : "retiré de l'anneau");
+  }
+  new vm.Script(text); // garde-fou avant d'écrire quoi que ce soit
+
+  for (const [file, buffer] of writes) {
+    fs.mkdirSync(path.dirname(path.join(ROOT, file)), { recursive: true });
+    fs.writeFileSync(path.join(ROOT, file), buffer);
+  }
+  const heroFile = path.join(HERO_DIR, `${id}.webp`);
+  if (removeHero && fs.existsSync(heroFile)) fs.unlinkSync(heroFile);
   writeData(text);
   bumpDataVersion(version);
-  console.log(`✓ ${project.title} : ${done.join(", ") || "rien à changer"}`);
+
+  const reread = findProject(readData().projects, id);
+  if (!reread || formatProject(reread) !== formatProject(project)) {
+    throw new Error("Le projet relu ne correspond pas à ce qui a été enregistré : vérifie js/projects-data.js.");
+  }
+  console.log(`✓ ${project.title}${body.create ? " (nouveau projet)" : ""} : ${done.join(", ") || "rien à changer"}`);
+  return { id };
+}
+
+// Image de couverture d'une vidéo YouTube, relayée pour que la page de
+// l'outil puisse la redimensionner (le navigateur ne peut pas lire une image
+// d'un autre site dans un canvas).
+async function youtubeCover(id) {
+  if (!/^[\w-]{11}$/.test(id || "")) throw new Error("Identifiant YouTube invalide.");
+  for (const size of ["maxresdefault", "sddefault", "hqdefault"]) {
+    const res = await fetch(`https://i.ytimg.com/vi/${id}/${size}.jpg`).catch(() => null);
+    if (res && res.ok) return Buffer.from(await res.arrayBuffer());
+  }
+  throw new Error("Impossible de récupérer l'image YouTube (vérifie le lien ou ta connexion).");
 }
 
 function saveOrbit(body) {
@@ -214,18 +386,14 @@ function saveOrbit(body) {
    corps : { order: { videos: [ids], photos: [ids], graphisme: [ids] } }
    Les blocs des projets sont permutés dans leur tableau ; ce qui les
    sépare (virgules, commentaires) reste en place. */
-const PROJECT_BLOCK = /^    \{[\s\S]*?^    \}/gm;
-
 function reorderCategory(text, category, ids) {
-  const start = text.indexOf(`\n  ${category}: [`);
-  const end = text.indexOf("\n  ]", start);
-  if (start < 0 || end < 0) throw new Error(`tableau ${category} introuvable dans projects-data.js`);
+  const { start, end } = categoryRange(text, category);
   const body = text.slice(start, end);
   const blocks = new Map();
   for (const [block] of body.matchAll(PROJECT_BLOCK)) {
-    const id = /^      id: ("[^"\n]*"),/m.exec(block);
+    const id = blockId(block);
     if (!id) throw new Error(`projet sans id dans ${category}`);
-    blocks.set(JSON.parse(id[1]), block);
+    blocks.set(id, block);
   }
   if (blocks.size !== ids.length || ids.some((id) => !blocks.has(id))) {
     throw new Error(`Liste de projets ${category} incomplète : recharge la page.`);
@@ -353,7 +521,7 @@ function readBody(req) {
     let size = 0;
     req.on("data", (c) => {
       size += c.length;
-      if (size > 40 * 1024 * 1024) reject(new Error("Envoi trop lourd."));
+      if (size > 400 * 1024 * 1024) reject(new Error("Envoi trop lourd : ajoute les photos en plusieurs fois."));
       else chunks.push(c);
     });
     req.on("end", () => resolve(JSON.parse(Buffer.concat(chunks).toString("utf8") || "{}")));
@@ -385,10 +553,12 @@ function isLocal(req) {
 const server = http.createServer(async (req, res) => {
   try {
     if (!isLocal(req)) return send(res, 403, "Interdit", "text/plain; charset=utf-8");
-    const route = `${req.method} ${req.url}`;
+    const { pathname, searchParams } = new URL(req.url, "http://localhost");
+    const route = `${req.method} ${pathname}`;
     if (route === "GET /api/data") return send(res, 200, readData());
     if (route === "GET /api/git") return send(res, 200, await gitStatus());
-    if (route === "POST /api/project") { saveProject(await readBody(req)); return send(res, 200, { ok: true }); }
+    if (route === "GET /api/youtube-cover") return send(res, 200, await youtubeCover(searchParams.get("id")), "image/jpeg");
+    if (route === "POST /api/project") return send(res, 200, { ok: true, ...saveProject(await readBody(req)) });
     if (route === "POST /api/orbit") { saveOrbit(await readBody(req)); return send(res, 200, { ok: true }); }
     if (route === "POST /api/order") { saveOrder(await readBody(req)); return send(res, 200, { ok: true }); }
     if (route === "POST /api/publish") { await publish(await readBody(req)); return send(res, 200, { ok: true }); }

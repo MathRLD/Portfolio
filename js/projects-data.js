@@ -43,9 +43,11 @@
    Pour les projets graphisme, le premier tag indique le cadre :
    "Projet client", "Projet personnel" ou "Projet étudiant".
 
-   Pour changer les miniatures, l'ordre des carrousels, les vignettes ou
-   les projets de l'anneau sans toucher à ce fichier : double-clic sur
-   _outils/"Gérer les projets.bat".
+   Pour ajouter ou modifier un projet (textes, lien vidéo, images),
+   changer les miniatures, l'ordre des carrousels ou l'anneau sans
+   toucher à ce fichier : double-clic sur _outils/"Gérer les projets.bat".
+   L'outil réécrit chaque projet dans ce format (un champ par ligne) ; un
+   commentaire placé à l'intérieur d'un projet serait perdu.
    ===================================================== */
 
 const projectsData = {
@@ -116,27 +118,28 @@ const projectsData = {
     {
       id: "bobital-2026",
       title: "Bobital 2026",
-      client: "",
-      description: "Reportage photo au festival Bobital L'Armor à Sons, édition 2026. Les concerts, le public, et une belle lumière en fin de journée.",
+      client: "Festival",
+      description: "Reportage photo au festival Bobital, édition 2026. Les concerts, le public, et une énergie incroyable",
       cover: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-5.jpg",
       thumb: "assets/images/thumbs/bobital-2026.webp?v=20261004021011",
-      thumbPosition: "50% 100%",
-      tags: ["Événementiel", "Concert", "Reportage"],
+      thumbPosition: "50% 94%",
+      heroThumb: "assets/images/thumbs/hero/bobital-2026.webp?v=20261004192040",
+      tags: ["Événementiel", "Concert", "Reportage", "Festival", "Rap", "Photographie"],
       images: [
-        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026.jpg", alt: "Silhouette d'un rappeur sur scène en contre-jour, au coucher du soleil" },
-        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-3.jpg", alt: "Rappeur en casquette rouge au micro sur la scène du festival" },
-        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-5.jpg", alt: "Rappeur en casquette rouge chantant tête levée, arbres en arrière-plan" },
-        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-6.jpg", alt: "Deux rappeurs au bord de la scène face au public, en contre-plongée" },
-        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-8.jpg", alt: "Deux artistes sur scène devant la foule du festival, en plein jour" },
+        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026.jpg", alt: "Silhouette de La Mano sur scène en contre-jour, au coucher du soleil" },
+        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-3.jpg", alt: "La Mano en casquette rouge au micro sur la scène du festival" },
+        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-5.jpg", alt: "La Mano en casquette rouge chantant tête levée, arbres en arrière-plan" },
+        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-6.jpg", alt: "La Mano au bord de la scène face au public, en contre-plongée" },
+        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-8.jpg", alt: "La Mano devant la foule du festival, en plein jour" },
         { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-9.jpg", alt: "Structure d'éclairage de la scène en contre-jour" },
-        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-12.jpg", alt: "Rappeur aux lunettes vertes, doigt levé, micro en main" },
-        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-13.jpg", alt: "Rappeur aux lunettes vertes en mouvement sur scène, dans la lumière des projecteurs" },
-        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-14.jpg", alt: "Rappeur aux lunettes vertes au micro, projecteur en arrière-plan" },
-        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-18.jpg", alt: "Chanteuse au micro en gros plan, devant la structure de la scène" },
-        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-19.jpg", alt: "Chanteuse en mouvement sur scène, ciel nuageux en arrière-plan" },
-        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-25.jpg", alt: "Rappeur sur scène dans une lumière orange et la fumée" },
-        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-26.jpg", alt: "Artiste bras levé dans une lumière bleue, bouteille d'eau à la main" },
-        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-28.jpg", alt: "Rappeur au micro en contre-plongée, dans des faisceaux bleus et jaunes" }
+        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-12.jpg", alt: "Soprano aux lunettes vertes, doigt levé, micro en main" },
+        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-13.jpg", alt: "Soprano aux lunettes vertes en mouvement sur scène, dans la lumière des projecteurs" },
+        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-14.jpg", alt: "Soprano aux lunettes vertes au micro, projecteur en arrière-plan" },
+        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-18.jpg", alt: "Adèle Castillon au micro en gros plan, devant la structure de la scène" },
+        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-19.jpg", alt: "Adèle Castillon en mouvement sur scène, ciel nuageux en arrière-plan" },
+        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-25.jpg", alt: "Nono La Grinta sur scène dans une lumière orange et la fumée" },
+        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-26.jpg", alt: "Nono La Grinta bras levé dans une lumière bleue, bouteille d'eau à la main" },
+        { src: "assets/images/photos/bobital/web/@_rawland_MathysRoland_BOBITAL2026-28.jpg", alt: "Nono La Grinta au micro en contre-plongée, dans des faisceaux bleus et jaunes" }
       ]
     },
     {
@@ -148,7 +151,7 @@ const projectsData = {
       thumb: "assets/images/thumbs/stpauli-koln-2026.webp?v=20261004020913",
       thumbPosition: "58% 50%",
       heroThumb: "assets/images/thumbs/hero/stpauli-koln-2026.webp?v=20261004023821",
-      tags: ["Sport", "Football", "Bundesliga", "Reportage"],
+      tags: ["Sport", "Football", "Bundesliga", "Reportage", "FC Saint-Pauli", "FC Sankt-Pauli", "FC St-Pauli"],
       images: [
         { src: "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-53.jpg", alt: "Duel au milieu de terrain entre un joueur du FC St. Pauli et trois joueurs du 1. FC Köln, devant une tribune pleine" },
         { src: "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-6.jpg", alt: "Drapeau blanc du FC St. Pauli agité au premier plan, joueurs flous derrière" },
@@ -156,7 +159,7 @@ const projectsData = {
         { src: "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-13.jpg", alt: "Joueurs du FC St. Pauli sur une pelouse noyée dans la fumée rose des fumigènes" },
         { src: "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-24.jpg", alt: "Phase de jeu entre joueurs du FC St. Pauli et du 1. FC Köln devant la tribune" },
         { src: "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-29.jpg", alt: "Joueur du 1. FC Köln frappant le ballon le long de la ligne de touche, sous les projecteurs" },
-        { src: "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-32.jpg", alt: "Capitaine du FC St. Pauli, brassard arc-en-ciel au bras, donnant des consignes" },
+        { src: "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-32.jpg", alt: "Capitaine du FC St. Pauli, Jackson Irvine, brassard arc-en-ciel au bras, donnant des consignes" },
         { src: "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-41.jpg", alt: "Joueur du FC St. Pauli tenant le ballon avant une remise en jeu" },
         { src: "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-44.jpg", alt: "Joueur du FC St. Pauli numéro 27, de dos face à la tribune" },
         { src: "assets/images/photos/stpauli/web/StPauli-Cologne_17_04-47.jpg", alt: "Confettis qui tombent sous le toit du stade, à contre-jour des projecteurs" },
@@ -171,13 +174,13 @@ const projectsData = {
     },
     {
       id: "sncf-intercites-lifestyle",
-      title: "SNCF Intercités - Shooting lifestyle",
+      title: "Shooting lifestyle",
       client: "SNCF Intercités",
-      description: "Shooting lifestyle à bord d'un train Intercités, en lumière naturelle, pour montrer le voyage côté passagers.",
+      description: "Shooting lifestyle à bord d'un train Intercités, en lumière naturelle, pour montrer le voyage côté passagers et mettre en avant les trains de nuit.",
       cover: "assets/images/photos/Shootingsncf1/web/Shooting photo TDN-3.jpg",
       thumb: "assets/images/thumbs/sncf-intercites-lifestyle.webp?v=20261004020934",
       thumbPosition: "100% 50%",
-      tags: ["Lifestyle", "Institutionnel", "SNCF"],
+      tags: ["Lifestyle", "Institutionnel", "SNCF", "Intercités", "Train de nuit"],
       images: [
         { src: "assets/images/photos/Shootingsncf1/web/Shooting photo TDN.jpg", alt: "Voyageuse regardant par la fenêtre d'un compartiment Intercités, en lumière naturelle" },
         { src: "assets/images/photos/Shootingsncf1/web/Shooting photo TDN-3.jpg", alt: "Deux voyageuses face à face près de la fenêtre, la campagne défile derrière" },
@@ -196,7 +199,7 @@ const projectsData = {
       description: "Photos de la release party de Jeune Lion, le 12 février 2026.",
       cover: "assets/images/photos/jeunelion/web/Releaseparty_Jeune-Lion_12_02_26_@Rawland-5.jpg",
       thumb: "assets/images/thumbs/jeune-lion-release-party.webp?v=20261004021037",
-      tags: ["Événementiel", "Musique", "Reportage"],
+      tags: ["Événementiel", "Musique", "Reportage", "jeune Lion", "Release Party"],
       images: [
         { src: "assets/images/photos/jeunelion/web/Releaseparty_Jeune-Lion_12_02_26_@Rawland-17.jpg", alt: "Pendentif tête de lion doré sur un t-shirt blanc, en gros plan" },
         { src: "assets/images/photos/jeunelion/web/Releaseparty_Jeune-Lion_12_02_26_@Rawland-2.jpg", alt: "Photo en flou de mouvement dans les lumières rouges de la soirée" },
@@ -220,10 +223,10 @@ const projectsData = {
       id: "redstar-eag",
       title: "Red Star FC - EA Guingamp",
       client: "Ligue 2",
-      description: "Reportage photo du match de Ligue 2 entre le Red Star FC et l'En Avant Guingamp (24.04), jusqu'à la fête en fin de match.",
+      description: "Reportage photo du match de Ligue 2 entre le Red Star FC et l'En Avant Guingamp (24.04), de l'échauffement des joueurs jusqu'à l'explosion de joie au coup de sifflet final.",
       cover: "assets/images/photos/redstareag/web/RedStar_EAG_@Rawland_24_04-14.jpg",
       thumb: "assets/images/thumbs/redstar-eag.webp?v=20261004021050",
-      tags: ["Sport", "Football", "Ligue 2", "Reportage"],
+      tags: ["Sport", "Football", "Ligue 2", "Reportage", "Red Star FC"],
       images: [
         { src: "assets/images/photos/redstareag/web/RedStarFC_EAG_@Rawland_24_04-99.jpg", alt: "Joueurs du Red Star FC qui fêtent la fin du match face au public, poings levés" },
         { src: "assets/images/photos/redstareag/web/RedStarFC_EAG_@Rawland_24_04-13.jpg", alt: "Deux joueurs du Red Star en chasuble jaune à l'échauffement, à contre-jour" },
@@ -239,7 +242,7 @@ const projectsData = {
         { src: "assets/images/photos/redstareag/web/RedStarFC_EAG_@Rawland_24_04-83.jpg", alt: "Supporters du Red Star en tribune sous de grands drapeaux verts" },
         { src: "assets/images/photos/redstareag/web/RedStarFC_EAG_@Rawland_24_04-88.jpg", alt: "Duel épaule contre épaule entre un joueur du Red Star et un joueur de Guingamp" },
         { src: "assets/images/photos/redstareag/web/RedStar_EAG_@Rawland_24_04-2.jpg", alt: "Tribune du stade sous les projecteurs, en fin de journée" },
-        { src: "assets/images/photos/redstareag/web/RedStar_EAG_@Rawland_24_04-14.jpg", alt: "Joueur du Red Star floqué Kamila 7, bras levé vers les supporters" },
+        { src: "assets/images/photos/redstareag/web/RedStar_EAG_@Rawland_24_04-14.jpg", alt: "Damien Durand, Joueur du Red Star floqué Kamila 7, bras levé vers les supporters" },
         { src: "assets/images/photos/redstareag/web/RedStar_EAG_@Rawland_24_04-17.jpg", alt: "Dos du maillot vert du Red Star floqué Mounia 98, en gros plan" },
         { src: "assets/images/photos/redstareag/web/RedStar_EAG_@Rawland_24_04-35.jpg", alt: "Joueur du Red Star qui glisse à genoux sur la pelouse pour célébrer" },
         { src: "assets/images/photos/redstareag/web/RedStar_EAG_@Rawland_24_04-39.jpg", alt: "Remplaçant du Red Star en chasuble jaune, de dos, face à un projecteur" },
@@ -256,7 +259,8 @@ const projectsData = {
       cover: "assets/images/photos/Shootingsncf2/web/Photos_Shooting_05_05-34.jpg",
       thumb: "assets/images/thumbs/sncf-intercites-gare.webp?v=20261004020944",
       thumbPosition: "72% 50%",
-      tags: ["Reportage", "Institutionnel", "SNCF"],
+      heroThumb: "assets/images/thumbs/hero/sncf-intercites-gare.webp?v=20261004195101",
+      tags: ["Reportage", "Institutionnel", "SNCF", "Intercités", "Train", "Train flou."],
       images: [
         { src: "assets/images/photos/Shootingsncf2/web/Photos_Shooting_05_05-35.jpg", alt: "Locomotive Intercités entrant en gare de nuit, phares allumés, le long des quais éclairés" },
         { src: "assets/images/photos/Shootingsncf2/web/Photos_Shooting_05_05-21.jpg", alt: "Couloir vide d'une voiture Intercités, en perspective" },

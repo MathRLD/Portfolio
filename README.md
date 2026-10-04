@@ -31,7 +31,10 @@ Aucune installation n'est nécessaire. Deux options :
 
 ## Ajouter un projet
 
-Tout se passe dans `js/projects-data.js`. Chaque projet est un objet dans un des
+Le plus simple : l'outil de gestion des projets (voir plus bas), bouton
+**+ Nouveau projet**. Il s'occupe des images et du fichier de données.
+
+À la main, tout se passe dans `js/projects-data.js`. Chaque projet est un objet dans un des
 trois tableaux (`videos`, `photos`, `graphisme`). Pour ajouter un projet :
 
 1. Dépose ton image (ou vidéo) dans le bon sous-dossier de `assets/images/`.
@@ -49,13 +52,29 @@ pour garder la mise en page complète (comme sur ta maquette de référence).
 > au reste du site, puisque tout le contenu passe déjà par une seule source
 > de données.
 
-## Gérer les projets (miniatures, ordre, anneau, publication)
+## Gérer les projets (ajout, textes, images, ordre, anneau, publication)
 
 Double-clic sur `_outils/Gérer les projets.bat` : une page s'ouvre dans
 le navigateur (http://localhost:4321).
 
-**Onglets Photos, Vidéos, Graphisme** : clique sur un projet à gauche.
+**Onglets Photos, Vidéos, Graphisme** : clique sur un projet à gauche, ou
+sur **+ Nouveau projet** en haut de la liste (il s'ajoute à la fin du
+carrousel ; son identifiant est tiré du titre et ne change plus ensuite).
 
+- *Textes* : titre, sous-titre (client ou contexte, sous le titre de la
+  carte), description, mots-clés séparés par des virgules. En graphisme, le
+  *Cadre* (projet client, personnel ou étudiant) devient le premier mot-clé.
+- *Vidéo* : colle le lien YouTube (page de la vidéo, youtu.be ou Shorts) ou
+  Vimeo ; un lien Shorts coche tout seul « Vidéo verticale ». L'image de
+  couverture de la popup s'importe, ou se récupère depuis YouTube.
+- *Galerie* (photos et graphisme) : glisse tes fichiers dans la zone ou
+  clique sur « Ajouter des images ». Ils sont redimensionnés à 2000px sur le
+  grand côté et compressés (JPEG ; WebP s'ils ont de la transparence), puis
+  rangés dans le dossier des autres images du projet, ou dans
+  `assets/images/<section>/<id>/` pour un nouveau projet. Glisse les images
+  pour changer l'ordre, × pour en retirer une (le fichier reste sur le
+  disque). Le texte sous chaque image la décrit pour les lecteurs d'écran ;
+  vide, il reprend le titre du projet. Les originaux ne sont pas copiés.
 - *Miniature de la carte* : choisis une image du projet, ou **Importer** une
   image de ton ordinateur (ou glisse-la directement dans l'aperçu). Fais
   glisser l'image dans l'aperçu pour la cadrer.
