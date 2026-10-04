@@ -328,8 +328,8 @@ const projectsData = {
       title: "France Euro - Affiches",
       client: "",
       description: "Projet personnel autour de l'équipe de France à l'Euro 2024 : une affiche « En route vers la finale » en deux versions, mise en situation en mockups.",
-      cover: "assets/images/graphisme/FranceEuro/Francemockup2.jpg",
-      thumb: "assets/images/thumbs/france-euro-affiches.webp",
+      cover: "assets/images/graphisme/FranceEuro/Francemockup1.jpg",
+      thumb: "assets/images/thumbs/france-euro-affiches.webp?v=20261004191149",
       tags: ["Projet personnel", "Affiche", "Football", "Mockup"],
       images: [
         { src: "assets/images/graphisme/FranceEuro/France_affiche1.jpg", alt: "Affiche « En route vers la finale » : les joueurs de l'équipe de France réunis en cercle sur fond bleu, avec des étoiles dorées, version avec cadre" },
