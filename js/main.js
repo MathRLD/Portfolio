@@ -978,17 +978,23 @@
 
   /* ---------------------------------------------------
      7. À PROPOS : toggle des expériences
+     Le bouton Expériences et le polaroid font la même chose : la liste
+     se déplie (animation en CSS, .about-grid.is-open), la section grandit,
+     le bandeau logos descend et révèle le bas du polaroid.
      --------------------------------------------------- */
+  const aboutGrid = document.querySelector(".about-grid");
   const expToggle = document.getElementById("exp-toggle");
-  const expList = document.getElementById("exp-list");
-  expToggle.addEventListener("click", () => {
-    const isHidden = expList.hasAttribute("hidden");
-    if (isHidden) {
-      expList.removeAttribute("hidden");
-    } else {
-      expList.setAttribute("hidden", "");
-    }
-    expToggle.setAttribute("aria-expanded", String(isHidden));
+  const expWrap = document.querySelector(".exp-wrap");
+  const expTriggers = [expToggle, document.getElementById("about-polaroid")];
+  // les expériences apparaissent l'une après l'autre
+  expWrap.querySelectorAll("li").forEach((li, i) => li.style.setProperty("--i", i));
+  expTriggers.forEach((trigger) => {
+    trigger.addEventListener("click", () => {
+      const open = !aboutGrid.classList.contains("is-open");
+      aboutGrid.classList.toggle("is-open", open);
+      expWrap.inert = !open;
+      expTriggers.forEach((t) => t.setAttribute("aria-expanded", String(open)));
+    });
   });
 
   /* ---------------------------------------------------

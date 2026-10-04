@@ -98,7 +98,7 @@
      .is-loaded dans style.css) ne s'applique que si JS tourne, sinon elles
      resteraient invisibles. -->
 <script>document.documentElement.classList.add("js");</script>
-<link rel="stylesheet" href="css/style.css?v=20261004n">
+<link rel="stylesheet" href="css/style.css?v=20261005a">
 </head>
 <body>
 
@@ -233,6 +233,16 @@
     <div class="container about-grid">
       <h2 class="section-title reveal">À propos.</h2>
 
+      <!-- Polaroid : le bas est caché sous le bandeau logos ; un clic (ici ou
+           sur Expériences) déplie les expériences, ce qui agrandit la section
+           et le révèle en entier (main.js, 7). -->
+      <div class="about-polaroid reveal">
+        <button class="polaroid" id="about-polaroid" type="button" aria-expanded="false" aria-controls="exp-list"
+                aria-label="Polaroid de Mathys Roland : afficher les expériences">
+          <img src="assets/Logo/polaroid.jpg" alt="" width="800" height="1000" loading="lazy" decoding="async">
+        </button>
+      </div>
+
       <div class="about-content reveal">
         <p>
           Je m'appelle Mathys Roland, photographe, vidéaste et graphiste freelance basé à Paris.
@@ -253,7 +263,8 @@
           Expériences
         </button>
 
-        <ul class="exp-list" id="exp-list" hidden>
+        <div class="exp-wrap" inert>
+        <ul class="exp-list" id="exp-list">
           <li>
             <img class="exp-logo" src="assets/Logo/Favicon.svg" alt="" loading="lazy">
             <strong>Freelance - RAWLAND</strong>
@@ -291,6 +302,7 @@
             </p>
           </li>
         </ul>
+        </div>
       </div>
     </div>
   </section>
@@ -367,6 +379,6 @@
 </div>
 
 <script src="js/projects-data.js?v=20261004195101"></script>
-<script src="js/main.js?v=20261004g"></script>
+<script src="js/main.js?v=20261005a"></script>
 </body>
 </html>
