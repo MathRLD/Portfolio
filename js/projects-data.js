@@ -10,6 +10,8 @@
 
    Champs communs à tous les projets :
    - id          : identifiant unique (texte, sans espace)
+   - archived    : true pour retirer le projet du site (carrousel et
+                   anneau) sans le supprimer. Optionnel.
    - title       : titre affiché sur la carte et la popup
    - client      : nom du client / contexte (optionnel, "" si aucun)
    - description : texte affiché dans la popup

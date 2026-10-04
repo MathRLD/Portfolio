@@ -10,6 +10,7 @@
    - projets : création et modification des textes, du lien vidéo, de la
      couverture des vidéos et de la galerie des photos / graphisme ;
      chaque projet est réécrit en entier dans projects-data.js ;
+   - archivage : champ archived (le site ignore ces projets), restaurable ;
    - images de galerie et couvertures : 2000px max sur le grand côté, en
      JPEG (WebP si l'image a de la transparence), dans le dossier des
      autres images du projet ou assets/images/<section>/<id>/ ;
@@ -86,7 +87,7 @@ function imagesOf(project) {
 /* ---------- écriture de projects-data.js ----------
    Un projet est toujours réécrit en entier à partir de son objet, dans le
    format du fichier : un champ par ligne, une image de galerie par ligne. */
-const FIELD_ORDER = ["id", "title", "client", "description", "cover", "thumb", "thumbPosition", "heroThumb", "tags", "media", "images"];
+const FIELD_ORDER = ["id", "archived", "title", "client", "description", "cover", "thumb", "thumbPosition", "heroThumb", "tags", "media", "images"];
 const PROJECT_BLOCK = /^    \{[\s\S]*?^    \}/gm;
 
 function inlineValue(value) {
@@ -221,7 +222,8 @@ function cleanMedia(media) {
 }
 
 /* ---------- enregistrement d'un projet ----------
-   corps : { id | create: { category }, info?, media?, cover?, gallery?, card?, hero?, inOrbit? }
+   corps : { id | create: { category }, archived?, info?, media?, cover?, gallery?, card?, hero?, inOrbit? }
+   archived : true retire le projet du site (et de l'anneau) sans le supprimer
    info : { title, client, description, tags: [] }
    media (vidéos) : { type: "youtube" | "vimeo", src, vertical? }
    cover (vidéos) : { name, image } nouvelle image de couverture de la popup
@@ -252,6 +254,13 @@ function saveProject(body) {
     project = JSON.parse(JSON.stringify(findProject(projects, body.id)));
   }
   const id = project.id;
+
+  if (typeof body.archived === "boolean") {
+    if (body.create) throw new Error("Un nouveau projet ne peut pas être archivé.");
+    if (body.archived) project.archived = true;
+    else delete project.archived;
+    done.push(body.archived ? "archivé" : "restauré");
+  }
 
   if (body.info) {
     const { title, client, description, tags } = body.info;
@@ -336,11 +345,12 @@ function saveProject(body) {
   }
 
   let text = writeProjectBlock(fs.readFileSync(DATA_FILE, "utf8"), category, project);
-  if (typeof body.inOrbit === "boolean") {
+  const inOrbit = project.archived ? false : body.inOrbit; // un projet archivé quitte l'anneau
+  if (typeof inOrbit === "boolean") {
     const has = heroOrbit.includes(id);
-    if (body.inOrbit && !has) text = setHeroOrbit(text, [...heroOrbit, id]);
-    if (!body.inOrbit && has) text = setHeroOrbit(text, heroOrbit.filter((x) => x !== id));
-    if (body.inOrbit !== has) done.push(body.inOrbit ? "ajouté à l'anneau" : "retiré de l'anneau");
+    if (inOrbit && !has) text = setHeroOrbit(text, [...heroOrbit, id]);
+    if (!inOrbit && has) text = setHeroOrbit(text, heroOrbit.filter((x) => x !== id));
+    if (inOrbit !== has) done.push(inOrbit ? "ajouté à l'anneau" : "retiré de l'anneau");
   }
   new vm.Script(text); // garde-fou avant d'écrire quoi que ce soit
 
@@ -377,6 +387,7 @@ function saveOrbit(body) {
   const { projects } = readData();
   const ids = body.ids;
   if (!Array.isArray(ids) || ids.some((id) => !findProject(projects, id))) throw new Error("Liste de projets invalide.");
+  if (ids.some((id) => findProject(projects, id).archived)) throw new Error("Un projet archivé ne peut pas être dans l'anneau.");
   writeData(setHeroOrbit(fs.readFileSync(DATA_FILE, "utf8"), [...new Set(ids)]));
   bumpDataVersion(timestamp());
   console.log(`✓ Anneau du hero : ${ids.length} projets`);

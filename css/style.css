@@ -1150,6 +1150,27 @@ a { color: inherit; text-decoration: none; }
   border-color: transparent transparent transparent var(--black);
   margin-left: 5px;
 }
+/* Mobile, vidéo horizontale : le titre passe sur un bandeau au-dessus du
+   lecteur (en surimpression, il recouvrait le bouton lecture d'un lecteur
+   aussi petit) et la popup prend presque toute la largeur. Les vidéos
+   verticales, assez hautes, gardent le titre en surimpression. */
+@media (max-width: 640px) {
+  .modal:has(.modal-panel--video:not(.modal-panel--vertical)) { padding: 10px; }
+  .modal-panel--video:not(.modal-panel--vertical) {
+    background: var(--black);
+    border-radius: 18px;
+  }
+  .modal-panel--video:not(.modal-panel--vertical) .modal-topbar--on-media {
+    position: relative;
+    align-items: center;
+    padding: 14px 14px 14px 18px;
+    background: var(--black);
+    border-radius: 18px 18px 0 0;
+  }
+  .modal-panel--video:not(.modal-panel--vertical) .modal-kicker { margin-bottom: 4px; }
+  .modal-panel--video:not(.modal-panel--vertical) .modal-topbar h3 { font-size: 20px; }
+  .modal-panel--video:not(.modal-panel--vertical) .modal-video-stage { border-radius: 0 0 18px 18px; }
+}
 
 /* ---------- gabarit photo : description courte + galerie en masonry ---------- */
 .modal-photo-desc {

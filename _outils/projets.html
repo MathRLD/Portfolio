@@ -412,6 +412,30 @@
     font-size: 24px;
   }
   .item--new:hover, .item--new.is-active { color: var(--text); }
+
+  /* ---------- projets archivés ---------- */
+  .list-sep {
+    padding: 18px 16px 8px;
+    border-bottom: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  .item.is-archived img { opacity: 0.45; filter: grayscale(1); }
+  .item.is-archived > span { color: var(--muted); }
+  .archived-note {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+    margin-top: 16px;
+    padding: 12px 16px;
+    border: 1px solid #f0b35e;
+    color: #f0b35e;
+    font-size: 13px;
+  }
+  .archived-note .btn { border-color: #f0b35e; }
   .warn { margin: 14px 0 0; color: #f0b35e; font-size: 13px; }
   .warn:empty { display: none; }
   #publish-status { min-height: 1.5em; margin: 14px 0 0; color: var(--muted); font-size: 13px; }
@@ -556,7 +580,7 @@
     } else {
       renderList();
       const list = data.projects[tab];
-      const p = list.find((x) => x.id === keepId) || list[0];
+      const p = list.find((x) => x.id === keepId) || list.find((x) => !x.archived) || list[0];
       if (p) select(p);
       else selectNew();
     }
@@ -578,19 +602,30 @@
       if (!project?.isNew && confirmLeave()) selectNew();
     });
     listEl.appendChild(add);
-    data.projects[tab].forEach((p) => {
-      const item = document.createElement("button");
-      item.type = "button";
-      item.className = "item";
-      item.dataset.id = p.id;
-      const inRing = data.heroOrbit.includes(p.id);
-      item.innerHTML = `<img src="${url(p.thumb || p.cover)}" alt="" style="object-position:${p.thumbPosition || "50% 50%"}">
-        <span>${esc(p.title)}${p.client ? `<small>${esc(p.client)}</small>` : ""}${inRing ? `<span class="badge">Anneau</span>` : ""}</span>`;
-      item.addEventListener("click", () => {
-        if (p.id !== project?.id && confirmLeave()) select(p);
-      });
-      listEl.appendChild(item);
+    const all = data.projects[tab];
+    const archived = all.filter((p) => p.archived);
+    all.filter((p) => !p.archived).forEach(addItem);
+    if (archived.length) {
+      const sep = document.createElement("div");
+      sep.className = "list-sep";
+      sep.textContent = `Archivés (${archived.length})`;
+      listEl.appendChild(sep);
+      archived.forEach(addItem);
+    }
+  }
+
+  function addItem(p) {
+    const item = document.createElement("button");
+    item.type = "button";
+    item.className = "item" + (p.archived ? " is-archived" : "");
+    item.dataset.id = p.id;
+    const badge = p.archived ? "Archivé" : data.heroOrbit.includes(p.id) ? "Anneau" : "";
+    item.innerHTML = `<img src="${url(p.thumb || p.cover)}" alt="" style="object-position:${p.thumbPosition || "50% 50%"}">
+      <span>${esc(p.title)}${p.client ? `<small>${esc(p.client)}</small>` : ""}${badge ? `<span class="badge">${badge}</span>` : ""}</span>`;
+    item.addEventListener("click", () => {
+      if (p.id !== project?.id && confirmLeave()) select(p);
     });
+    listEl.appendChild(item);
   }
 
   /* =========================================================
@@ -698,6 +733,11 @@
       <p class="hint">${project.isNew
         ? `Nouveau projet ${CATEGORY_LABEL[tab]} : il sera ajouté à la fin du carrousel.`
         : `Identifiant : ${esc(project.id)}`}</p>
+      ${project.archived ? `
+      <div class="archived-note">
+        <span>Projet archivé : il n'apparaît plus sur le site. Tu peux encore le modifier.</span>
+        <button type="button" class="btn small" data-archive="false">Restaurer</button>
+      </div>` : ""}
 
       <section class="block">
         <h3>Textes</h3>
@@ -771,8 +811,21 @@
         <div class="choices" data-choices="hero"></div>
       </section>
       </div>
+
+      ${project.isNew || project.archived ? "" : `
+      <section class="block">
+        <h3>Archiver</h3>
+        <div class="row">
+          <p class="hint" style="max-width:560px">Le projet disparaît du site (carrousel et anneau) mais reste ici avec
+            ses textes et ses images, dans une liste « Archivés » : tu pourras le restaurer.</p>
+          <button type="button" class="btn small" data-archive="true">Archiver le projet</button>
+        </div>
+      </section>`}
     `;
 
+    editorEl.querySelectorAll("[data-archive]").forEach((b) => {
+      b.addEventListener("click", () => setArchived(b.dataset.archive === "true"));
+    });
     editorEl.querySelectorAll("[data-info]").forEach((el) => {
       el.value = draft.info[el.dataset.info] ?? "";
       el.addEventListener("input", () => {
@@ -828,6 +881,26 @@
 
     renderChoices();
     update();
+  }
+
+  // Archive ou restaure tout de suite le projet affiché (sans passer par
+  // Enregistrer) ; les modifications en cours sont abandonnées.
+  async function setArchived(value) {
+    const lose = isDirty() ? "\n\nLes modifications non enregistrées seront perdues." : "";
+    const question = value
+      ? `Archiver « ${project.title} » ?\nIl disparaîtra du site (carrousel et anneau) mais restera dans l'outil, et tu pourras le restaurer.${lose}`
+      : `Restaurer « ${project.title} » ?${lose}`;
+    if ((value || lose) && !confirm(question)) return;
+    const id = project.id;
+    setStatus(value ? "Archivage…" : "Restauration…");
+    try {
+      await post("/api/project", { id, archived: value });
+      await loadData(id);
+      setStatus(value ? "Projet archivé ✓" : "Projet restauré ✓ (ajoute-le à l'anneau si besoin)", "ok");
+    } catch (err) {
+      setStatus(err.message, "error");
+    }
+    refreshGit();
   }
 
   function updateTitle() {
@@ -1127,6 +1200,7 @@
       ? "Image recadrée en 3:4 pour l'anneau, indépendante de la carte. Glisse pour cadrer, zoome si besoin."
       : "L'anneau reprend la miniature de la carte et son cadrage.";
     $("#in-orbit").checked = draft.inOrbit;
+    $("#in-orbit").disabled = Boolean(project.archived);
     updateSavebar();
   }
 
@@ -1324,7 +1398,7 @@
     const inRing = orbitDraft.map(byId).filter(Boolean);
     const others = CATEGORIES.map((c) => ({
       c,
-      list: data.projects[c].filter((p) => !orbitDraft.includes(p.id)),
+      list: data.projects[c].filter((p) => !p.archived && !orbitDraft.includes(p.id)),
     }));
     const tile = (p, i) => {
       const o = orbitImage(p);
@@ -1370,9 +1444,11 @@
   /* =========================================================
      Onglet ordre des carrousels
      ========================================================= */
+  // Ordre des projets visibles ; les archivés ne s'affichent pas ici.
   function currentOrder() {
-    return Object.fromEntries(CATEGORIES.map((c) => [c, data.projects[c].map((p) => p.id)]));
+    return Object.fromEntries(CATEGORIES.map((c) => [c, data.projects[c].filter((p) => !p.archived).map((p) => p.id)]));
   }
+  const archivedIds = (c) => data.projects[c].filter((p) => p.archived).map((p) => p.id);
 
   // Carrousels vidéos et graphisme : au chargement, la 2e carte est la
   // grande carte mise en avant (la 1re sur mobile).
@@ -1397,7 +1473,7 @@
         Fais glisser une carte sur une autre pour la déplacer, ou utilise les flèches.</p>
       ${CATEGORIES.map((c) => `
         <section class="block">
-          <h3>${CATEGORY_TITLE[c]} (${orderDraft[c].length})</h3>
+          <h3>${CATEGORY_TITLE[c]} (${orderDraft[c].length})${archivedIds(c).length ? ` · ${archivedIds(c).length} archivé${archivedIds(c).length > 1 ? "s" : ""}, masqué${archivedIds(c).length > 1 ? "s" : ""}` : ""}</h3>
           <p class="hint">${HAS_FEATURED[c]
             ? "Au chargement, la carte n°2 est la grande carte mise en avant (sur mobile, c'est la n°1)."
             : "Au chargement, la photo n°1 est la première à gauche."}</p>
@@ -1460,7 +1536,8 @@
       const created = CATEGORIES.includes(tab) && project?.isNew;
       let keepId = project?.id;
       if (tab === "orbit") await post("/api/orbit", { ids: orbitDraft });
-      else if (tab === "order") await post("/api/order", { order: orderDraft });
+      // les projets archivés passent en fin de liste, hors du site de toute façon
+      else if (tab === "order") await post("/api/order", { order: Object.fromEntries(CATEGORIES.map((c) => [c, [...orderDraft[c], ...archivedIds(c)]])) });
       else keepId = await saveProject();
       await loadData(keepId);
       setStatus(created ? "Projet créé ✓" : "Enregistré ✓", "ok");

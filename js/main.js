@@ -181,6 +181,12 @@
   }
   window.addEventListener("resize", updateHeroPortraitPosition);
 
+  // Projets affichés sur le site : ceux d'une section, sauf les archivés
+  // (archived: true, réglé avec _outils/), gardés dans projects-data.js.
+  function visibleProjects(category) {
+    return (projectsData[category] || []).filter((p) => !p.archived);
+  }
+
   // Récupère jusqu'à `count` projets pour peupler l'orbite : les ids listés
   // dans `pinnedIds` sont toujours inclus en premier, les ids de
   // `excludedIds` ne sont jamais repris, le reste est complété en
@@ -189,7 +195,7 @@
   function gatherOrbitProjects(count, pinnedIds, excludedIds) {
     const cats = ["videos", "photos", "graphisme"];
     const lists = cats.map((c) =>
-      (projectsData[c] || []).map((p) => Object.assign({}, p, { category: c }))
+      visibleProjects(c).map((p) => Object.assign({}, p, { category: c }))
     );
     const picked = [];
     const usedIds = new Set(excludedIds || []);
@@ -780,20 +786,20 @@
     "videos-carousel",
     "videos-row",
     "videos-track",
-    buildCardFactories("videos-row", projectsData.videos, "videos", 4),
+    buildCardFactories("videos-row", visibleProjects("videos"), "videos", 4),
     { cardScale: 1.12 }
   );
   setupInfiniteSlider(
     "graphisme-carousel",
     "graphisme-row",
     "graphisme-track",
-    buildCardFactories("graphisme-row", projectsData.graphisme, "graphisme", 4)
+    buildCardFactories("graphisme-row", visibleProjects("graphisme"), "graphisme", 4)
   );
   setupInfiniteSlider(
     "photos-carousel",
     "photos-row",
     "photos-track",
-    buildCardFactories("photos-row", projectsData.photos, "photos", 0),
+    buildCardFactories("photos-row", visibleProjects("photos"), "photos", 0),
     { featured: false, cardAspect: 1, bleed: 0.85 }
   );
 

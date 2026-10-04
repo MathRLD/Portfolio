@@ -75,6 +75,11 @@ carrousel ; son identifiant est tiré du titre et ne change plus ensuite).
   pour changer l'ordre, × pour en retirer une (le fichier reste sur le
   disque). Le texte sous chaque image la décrit pour les lecteurs d'écran ;
   vide, il reprend le titre du projet. Les originaux ne sont pas copiés.
+- *Archiver* (en bas d'un projet) : le projet disparaît du site (carrousel
+  et anneau) mais reste dans l'outil, sous « Archivés » en bas de la liste,
+  avec ses textes et ses images. **Restaurer** le remet dans le carrousel ;
+  il faut le remettre dans l'anneau à la main si besoin. Dans
+  `projects-data.js`, c'est le champ `archived: true`.
 - *Miniature de la carte* : choisis une image du projet, ou **Importer** une
   image de ton ordinateur (ou glisse-la directement dans l'aperçu). Fais
   glisser l'image dans l'aperçu pour la cadrer.
