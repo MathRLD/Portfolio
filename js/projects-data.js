@@ -111,6 +111,17 @@ const projectsData = {
       thumbPosition: "100% 50%",
       tags: ["Court-métrage", "Réalisation", "SNCF"],
       media: { type: "youtube", src: "470WgFqnpT4" }
+    },
+    {
+      id: "aftermovie-toull",
+      title: "Aftermovie Toull",
+      client: "Festival Bobital",
+      description: "",
+      cover: "assets/images/videos/aftermovie-toull-cover.jpg",
+      thumb: "assets/images/thumbs/aftermovie-toull.webp?v=20261022175357",
+      heroThumb: "assets/images/thumbs/hero/aftermovie-toull.webp?v=20261022175357",
+      tags: ["Aftermovie", "festival", "Techno", "DJ SET", "Aftermovie Festival"],
+      media: { type: "youtube", src: "UJgUhu5tFgk" }
     }
     // Ajoute d'autres vidéos ici en copiant le bloc ci-dessus.
   ],
@@ -496,5 +507,6 @@ const heroOrbit = [
   "sncf-valeurs-eigs",
   "stpauli-koln-2026",
   "sncf-intercites-lifestyle",
-  "psg-f-ol-lyonnes"
+  "psg-f-ol-lyonnes",
+  "aftermovie-toull"
 ];
